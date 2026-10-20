@@ -120,15 +120,46 @@ async function iniciarServidor() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+
+    app.use("*", async (req, res, next) => {
+      if (
+        req.originalUrl.startsWith("/api") ||
+        req.originalUrl.startsWith("/adm") ||
+        req.originalUrl.startsWith("/admin") ||
+        req.originalUrl.startsWith("/webhook")
+      ) {
+        return next();
+      }
+      try {
+        const indexPath = path.resolve(process.cwd(), "index.html");
+        let template = fs.readFileSync(indexPath, "utf-8");
+        template = await vite.transformIndexHtml(req.originalUrl, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
   } else {
     // Modo Produção: Serve arquivos estáticos da pasta dist
     const distPath = path.resolve(process.cwd(), "dist");
     if (fs.existsSync(distPath)) {
       app.use(express.static(distPath));
-      app.get("*", (_req, res) => {
-        res.sendFile(path.resolve(distPath, "index.html"));
-      });
     }
+    app.get("*", (req, res, next) => {
+      if (
+        req.originalUrl.startsWith("/api") ||
+        req.originalUrl.startsWith("/adm") ||
+        req.originalUrl.startsWith("/admin") ||
+        req.originalUrl.startsWith("/webhook")
+      ) {
+        return next();
+      }
+      const indexPath = fs.existsSync(path.resolve(distPath, "index.html"))
+        ? path.resolve(distPath, "index.html")
+        : path.resolve(process.cwd(), "index.html");
+      res.sendFile(indexPath);
+    });
   }
 
   // Inicia o servidor HTTP e conecta ao banco de dados PostgreSQL

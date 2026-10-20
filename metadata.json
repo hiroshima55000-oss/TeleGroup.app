@@ -1,0 +1,8 @@
+{
+  "name": "TeleGroup",
+  "description": "Plataforma de anúncios e divulgação de comunidades e canais do Telegram.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

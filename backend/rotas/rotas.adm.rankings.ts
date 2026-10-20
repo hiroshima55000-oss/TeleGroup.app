@@ -52,6 +52,18 @@ rotas.post("/custo-beneficio", AdmRankingsControle.obterRankResultadoCampanhas);
 rotas.get("/rank-resultado-campanha", AdmRankingsControle.obterRankResultadoCampanhas);
 rotas.post("/rank-resultado-campanha", AdmRankingsControle.obterRankResultadoCampanhas);
 
+// Rank de Denunciados
+rotas.get("/denunciados", AdmRankingsControle.obterRankDenunciados);
+rotas.post("/denunciados", AdmRankingsControle.obterRankDenunciados);
+rotas.get("/rank-denunciados", AdmRankingsControle.obterRankDenunciados);
+rotas.post("/rank-denunciados", AdmRankingsControle.obterRankDenunciados);
+
+// Histórico de Banidos
+rotas.get("/banidos", AdmRankingsControle.obterHistoricoBanidos);
+rotas.post("/banidos", AdmRankingsControle.obterHistoricoBanidos);
+rotas.get("/historico-banido", AdmRankingsControle.obterHistoricoBanidos);
+rotas.post("/historico-banido", AdmRankingsControle.obterHistoricoBanidos);
+
 // Envio proativo para o painel via Webhook
 rotas.post("/enviar", AdmRankingsControle.enviarParaPainel);
 rotas.post("/enviar/:tipo", AdmRankingsControle.enviarParaPainel);

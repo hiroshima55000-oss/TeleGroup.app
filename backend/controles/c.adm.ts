@@ -10,6 +10,7 @@ import { AdmDivulgacoesControle } from "./c.adm.divulgacoes";
 import { AdmRankingCampanhasControle, AdmCampanhasAtivasControle } from "./c.adm.campanhas.ativas";
 import { AdmSaldoControle } from "./c.adm.saldo";
 import { AdmRankingsControle } from "./c.adm.rankings";
+import { AdmModeracaoControle } from "./c.adm.moderacao";
 
 export const AdmControle = {
   usuario: AdmUsuarioControle,
@@ -20,6 +21,9 @@ export const AdmControle = {
   saldo: AdmSaldoControle,
   adicionarSaldo: AdmSaldoControle.adicionarSaldo,
   rankings: AdmRankingsControle,
+  moderacao: AdmModeracaoControle,
+  rankDenunciados: AdmModeracaoControle.obterRankDenunciados,
+  historicoBanidos: AdmModeracaoControle.obterHistoricoBanidos,
   rankPublicadores: AdmRankingsControle.obterRankPublicadores,
   rankAnunciantes: AdmRankingsControle.obterRankAnunciantes,
   rankInvestidores: AdmRankingsControle.obterRankInvestidores,
@@ -578,6 +582,26 @@ export const AdmControle = {
       area === "divulgacao_rank_resultado_campanha"
     ) {
       return AdmRankingsControle.obterRankResultadoCampanhas(req, res);
+    }
+    if (
+      area === "rank_denunciados" ||
+      area === "rank-denunciados" ||
+      area === "denunciados" ||
+      area === "moderacao_rank_denunciados" ||
+      area === "moderacao-rank-denunciados"
+    ) {
+      return AdmModeracaoControle.obterRankDenunciados(req, res);
+    }
+    if (
+      area === "historico_banido" ||
+      area === "historico-banido" ||
+      area === "historico_banidos" ||
+      area === "historico-banidos" ||
+      area === "banidos" ||
+      area === "moderacao_historico_banido" ||
+      area === "moderacao-historico-banido"
+    ) {
+      return AdmModeracaoControle.obterHistoricoBanidos(req, res);
     }
     return AdmControle.obterMetricasUsuarios(req, res);
   },

@@ -8,8 +8,9 @@ import rotasAdmCampanhasAtivas from "./rotas.adm.campanhas.ativas";
 import rotasAdmRankingCampanhas from "./rotas.adm.campanhas.ranking";
 import rotasAdmSaldo from "./rotas.adm.saldo";
 import rotasAdmRankings from "./rotas.adm.rankings";
+import rotasAdmModeracao from "./rotas.adm.moderacao";
 
-export { rotasAdmUsuario, rotasAdmArrecadacao, rotasAdmDivulgacoes, rotasAdmCampanhasAtivas, rotasAdmRankingCampanhas, rotasAdmSaldo, rotasAdmRankings };
+export { rotasAdmUsuario, rotasAdmArrecadacao, rotasAdmDivulgacoes, rotasAdmCampanhasAtivas, rotasAdmRankingCampanhas, rotasAdmSaldo, rotasAdmRankings, rotasAdmModeracao };
 
 const rotasAdm = Router();
 
@@ -24,6 +25,7 @@ const rotasAdm = Router();
  * - adm.divulgações: dados e métricas da área de divulgações (divulgações, publicações e campanhas)
  * - adm.campanhas.ativas: ranking de campanhas ativas por quantidade agrupadas por orçamento diário
  * - adm.rankings: rankings de publicadores, anunciantes, investidores e saldos disponíveis
+ * - adm.moderacao: moderação (rank de denunciados e histórico de banidos)
  */
 
 // 1. Módulos Específicos e Isolados
@@ -41,6 +43,10 @@ rotasAdm.use("/adicionar-saldo", rotasAdmSaldo);
 rotasAdm.use("/adcionar-saldo", rotasAdmSaldo);
 rotasAdm.use("/rankings", rotasAdmRankings);
 rotasAdm.use("/rank", rotasAdmRankings);
+rotasAdm.use("/moderacao", rotasAdmModeracao);
+rotasAdm.use("/moderação", rotasAdmModeracao);
+rotasAdm.use("/denunciados", rotasAdmModeracao);
+rotasAdm.use("/banidos", rotasAdmModeracao);
 
 // Rota raiz e métricas gerais (roteia automaticamente entre usuários, arrecadação, divulgações e campanhas se especificado)
 rotasAdm.get("/", AdmControle.rotearPorArea);

@@ -6,10 +6,11 @@ import rotasCampanhas from "./rotas/rotas.campanhas";
 import rotasPublicacoes from "./rotas/rotas.publicacoes";
 import rotasTrafego from "./rotas/rotas.trafego";
 import rotasPagamento from "./rotas/rotas.pagamento";
-import rotasAdm, { rotasAdmUsuario, rotasAdmArrecadacao, rotasAdmDivulgacoes, rotasAdmRankingCampanhas, rotasAdmRankings } from "./rotas/rotas.adm";
+import rotasAdm, { rotasAdmUsuario, rotasAdmArrecadacao, rotasAdmDivulgacoes, rotasAdmRankingCampanhas, rotasAdmRankings, rotasAdmModeracao } from "./rotas/rotas.adm";
 import { PagamentoControle } from "./controles/c.pagamento";
 import { AdmControle } from "./controles/c.adm";
 import { HistoricoControle } from "./controles/c.historico";
+import { AdmModeracaoControle } from "./controles/c.adm.moderacao";
 
 const rotas = Router();
 
@@ -68,6 +69,12 @@ rotas.use(
   rotasAdmRankings
 );
 
+// adm.moderacao -> moderação (rank de denunciados e histórico de banidos)
+rotas.use(
+  ["/adm.moderacao", "/adm.moderação", encodeURI("/adm.moderação"), "/adm/moderacao", "/adm/moderação", encodeURI("/adm/moderação"), "/adm/denunciados", "/adm/banidos"],
+  rotasAdmModeracao
+);
+
 // Painel Administrativo geral e Métricas (/api/adm/*, /api/admin/*)
 rotas.use("/adm", rotasAdm);
 rotas.use("/admin", rotasAdm);
@@ -122,6 +129,14 @@ rotas.get("/ranking-campanhas", AdmControle.obterMetricasCampanhasAtivas);
 rotas.post("/ranking-campanhas", AdmControle.obterMetricasCampanhasAtivas);
 rotas.post("/enviar/campanhas-ativas", AdmControle.enviarCampanhasAtivasParaPainel);
 rotas.post("/enviar/ranking-campanhas", AdmControle.enviarCampanhasAtivasParaPainel);
+
+// Área: Moderação (rank de denunciados e histórico de banidos)
+rotas.get("/dados/denunciados", AdmModeracaoControle.obterRankDenunciados);
+rotas.post("/dados/denunciados", AdmModeracaoControle.obterRankDenunciados);
+rotas.get("/dados/banidos", AdmModeracaoControle.obterHistoricoBanidos);
+rotas.post("/dados/banidos", AdmModeracaoControle.obterHistoricoBanidos);
+rotas.post("/enviar/denunciados", AdmModeracaoControle.enviarParaPainel);
+rotas.post("/enviar/banidos", AdmModeracaoControle.enviarParaPainel);
 
 rotas.get("/comunicacao", AdmControle.rotearPorArea);
 rotas.post("/comunicacao", AdmControle.rotearPorArea);

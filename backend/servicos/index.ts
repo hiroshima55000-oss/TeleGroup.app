@@ -21,3 +21,5 @@ export * from "./s.painel.divulgacoes.adcionar.saldo";
 export * from "./s.painel.usuarios";
 export * from "./s.painel.usuarios.historico";
 export * from "./s.painel.usuarios.historico.interesses";
+export * from "./s.painel.moderacao.rank.denunciados";
+export * from "./s.painel.moderacao.historico.banido";

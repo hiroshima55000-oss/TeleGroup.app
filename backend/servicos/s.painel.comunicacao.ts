@@ -589,6 +589,44 @@ export const ComunicacaoServico = {
           textoFormatado: resCamp.textoFormatado,
           ...dadosExtras,
         };
+      } else if (
+        area === "rank_denunciados" ||
+        area === "rank-denunciados" ||
+        area === "denunciados" ||
+        area === "moderacao_rank_denunciados" ||
+        area === "moderacao-rank-denunciados"
+      ) {
+        const { RankDenunciadosServico } = await import("./s.painel.moderacao.rank.denunciados");
+        const resDen = await RankDenunciadosServico.obterRankingDenunciados();
+        dadosPayload = {
+          titulo: resDen.titulo,
+          totalDenunciados: resDen.totalDenunciados,
+          totalDenuncias: resDen.totalDenuncias,
+          ranking: resDen.ranking,
+          linhas: resDen.linhas,
+          textoFormatado: resDen.textoFormatado,
+          ...dadosExtras,
+        };
+      } else if (
+        area === "historico_banido" ||
+        area === "historico-banido" ||
+        area === "historico_banidos" ||
+        area === "historico-banidos" ||
+        area === "banidos" ||
+        area === "moderacao_historico_banido" ||
+        area === "moderacao-historico-banido"
+      ) {
+        const { HistoricoBanidoServico } = await import("./s.painel.moderacao.historico.banido");
+        const resBan = await HistoricoBanidoServico.obterHistoricoBanidos();
+        dadosPayload = {
+          titulo: resBan.titulo,
+          totalBanidos: resBan.totalBanidos,
+          historico: resBan.historico,
+          cardsTexto: resBan.cardsTexto,
+          linhas: resBan.linhas,
+          textoFormatado: resBan.textoFormatado,
+          ...dadosExtras,
+        };
       } else {
         const metricasAtuais = await this.obterMetricasCompletas();
         dadosPayload = {
@@ -671,6 +709,26 @@ export const ComunicacaoServico = {
     dadosExtras: any = {}
   ): Promise<{ enviado: boolean; status?: number; erro?: string; duracaoMs?: number }> {
     return this.dispararWebhookParaWebsite1(evento, "campanhas_ativas", dadosExtras);
+  },
+
+  /**
+   * Envia proativamente o ranking de denunciados para o Website 1 (Painel)
+   */
+  async dispararRankDenunciadosParaWebsite1(
+    evento: string = "sincronizacao_rank_denunciados",
+    dadosExtras: any = {}
+  ): Promise<{ enviado: boolean; status?: number; erro?: string; duracaoMs?: number }> {
+    return this.dispararWebhookParaWebsite1(evento, "rank_denunciados", dadosExtras);
+  },
+
+  /**
+   * Envia proativamente o histórico de banidos para o Website 1 (Painel)
+   */
+  async dispararHistoricoBanidosParaWebsite1(
+    evento: string = "sincronizacao_historico_banidos",
+    dadosExtras: any = {}
+  ): Promise<{ enviado: boolean; status?: number; erro?: string; duracaoMs?: number }> {
+    return this.dispararWebhookParaWebsite1(evento, "historico_banido", dadosExtras);
   },
 
   /**

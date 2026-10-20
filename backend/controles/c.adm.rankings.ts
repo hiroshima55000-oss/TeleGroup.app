@@ -256,6 +256,22 @@ export const AdmRankingsControle = {
   },
 
   /**
+   * Retorna o rank de denunciados
+   */
+  async obterRankDenunciados(req: Request, res: Response): Promise<void> {
+    const { AdmModeracaoControle } = await import("./c.adm.moderacao");
+    return AdmModeracaoControle.obterRankDenunciados(req, res);
+  },
+
+  /**
+   * Retorna o histórico de banidos
+   */
+  async obterHistoricoBanidos(req: Request, res: Response): Promise<void> {
+    const { AdmModeracaoControle } = await import("./c.adm.moderacao");
+    return AdmModeracaoControle.obterHistoricoBanidos(req, res);
+  },
+
+  /**
    * Envia qualquer rank para o painel via webhook
    */
   async enviarParaPainel(req: Request, res: Response): Promise<void> {
@@ -271,6 +287,12 @@ export const AdmRankingsControle = {
       resultado = await RankInvestidoresServico.enviarParaPainel(evento, req.body?.dadosExtras);
     } else if (area.includes("saldo")) {
       resultado = await RankSaldoServico.enviarParaPainel(evento, req.body?.dadosExtras);
+    } else if (area.includes("denuncia") || area.includes("denunciado")) {
+      const { RankDenunciadosServico } = await import("../servicos/s.painel.moderacao.rank.denunciados");
+      resultado = await RankDenunciadosServico.enviarParaPainel(evento, req.body?.dadosExtras);
+    } else if (area.includes("ban") || area.includes("banido")) {
+      const { HistoricoBanidoServico } = await import("../servicos/s.painel.moderacao.historico.banido");
+      resultado = await HistoricoBanidoServico.enviarParaPainel(evento, req.body?.dadosExtras);
     } else if (area.includes("resultado") || area.includes("custo_beneficio") || area.includes("campanha")) {
       const { RankResultadoCampanhaServico } = await import("../servicos/s.painel.divulgacoes.rank.resultado.campanha");
       resultado = await RankResultadoCampanhaServico.enviarParaPainel(evento, req.body?.dadosExtras);
