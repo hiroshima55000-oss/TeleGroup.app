@@ -363,7 +363,7 @@ export const HistoricoUsuarioServico = {
     let interessesFormatadosTexto = "";
 
     try {
-      const { PerfilInteressesServico } = await import("./interesses/s.perfil.interesses");
+      const { PerfilInteressesServico } = await import("./AlgoritmoOrganico/s.perfil.interesses");
       const perfilInt = PerfilInteressesServico.obterPerfil(usuarioId, nickname);
       classificacaoPublico = perfilInt.classificacaoPublico;
       taxaCliquesCTR = perfilInt.taxaCliquesCTR || taxaCliquesCTR;

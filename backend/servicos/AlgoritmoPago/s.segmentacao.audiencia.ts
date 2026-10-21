@@ -1,5 +1,5 @@
 import { Campanha } from "../../schemas/schema.campanhas";
-import { PerfilInteressesServico } from "../interesses/s.perfil.interesses";
+import { PerfilInteressesServico } from "../AlgoritmoOrganico/s.perfil.interesses";
 import { CONFIG_VANTAGEM_PAGA } from "./s.pesos.vantagem";
 
 export const SegmentacaoAudienciaServico = {

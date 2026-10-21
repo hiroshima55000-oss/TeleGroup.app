@@ -13,7 +13,7 @@ import {
   PerfilInteresseUsuario,
   ScoreDetalhadoPublicacao,
   TipoAcaoInteresse,
-} from "./interesses";
+} from "./AlgoritmoOrganico";
 
 export const PublicacoesServico = {
   /**
@@ -68,7 +68,7 @@ export const PublicacoesServico = {
     if (!filtros.apenasMinhas) {
       try {
         const { RepositorioCampanhas } = await import("../repositorios/repositorio.campanhas");
-        const { LeilaoAdRankServico, CONFIG_VANTAGEM_PAGA } = await import("./CampanhasPagas");
+        const { LeilaoAdRankServico, CONFIG_VANTAGEM_PAGA } = await import("./AlgoritmoPago");
         const todasCampanhas = await RepositorioCampanhas.buscarTodas();
 
         // Limite estrito de saturação (máximo 20% do feed exibido)
