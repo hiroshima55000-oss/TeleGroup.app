@@ -83,7 +83,6 @@ export default function TelaBloqueioLoginGoogle() {
   const [popupBloqueado, setPopupBloqueado] = useState(false);
   const [googleClientId, setGoogleClientId] = useState<string>("");
   const [gisPronto, setGisPronto] = useState(false);
-  const [emailManual, setEmailManual] = useState<string>("");
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
@@ -91,28 +90,6 @@ export default function TelaBloqueioLoginGoogle() {
     const atual = obterGoogleUsuario();
     setUsuarioGoogle(atual);
   }, []);
-
-  async function handleLoginComEmailInformado(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    const emailLimpo = emailManual.trim().toLowerCase();
-    if (!emailLimpo || !emailLimpo.includes("@")) {
-      setErroLogin("Por favor, digite um endereço de email Google válido.");
-      return;
-    }
-
-    try {
-      setCarregando(true);
-      setErroLogin(null);
-      await finalizarAutenticacaoNoServidor({
-        email: emailLimpo,
-        name: emailLimpo.split("@")[0],
-        googleId: `gid_${Date.now()}`,
-      });
-    } catch (err: any) {
-      setErroLogin(err?.message || "Falha ao autenticar com email Google.");
-      setCarregando(false);
-    }
-  }
 
   useEffect(() => {
     let montado = true;
@@ -753,156 +730,6 @@ export default function TelaBloqueioLoginGoogle() {
                     </>
                   )}
                 </button>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    margin: "18px 0 14px",
-                  }}
-                >
-                  <div
-                    style={{
-                      flex: 1,
-                      height: "1px",
-                      background: "rgba(148, 163, 184, 0.16)",
-                    }}
-                  />
-                  <span
-                    style={{
-                      color: "#94a3b8",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    ou informe sua conta Google
-                  </span>
-                  <div
-                    style={{
-                      flex: 1,
-                      height: "1px",
-                      background: "rgba(148, 163, 184, 0.16)",
-                    }}
-                  />
-                </div>
-
-                <form
-                  onSubmit={handleLoginComEmailInformado}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "6px",
-                    }}
-                  >
-                    <label
-                      style={{
-                        color: "#cbd5e1",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Conta Google
-                    </label>
-                    <input
-                      type="email"
-                      value={emailManual}
-                      onChange={(e) => setEmailManual(e.target.value)}
-                      placeholder="seuemail@gmail.com"
-                      disabled={carregando}
-                      style={{
-                        width: "100%",
-                        padding: "11px 14px",
-                        background: "rgba(15, 23, 42, 0.7)",
-                        border: "1px solid rgba(56, 189, 248, 0.28)",
-                        borderRadius: "10px",
-                        color: "#f8fafc",
-                        fontSize: "13px",
-                        outline: "none",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  {emailManual.trim() && (
-                    <div
-                      style={{
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        background: "rgba(56, 189, 248, 0.1)",
-                        border: "1px solid rgba(56, 189, 248, 0.2)",
-                        color: "#38bdf8",
-                        fontSize: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        flexWrap: "wrap",
-                        gap: "6px",
-                      }}
-                    >
-                      <span>
-                        Seu @ será:{" "}
-                        <strong style={{ color: "#67e8f9" }}>
-                          @
-                          {emailManual
-                            .split("@")[0]
-                            .replace(/[^a-zA-Z0-9_]/g, "") || "usuario"}
-                        </strong>
-                      </span>
-                      <span style={{ color: "#4ade80", fontSize: "11px" }}>
-                        ✓ Interesses mantidos
-                      </span>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={carregando || !emailManual.trim()}
-                    style={{
-                      width: "100%",
-                      minHeight: "44px",
-                      padding: "10px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                      background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-                      border: "none",
-                      borderRadius: "10px",
-                      color: "#ffffff",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      cursor: carregando ? "wait" : "pointer",
-                      boxShadow: "0 4px 14px rgba(37, 99, 235, 0.28)",
-                    }}
-                  >
-                    {carregando ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        <span>Entrando com o Google...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>
-                          Entrar com @
-                          {emailManual
-                            .split("@")[0]
-                            .replace(/[^a-zA-Z0-9_]/g, "") || "usuario"}
-                        </span>
-                        <ArrowRight size={15} />
-                      </>
-                    )}
-                  </button>
-                </form>
               </div>
             )}
 
