@@ -601,3 +601,61 @@ export async function registrarVisualizacoesEmLote(ids: string[]): Promise<void>
     });
   } catch {}
 }
+
+export interface DadosDenunciaInput {
+  motivo: string;
+  categoria?: string;
+  detalhes?: string;
+  denunciante?: string;
+  usuarioId?: string;
+  usuario?: string;
+}
+
+/**
+ * Envia uma denúncia funcional contra a publicação para o sistema de moderação
+ */
+export async function enviarDenunciaPublicacao(
+  publicacaoId: string,
+  dados: DadosDenunciaInput
+): Promise<{ sucesso: boolean; mensagem?: string; erro?: string }> {
+  try {
+    const usuarioLogado = obterUsuarioId();
+    const endpoint = publicacaoId
+      ? `/api/publicacoes/${encodeURIComponent(publicacaoId)}/denunciar`
+      : `/api/publicacoes/denunciar`;
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": usuarioLogado,
+      },
+      body: JSON.stringify({
+        publicacaoId,
+        motivo: dados.motivo,
+        categoria: dados.categoria || "Moderação de Comunidade",
+        detalhes: dados.detalhes,
+        denunciante: dados.denunciante || usuarioLogado,
+        usuarioId: dados.usuarioId,
+        usuario: dados.usuario,
+      }),
+    });
+
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(json.erro || json.mensagem || `Erro ao registrar denúncia (${res.status})`);
+    }
+
+    return {
+      sucesso: true,
+      mensagem: json.mensagem || "Denúncia registrada com sucesso para moderação.",
+    };
+  } catch (err: any) {
+    console.error("Erro ao enviar denúncia:", err);
+    return {
+      sucesso: false,
+      erro: err.message || "Não foi possível registrar sua denúncia no momento.",
+    };
+  }
+}
+

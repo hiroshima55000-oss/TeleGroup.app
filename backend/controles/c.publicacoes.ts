@@ -219,6 +219,51 @@ export const PublicacoesControle = {
       res.status(404).json({ sucesso: false, erro: erro.message });
     }
   },
+
+  /**
+   * Endpoint: POST /api/publicacoes/:id/denunciar e POST /api/publicacoes/denunciar
+   * Registra uma denúncia contra a publicação no sistema de moderação
+   */
+  async denunciarPublicacao(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id || req.body.publicacaoId || req.body.id;
+      const { motivo, denunciante, categoria, detalhes, usuario, usuarioId } = req.body;
+
+      let alvo = usuario || usuarioId;
+      let pub: any = null;
+      if (id) {
+        pub = await PublicacoesServico.buscarPorId(id).catch(() => null);
+        if (!alvo && pub) {
+          alvo = pub.usuarioId || pub.nome || `@pub_${id}`;
+        }
+      }
+      if (!alvo) {
+        alvo = `@conteudo_${id || "desconhecido"}`;
+      }
+
+      const motivoCompleto = detalhes && String(detalhes).trim()
+        ? `${motivo || "Denúncia de publicação"}: ${String(detalhes).trim()}`
+        : (motivo || "Violação das regras da comunidade");
+
+      const { RankDenunciadosServico } = await import("../servicos/s.painel.moderacao.rank.denunciados");
+      const resultado = await RankDenunciadosServico.registrarDenuncia({
+        usuario: alvo,
+        usuarioId: pub?.usuarioId || usuarioId,
+        motivo: motivoCompleto,
+        denunciante: denunciante || "@anonimo",
+        categoria: categoria || "Conteúdo impróprio",
+        publicacaoId: id,
+      });
+
+      res.status(200).json({
+        sucesso: true,
+        mensagem: "Denúncia registrada com sucesso. A publicação foi sinalizada para a equipe de moderação.",
+        dados: resultado,
+      });
+    } catch (erro: any) {
+      res.status(500).json({ sucesso: false, erro: erro.message });
+    }
+  },
 };
 
 export default PublicacoesControle;

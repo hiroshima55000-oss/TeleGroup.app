@@ -472,6 +472,8 @@ function TelaDivulgacaoTelegram() {
               {grupos.map((grupo) => (
                 <ContainerGrupoTelegram
                   key={grupo.id}
+                  id={grupo.id}
+                  usuarioId={grupo.usuarioId}
                   nome={grupo.nome}
                   descricao={grupo.descricao}
                   destaque={grupo.destaque}

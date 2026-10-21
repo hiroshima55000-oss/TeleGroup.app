@@ -5,10 +5,14 @@ import {
   Send,
   ChevronDown,
   ChevronUp,
+  MoreVertical,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import CardDenunciar from "./card.denunciar";
 
 export interface ContainerGrupoTelegramProps {
+  id?: string;
+  usuarioId?: string;
   nome?: string;
   descricao: string;
   destaque?: boolean;
@@ -28,6 +32,7 @@ export interface ContainerGrupoTelegramProps {
   onCurtir?: () => void;
   onEntrar?: () => void;
   onTagClick?: (tag: string) => void;
+  onDenunciar?: () => void;
 }
 
 /**
@@ -87,6 +92,9 @@ export function organizarSequenciasTexto(texto: string): string {
 }
 
 function ContainerGrupoTelegram({
+  id,
+  usuarioId,
+  nome,
   descricao,
   foto,
   visualizacoes,
@@ -103,7 +111,9 @@ function ContainerGrupoTelegram({
   onCurtir,
   onEntrar,
   onTagClick,
+  onDenunciar,
 }: ContainerGrupoTelegramProps) {
+  const [denunciarAberto, setDenunciarAberto] = useState(false);
   // Controle progressivo de linhas: inicia em 4 linhas no máximo e avança +4 a cada clique
   const PASSO_LINHAS = 4;
   const [linhasMaximas, setLinhasMaximas] = useState(PASSO_LINHAS);
@@ -162,18 +172,66 @@ function ContainerGrupoTelegram({
   }
 
   return (
-    <article
-      style={{
-        width: "calc(100% - 32px)",
-        maxWidth: "620px",
-        background: "#151a21",
-        border: "1px solid rgba(255,255,255,0.07)",
-        borderRadius: "16px",
-        overflow: "hidden",
-        margin: "18px auto",
-        boxShadow: "0 12px 35px rgba(0,0,0,0.20)",
-      }}
-    >
+    <>
+      <article
+        style={{
+          width: "calc(100% - 32px)",
+          maxWidth: "620px",
+          background: "#151a21",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          margin: "18px auto",
+          boxShadow: "0 12px 35px rgba(0,0,0,0.20)",
+          position: "relative",
+        }}
+      >
+        {/* BOTÃO DISCRETO DE 3 PONTINHOS PARA ABRIR O CARD DE DENÚNCIA */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onDenunciar) {
+              onDenunciar();
+            } else {
+              setDenunciarAberto(true);
+            }
+          }}
+          aria-label="Opções da publicação (denunciar)"
+          title="Denunciar publicação"
+          style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            zIndex: 15,
+            width: "32px",
+            height: "32px",
+            borderRadius: "50%",
+            background: "rgba(15, 20, 26, 0.72)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#cbd5e1",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.35)",
+            transition: "all 0.18s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(30, 41, 59, 0.95)";
+            e.currentTarget.style.color = "#ffffff";
+            e.currentTarget.style.transform = "scale(1.08)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(15, 20, 26, 0.72)";
+            e.currentTarget.style.color = "#cbd5e1";
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          <MoreVertical size={16} />
+        </button>
       {/* FOTO (OPCIONAL: EXIBIDA SE HOUVER FOTO - PROPORÇÃO 16:9) */}
       {foto ? (
         <div
@@ -470,6 +528,21 @@ function ContainerGrupoTelegram({
         </button>
       </div>
     </article>
+
+    {/* CARD FUNCIONAL DE DENÚNCIA */}
+    <CardDenunciar
+      aberto={denunciarAberto}
+      publicacao={{
+        id,
+        nome,
+        descricao,
+        usuarioId,
+        link,
+        foto,
+      }}
+      onFechar={() => setDenunciarAberto(false)}
+    />
+  </>
   );
 }
 

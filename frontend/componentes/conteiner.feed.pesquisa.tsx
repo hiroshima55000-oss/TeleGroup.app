@@ -3,12 +3,14 @@ import {
   Heart,
   MousePointerClick,
   ExternalLink,
+  MoreVertical,
 } from "lucide-react";
 
 import {
   useState,
   useEffect,
 } from "react";
+import CardDenunciar from "./card.denunciar";
 
 import type {
   PublicacaoItem,
@@ -120,6 +122,7 @@ export function ConteinerFeedPesquisa({
 
   const [curtido, setCurtido] = useState(jaCurtiuInicial);
   const [totalLikes, setTotalLikes] = useState(initialLikes);
+  const [denunciarAberto, setDenunciarAberto] = useState(false);
 
   useEffect(() => {
     if (grupo?.id) {
@@ -198,11 +201,54 @@ export function ConteinerFeedPesquisa({
 
 
   return (
-    <article className="card-feed-pesquisa">
+    <>
+      <article className="card-feed-pesquisa" style={{ position: "relative" }}>
+        {/* BOTÃO DISCRETO DE 3 PONTINHOS PARA ABRIR O CARD DE DENÚNCIA */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setDenunciarAberto(true);
+          }}
+          aria-label="Denunciar publicação"
+          title="Denunciar publicação"
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            zIndex: 15,
+            width: "28px",
+            height: "28px",
+            borderRadius: "50%",
+            background: "rgba(15, 20, 26, 0.72)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#cbd5e1",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 3px 10px rgba(0, 0, 0, 0.3)",
+            transition: "all 0.18s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(30, 41, 59, 0.95)";
+            e.currentTarget.style.color = "#ffffff";
+            e.currentTarget.style.transform = "scale(1.08)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(15, 20, 26, 0.72)";
+            e.currentTarget.style.color = "#cbd5e1";
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          <MoreVertical size={14} />
+        </button>
 
-      {/* CONTEÚDO */}
+        {/* CONTEÚDO */}
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
 
         {/* FOTO */}
 
@@ -446,6 +492,22 @@ export function ConteinerFeedPesquisa({
       </div>
 
     </article>
+
+    {/* CARD FUNCIONAL DE DENÚNCIA */}
+    <CardDenunciar
+      aberto={denunciarAberto}
+      publicacao={
+        grupo || {
+          id: "",
+          nome: grupo?.nome || "Publicação",
+          descricao: grupo?.descricao,
+          link,
+          foto,
+        }
+      }
+      onFechar={() => setDenunciarAberto(false)}
+    />
+  </>
   );
 }
 

@@ -17,6 +17,8 @@ rotasPublicacoes.post("/:id/like", PublicacoesControle.curtirPublicacao);
 rotasPublicacoes.post("/:id/curtir", PublicacoesControle.curtirPublicacao);
 rotasPublicacoes.post("/:id/clique", PublicacoesControle.registrarClique);
 rotasPublicacoes.post("/:id/visualizacao", PublicacoesControle.registrarVisualizacao);
+rotasPublicacoes.post("/:id/denunciar", PublicacoesControle.denunciarPublicacao);
+rotasPublicacoes.post("/denunciar", PublicacoesControle.denunciarPublicacao);
 rotasPublicacoes.delete("/:id", PublicacoesControle.remover);
 
 export default rotasPublicacoes;
