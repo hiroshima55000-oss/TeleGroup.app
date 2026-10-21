@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import { API_URL, PAINEL_CHAVE_SECRETA, CHAVE_SECRETA_TELEGROUP } from "../configuracao/variaveis";
 import { LoggerInformativo } from "./s.comunicacao";
-import { PerfilInteressesServico } from "./interesses/s.perfil.interesses";
-import { PerfilInteresseUsuario, GrupoInteressePercentual } from "./interesses/tipos.interesses";
+import { PerfilInteressesServico } from "./AlgoritmoOrganico/s.perfil.interesses";
+import { PerfilInteresseUsuario, GrupoInteressePercentual } from "./AlgoritmoOrganico/tipos.interesses";
 
 export interface ItemInteresseGrupo {
   grupoNome: string;

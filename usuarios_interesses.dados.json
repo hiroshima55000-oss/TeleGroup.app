@@ -1,0 +1,20 @@
+{
+  "usr_anonimo": {
+    "usuarioId": "usr_anonimo",
+    "nickname": "@usr_anonimo",
+    "totalInteracoes": 0,
+    "totalLikes": 0,
+    "totalCliques": 0,
+    "totalVisualizacoes": 0,
+    "tempoRetencaoEstimadoSegundos": 0,
+    "classificacaoPublico": "Passivo",
+    "taxaCliquesCTR": 0,
+    "descricaoQualificacao": "Usuário novo sem histórico recente de interações.",
+    "hashtags": {},
+    "distribuicaoGrupos": [],
+    "distribuicaoPercentual": {},
+    "sequenciaSessao": [],
+    "primeiraInteracao": "2026-10-21T15:46:21.735Z",
+    "ultimaAtualizacao": "2026-10-21T15:46:21.735Z"
+  }
+}
