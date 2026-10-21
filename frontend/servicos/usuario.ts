@@ -109,7 +109,7 @@ export function salvarLoginGoogle(dados: {
     localStorage.setItem(CHAVE_GOOGLE_TOKEN, dados.token);
   }
 
-  // O @ da pessoa atualiza e se torna o @ prefixo do email (ex: deepweb3036@gmail.com -> @deepweb3036)
+  // O @ da pessoa atualiza e se torna o @ prefixo do email Google (ex: prefixo do email)
   const arrobaGoogle = extrairArrobaDoEmail(emailLimpo);
   const nickFinal = dados.nickname && !dados.nickname.startsWith("@usuario_")
     ? (dados.nickname.startsWith("@") ? dados.nickname : `@${dados.nickname}`)
@@ -179,7 +179,7 @@ export function obterOuCriarUsuario(): InfoUsuario {
   const partes = id.split("_");
   const idCurto = partes.length >= 2 ? `#${partes[1]}` : `#${id.substring(0, 6)}`;
 
-  // Quando a pessoa loga com Google: o @ dela atualiza e se torna o @ prefixo do email (ex: deepweb3036@gmail.com -> @deepweb3036)
+  // Quando a pessoa loga com Google: o @ dela atualiza e se torna o @ prefixo do email
   if (logadoGoogle && google?.email) {
     nickname = extrairArrobaDoEmail(google.email);
     localStorage.setItem(CHAVE_NICKNAME, nickname);

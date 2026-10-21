@@ -195,7 +195,7 @@ export const RepositorioUsuario = {
       nome: dados.nome || existente?.nome || emailAlvo.split("@")[0],
       foto: dados.foto || existente?.foto,
       googleId: dados.googleId || existente?.googleId,
-      nickname: nicknameGoogle, // Sempre atualiza para o @ derivado da conta Google (ex: @deepweb3036)
+      nickname: nicknameGoogle, // Sempre atualiza para o @ derivado da conta Google
       cadastrado: true,
       primeiroAcesso: existente?.primeiroAcesso || agora,
       ultimoAcesso: agora,

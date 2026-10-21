@@ -83,7 +83,7 @@ export default function TelaBloqueioLoginGoogle() {
   const [popupBloqueado, setPopupBloqueado] = useState(false);
   const [googleClientId, setGoogleClientId] = useState<string>("");
   const [gisPronto, setGisPronto] = useState(false);
-  const [emailManual, setEmailManual] = useState<string>("deepweb3036@gmail.com");
+  const [emailManual, setEmailManual] = useState<string>("");
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
@@ -817,7 +817,7 @@ export default function TelaBloqueioLoginGoogle() {
                       type="email"
                       value={emailManual}
                       onChange={(e) => setEmailManual(e.target.value)}
-                      placeholder="ex: deepweb3036@gmail.com"
+                      placeholder="seuemail@gmail.com"
                       disabled={carregando}
                       style={{
                         width: "100%",
