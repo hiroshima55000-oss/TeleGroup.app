@@ -14,3 +14,4 @@ export * from "./rotas.adm.campanhas.ranking";
 export * from "./rotas.adm.rankings";
 export * from "./rotas.adm.saldo";
 export * from "./rotas.tags";
+export * from "./rotas.base.dados";

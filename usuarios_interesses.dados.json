@@ -1,0 +1,72 @@
+{
+  "anonimo": {
+    "usuarioId": "anonimo",
+    "nickname": "@anonimo",
+    "totalInteracoes": 0,
+    "totalLikes": 0,
+    "totalCliques": 0,
+    "totalVisualizacoes": 0,
+    "tempoRetencaoEstimadoSegundos": 0,
+    "classificacaoPublico": "Passivo",
+    "taxaCliquesCTR": 0,
+    "descricaoQualificacao": "Usuário novo sem histórico recente de interações.",
+    "hashtags": {},
+    "distribuicaoGrupos": [],
+    "distribuicaoPercentual": {},
+    "sequenciaSessao": [],
+    "primeiraInteracao": "2026-10-21T16:36:05.039Z",
+    "ultimaAtualizacao": "2026-10-21T16:36:05.039Z"
+  },
+  "usr_deutscher3036_mvfos8lr": {
+    "usuarioId": "usr_deutscher3036_mvfos8lr",
+    "nickname": "@deutscher3036",
+    "totalInteracoes": 0,
+    "totalLikes": 0,
+    "totalCliques": 0,
+    "totalVisualizacoes": 0,
+    "tempoRetencaoEstimadoSegundos": 0,
+    "classificacaoPublico": "Passivo",
+    "taxaCliquesCTR": 0,
+    "descricaoQualificacao": "Usuário novo sem histórico recente de interações.",
+    "hashtags": {},
+    "distribuicaoGrupos": [],
+    "distribuicaoPercentual": {},
+    "sequenciaSessao": [],
+    "primeiraInteracao": "2026-10-21T16:36:17.117Z",
+    "ultimaAtualizacao": "2026-10-21T16:36:17.117Z"
+  },
+  "usr_teste": {
+    "usuarioId": "usr_teste",
+    "nickname": "",
+    "classificacaoPublico": "Público de Alto Clique (Tráfego Focado)",
+    "taxaCliquesCTR": 100,
+    "totalEventosColetados": 1,
+    "totalVisualizacoes": 0,
+    "totalCliques": 1,
+    "totalLikes": 0,
+    "distribuicaoPercentual": {
+      "tecnologia e dev": 100
+    },
+    "distribuicaoGrupos": [
+      {
+        "grupoNome": "tecnologia e dev",
+        "percentual": 100,
+        "pontosPonderados": 11,
+        "totalAcoes": 2
+      }
+    ],
+    "topHashtags": {
+      "tecnologia": {
+        "pontos": 5,
+        "percentual": 100,
+        "usos": 1
+      }
+    },
+    "afinidadesNichos": {
+      "tecnologia": 4.999999995833333
+    },
+    "scoreEngajamento": 13,
+    "versaoCiclo": 1,
+    "ultimaOtimizacao": "2026-10-21T17:45:36.544Z"
+  }
+}

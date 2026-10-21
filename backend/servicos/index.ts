@@ -24,5 +24,6 @@ export * from "./s.painel.usuarios.historico.interesses";
 export * from "./s.painel.moderacao.rank.denunciados";
 export * from "./s.painel.moderacao.historico.banido";
 export * from "./s.rank.hastags";
+export * from "./BaseDados";
 export * from "./AlgoritmoOrganico";
 export * from "./AlgoritmoPago";

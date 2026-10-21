@@ -7,6 +7,7 @@ import rotasPublicacoes from "./rotas/rotas.publicacoes";
 import rotasTrafego from "./rotas/rotas.trafego";
 import rotasPagamento from "./rotas/rotas.pagamento";
 import rotasTags from "./rotas/rotas.tags";
+import rotasBaseDados from "./rotas/rotas.base.dados";
 import { RankHashtagsControle } from "./controles/c.rank.hastags";
 import rotasAdm, { rotasAdmUsuario, rotasAdmArrecadacao, rotasAdmDivulgacoes, rotasAdmRankingCampanhas, rotasAdmRankings, rotasAdmModeracao } from "./rotas/rotas.adm";
 import { PagamentoControle } from "./controles/c.pagamento";
@@ -46,6 +47,9 @@ rotas.use("/pagamento", rotasPagamento);
 // Ranking de Hashtags & Nichos para o usuário (/api/tags/*, /api/nichos)
 rotas.use("/tags", rotasTags);
 rotas.get("/nichos", RankHashtagsControle.listarNichos);
+
+// Motor Cíclico BaseDados (1-Coletar -> 2-Otimizar -> 3-Entregar -> 4-Coletar Mais -> 1)
+rotas.use("/basedados", rotasBaseDados);
 
 // Módulos dedicados para o Painel Administrativo
 // adm.usuario -> dados de usuários
