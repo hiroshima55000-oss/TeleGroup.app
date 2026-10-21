@@ -1,7 +1,7 @@
 import { Publicacao } from "../../schemas/schema.publicacoes";
 import { PerfilInteresseUsuario, ScoreDetalhadoPublicacao } from "./tipos.interesses";
-import { CONFIG_INTERESSES } from "./s.pesos.config";
-import { PerfilInteressesServico } from "./s.perfil.interesses";
+import { CONFIG_INTERESSES } from "./ep.1.pesos";
+import { PerfilInteressesServico } from "./ep.4.perfil.interesses";
 
 export const RanqueamentoFeedServico = {
   /**

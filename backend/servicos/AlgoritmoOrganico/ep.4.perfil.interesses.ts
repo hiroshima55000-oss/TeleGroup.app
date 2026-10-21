@@ -7,8 +7,8 @@ import {
   ItemSequenciaSessao,
   TipoAcaoInteresse,
 } from "./tipos.interesses";
-import { CONFIG_INTERESSES } from "./s.pesos.config";
-import { QualificacaoPublicoServico } from "./s.qualificacao.publico";
+import { CONFIG_INTERESSES } from "./ep.1.pesos";
+import { QualificacaoPublicoServico } from "./ep.2.qualificacao";
 
 const ARQUIVO_INTERESSES = path.resolve(process.cwd(), "usuarios_interesses.dados.json");
 

@@ -1,8 +1,8 @@
 import { Campanha } from "../../schemas/schema.campanhas";
 import { ResultadoLeilaoItem, SlotExibicao } from "./tipos.campanhas.pagas";
-import { CONFIG_VANTAGEM_PAGA } from "./s.pesos.vantagem";
-import { SegmentacaoAudienciaServico } from "./s.segmentacao.audiencia";
-import { EntregaPacingServico } from "./s.entrega.pacing";
+import { CONFIG_VANTAGEM_PAGA } from "./ep.1.pesos.vantagem";
+import { SegmentacaoAudienciaServico } from "./ep.2.segmentacao.audiencia";
+import { EntregaPacingServico } from "./ep.3.entrega.pacing";
 
 export const LeilaoAdRankServico = {
   /**

@@ -1,6 +1,6 @@
 import { Campanha } from "../../schemas/schema.campanhas";
 import { RitmoPacing } from "./tipos.campanhas.pagas";
-import { CONFIG_VANTAGEM_PAGA } from "./s.pesos.vantagem";
+import { CONFIG_VANTAGEM_PAGA } from "./ep.1.pesos.vantagem";
 
 export const EntregaPacingServico = {
   /**

@@ -9,9 +9,9 @@
  * 5. Cobrança do segundo preço (GSP) é matematicamente consistente
  */
 
-import { LeilaoAdRankServico } from "./s.leilao.ad.rank";
-import { RelatoriosMetricasServico } from "./s.relatorios.metricas";
-import { CONFIG_VANTAGEM_PAGA } from "./s.pesos.vantagem";
+import { LeilaoAdRankServico } from "./ep.4.leilao.ad.rank";
+import { RelatoriosMetricasServico } from "./ep.5.relatorios.metricas";
+import { CONFIG_VANTAGEM_PAGA } from "./ep.1.pesos.vantagem";
 import { Campanha } from "../../schemas/schema.campanhas";
 import { PublicacoesServico } from "../s.criacao.publicacoes";
 

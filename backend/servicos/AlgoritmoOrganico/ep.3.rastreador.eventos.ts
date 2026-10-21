@@ -1,5 +1,5 @@
 import { TipoAcaoInteresse, PerfilInteresseUsuario } from "./tipos.interesses";
-import { PerfilInteressesServico } from "./s.perfil.interesses";
+import { PerfilInteressesServico } from "./ep.4.perfil.interesses";
 import { RepositorioPublicacoes } from "../../repositorios/repositorio.publicacoes";
 
 export const RastreadorEventosServico = {

@@ -1,8 +1,8 @@
 import { Campanha } from "../../schemas/schema.campanhas";
 import { MetricasAlgoritmoItem, DiagnosticoCampanha } from "./tipos.campanhas.pagas";
-import { CONFIG_VANTAGEM_PAGA } from "./s.pesos.vantagem";
+import { CONFIG_VANTAGEM_PAGA } from "./ep.1.pesos.vantagem";
 import { RepositorioCampanhas } from "../../repositorios/repositorio.campanhas";
-import { EntregaPacingServico } from "./s.entrega.pacing";
+import { EntregaPacingServico } from "./ep.3.entrega.pacing";
 
 // Buffer em memória para proteção anti-fraude multicamada
 interface RegistroAntiFraude {
