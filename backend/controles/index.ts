@@ -14,3 +14,4 @@ export * from "./c.adm.campanhas.ativas";
 export * from "./c.adm.campanhas.ranking";
 export * from "./c.adm.rankings";
 export * from "./c.adm.saldo";
+export * from "./c.rank.hastags";

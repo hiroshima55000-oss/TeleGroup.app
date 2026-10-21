@@ -13,3 +13,4 @@ export * from "./rotas.adm.campanhas.ativas";
 export * from "./rotas.adm.campanhas.ranking";
 export * from "./rotas.adm.rankings";
 export * from "./rotas.adm.saldo";
+export * from "./rotas.tags";

@@ -6,6 +6,8 @@ import rotasCampanhas from "./rotas/rotas.campanhas";
 import rotasPublicacoes from "./rotas/rotas.publicacoes";
 import rotasTrafego from "./rotas/rotas.trafego";
 import rotasPagamento from "./rotas/rotas.pagamento";
+import rotasTags from "./rotas/rotas.tags";
+import { RankHashtagsControle } from "./controles/c.rank.hastags";
 import rotasAdm, { rotasAdmUsuario, rotasAdmArrecadacao, rotasAdmDivulgacoes, rotasAdmRankingCampanhas, rotasAdmRankings, rotasAdmModeracao } from "./rotas/rotas.adm";
 import { PagamentoControle } from "./controles/c.pagamento";
 import { AdmControle } from "./controles/c.adm";
@@ -40,6 +42,10 @@ rotas.use("/publicacoes", rotasPublicacoes);
 
 // Pagamento PIX e Integração SyncPay (/api/pagamento/*)
 rotas.use("/pagamento", rotasPagamento);
+
+// Ranking de Hashtags & Nichos para o usuário (/api/tags/*, /api/nichos)
+rotas.use("/tags", rotasTags);
+rotas.get("/nichos", RankHashtagsControle.listarNichos);
 
 // Módulos dedicados para o Painel Administrativo
 // adm.usuario -> dados de usuários
