@@ -23,6 +23,13 @@ rotasAdmUsuario.get("/historico", AdmUsuarioControle.obterHistorico);
 rotasAdmUsuario.post("/historico", AdmUsuarioControle.obterHistorico);
 rotasAdmUsuario.delete("/historico", AdmUsuarioControle.removerHistorico);
 
+// Histórico de interesses e afinidades dos usuários
+rotasAdmUsuario.get("/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdmUsuario.post("/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdmUsuario.get("/historico/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdmUsuario.post("/historico/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdmUsuario.post("/enviar-interesses", AdmUsuarioControle.enviarInteressesParaPainel);
+
 // Ações de moderação administrativa (Banir, Desbanir, Excluir, Investigar)
 rotasAdmUsuario.post("/banir", AdmUsuarioControle.banirUsuario);
 rotasAdmUsuario.post("/ban", AdmUsuarioControle.banirUsuario);

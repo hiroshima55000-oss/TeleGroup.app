@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AdmControle } from "../controles/c.adm";
+import { AdmUsuarioControle } from "../controles/c.adm.usuario";
 import { HistoricoControle } from "../controles/c.historico";
 import rotasAdmUsuario from "./rotas.adm.usuario";
 import rotasAdmArrecadacao from "./rotas.adm.arrecadacao";
@@ -61,6 +62,12 @@ rotasAdm.get("/dados/usuarios", AdmControle.obterMetricasUsuarios);
 rotasAdm.post("/dados/usuarios", AdmControle.obterMetricasUsuarios);
 rotasAdm.get("/metricas/usuarios", AdmControle.obterMetricasUsuarios);
 rotasAdm.post("/metricas/usuarios", AdmControle.obterMetricasUsuarios);
+
+// Histórico de interesses de usuários
+rotasAdm.get("/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdm.post("/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdm.get("/historico/interesses", AdmUsuarioControle.obterInteresses);
+rotasAdm.post("/historico/interesses", AdmUsuarioControle.obterInteresses);
 
 // =========================================================
 // ÁREA: ARRECADAÇÃO (Compatibilidade com endpoints legados)

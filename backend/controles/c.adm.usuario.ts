@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ComunicacaoServico } from "../servicos/s.painel.comunicacao";
 import { HistoricoUsuarioServico } from "../servicos/s.painel.usuarios.historico";
+import { PainelUsuariosHistoricoInteressesServico } from "../servicos/s.painel.usuarios.historico.interesses";
 import { LoggerInformativo, extrairIp } from "../servicos/s.comunicacao";
 import { HistoricoControle } from "./c.historico";
 
@@ -197,6 +198,91 @@ export const AdmUsuarioControle = {
         sucesso: resultado.enviado,
         mensagem: resultado.enviado
           ? "Histórico e cartões de usuários enviados com sucesso para a API_URL"
+          : `Falha ao enviar para API_URL: ${resultado.erro || "Sem resposta"}`,
+        status: resultado.status,
+        duracaoMs: resultado.duracaoMs,
+      });
+    } catch (e: any) {
+      res.status(500).json({ sucesso: false, erro: e.message });
+    }
+  },
+
+  /**
+   * Retorna o histórico de interesses dos usuários e o ranking de grupos
+   * Atende: GET/POST /adm.usuario/interesses, GET/POST /adm/usuario/interesses
+   */
+  async obterInteresses(req: Request, res: Response): Promise<void> {
+    const inicio = Date.now();
+    const clientIp = extrairIp(req);
+
+    const checagemLoop = ComunicacaoServico.checarLoopInstancia(req);
+    if (checagemLoop.loop) {
+      res.status(400).json({ sucesso: false, modulo: "adm.usuario", erro: checagemLoop.motivo });
+      return;
+    }
+
+    const checagemAuth = ComunicacaoServico.validarChavePainel(req);
+    if (!checagemAuth.valido) {
+      res.status(401).json({ sucesso: false, modulo: "adm.usuario", erro: checagemAuth.motivo });
+      return;
+    }
+
+    try {
+      const { formato, usuario, busca } = req.query;
+      const termo = (usuario as string) || (busca as string);
+
+      if (termo && termo.trim()) {
+        const perfil = PainelUsuariosHistoricoInteressesServico.obterPerfilUsuario(termo.trim());
+        if (formato === "texto" || req.headers.accept === "text/plain") {
+          res.setHeader("Content-Type", "text/plain; charset=utf-8");
+          res.status(200).send(perfil.textoFormatado);
+          return;
+        }
+        res.status(200).json({
+          sucesso: true,
+          modulo: "adm.usuario",
+          area: "historico_interesses",
+          dados: perfil,
+        });
+        return;
+      }
+
+      const historicoInteresses = await PainelUsuariosHistoricoInteressesServico.obterHistoricoGeral();
+
+      if (formato === "texto" || req.headers.accept === "text/plain") {
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.status(200).send(historicoInteresses.textoFormatado);
+        return;
+      }
+
+      res.status(200).json({
+        sucesso: true,
+        modulo: "adm.usuario",
+        area: "historico_interesses",
+        dados: historicoInteresses,
+      });
+    } catch (erro: any) {
+      res.status(500).json({
+        sucesso: false,
+        modulo: "adm.usuario",
+        erro: erro.message || "Erro ao consultar histórico de interesses",
+      });
+    }
+  },
+
+  /**
+   * Dispara proativamente o histórico de interesses para a API_URL
+   */
+  async enviarInteressesParaPainel(req: Request, res: Response): Promise<void> {
+    try {
+      const resultado = await PainelUsuariosHistoricoInteressesServico.enviarParaPainel(
+        "sincronizacao_historico_interesses"
+      );
+
+      res.status(resultado.enviado ? 200 : 502).json({
+        sucesso: resultado.enviado,
+        mensagem: resultado.enviado
+          ? "Histórico de interesses de usuários enviado com sucesso para a API_URL"
           : `Falha ao enviar para API_URL: ${resultado.erro || "Sem resposta"}`,
         status: resultado.status,
         duracaoMs: resultado.duracaoMs,
