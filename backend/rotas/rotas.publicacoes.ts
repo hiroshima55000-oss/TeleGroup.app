@@ -19,6 +19,8 @@ rotasPublicacoes.post("/:id/clique", PublicacoesControle.registrarClique);
 rotasPublicacoes.post("/:id/visualizacao", PublicacoesControle.registrarVisualizacao);
 rotasPublicacoes.post("/:id/denunciar", PublicacoesControle.denunciarPublicacao);
 rotasPublicacoes.post("/denunciar", PublicacoesControle.denunciarPublicacao);
+rotasPublicacoes.get("/historico/usuario", PublicacoesControle.obterHistoricoUsuario);
+rotasPublicacoes.post("/historico/reset-vistos", PublicacoesControle.resetarVisualizados);
 rotasPublicacoes.delete("/:id", PublicacoesControle.remover);
 
 export default rotasPublicacoes;

@@ -489,18 +489,20 @@ export async function alternarCurtidaPublicacao(
     });
 
     const json = await resposta.json();
-    if (json.sucesso && json.dados) {
+    if (json.sucesso) {
       const estaCurtido = Boolean(json.curtido ?? json.dados?.curtido);
       definirCurtidaLocal(id, estaCurtido);
       const totalLikes =
         typeof json.totalLikes === "number"
           ? json.totalLikes
+          : typeof json.likes === "number"
+          ? json.likes
           : typeof json.dados?.likes === "number"
           ? json.dados.likes
           : 0;
 
       return {
-        pub: { ...json.dados, curtido: estaCurtido, likes: totalLikes },
+        pub: json.dados ? { ...json.dados, curtido: estaCurtido, likes: totalLikes } : null,
         curtido: estaCurtido,
         totalLikes,
         incrementou: estaCurtido,
@@ -656,6 +658,86 @@ export async function enviarDenunciaPublicacao(
       sucesso: false,
       erro: err.message || "Não foi possível registrar sua denúncia no momento.",
     };
+  }
+}
+
+export interface CalculoInteressePeriodoItem {
+  periodo: "ontem" | "10d" | "30d";
+  label: string;
+  totalAcoes: number;
+  totalPontos: number;
+  totalVisualizacoes: number;
+  totalLikes: number;
+  totalCliques: number;
+  taxaCTR: number;
+  classificacao: string;
+  distribuicao: Record<string, number>;
+  distribuicaoGrupos: Array<{
+    grupoNome: string;
+    percentual: number;
+    pontos: number;
+    acoes: number;
+  }>;
+  topTags: string[];
+}
+
+export interface RespostaHistoricoUsuario {
+  sucesso: boolean;
+  usuarioId: string;
+  conteudos: {
+    visualizados: PublicacaoItem[];
+    curtidos: PublicacaoItem[];
+    clicados: PublicacaoItem[];
+    totalVisualizados: number;
+    totalCurtidos: number;
+    totalClicados: number;
+  };
+  calculadorInteresses: {
+    ontem: CalculoInteressePeriodoItem;
+    dezDias: CalculoInteressePeriodoItem;
+    trintaDias: CalculoInteressePeriodoItem;
+  };
+}
+
+/**
+ * Consulta todos os conteúdos visualizados, curtidos, clicados e o calculador de interesses (ontem, 10d, 30d)
+ */
+export async function obterHistoricoUsuarioApi(
+  usuarioId?: string
+): Promise<RespostaHistoricoUsuario | null> {
+  try {
+    const uid = usuarioId || obterUsuarioId();
+    const res = await fetch(
+      `/api/publicacoes/historico/usuario?usuarioId=${encodeURIComponent(uid)}`,
+      {
+        headers: { "x-user-id": uid },
+      }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("Erro ao obter histórico do usuário:", err);
+    return null;
+  }
+}
+
+/**
+ * Reseta o histórico de publicações já vistas pelo usuário para que voltem a aparecer no feed orgânico
+ */
+export async function resetarVisualizadosApi(usuarioId?: string): Promise<boolean> {
+  try {
+    const uid = usuarioId || obterUsuarioId();
+    const res = await fetch("/api/publicacoes/historico/reset-vistos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": uid,
+      },
+      body: JSON.stringify({ usuarioId: uid }),
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 

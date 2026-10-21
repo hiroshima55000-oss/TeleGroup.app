@@ -84,9 +84,38 @@ function CabecalhoDivulgacaoTelegram() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "8px",
           }}
         >
+          <Link
+            to="/historico"
+            title="Histórico e Calculador de Interesses"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "7px",
+              height: "38px",
+              padding: "0 12px",
+              borderRadius: "10px",
+              background: "rgba(56, 189, 248, 0.08)",
+              border: "1px solid rgba(56, 189, 248, 0.22)",
+              textDecoration: "none",
+              boxSizing: "border-box",
+              color: "#38bdf8",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "12.5px",
+                fontWeight: 750,
+                color: "#38bdf8",
+              }}
+            >
+              Interesses
+            </span>
+          </Link>
+
           <Link
             to="/dashboard"
             title="Painel"
@@ -98,15 +127,14 @@ function CabecalhoDivulgacaoTelegram() {
               padding: "0 14px",
               borderRadius: "10px",
               background: "rgba(255,255,255,0.05)",
-              border:
-                "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.1)",
               textDecoration: "none",
               boxSizing: "border-box",
             }}
           >
             <LayoutDashboard
               size={15}
-              color="#38bdf8"
+              color="#cbd5e1"
             />
 
             <span

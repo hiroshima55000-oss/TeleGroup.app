@@ -264,6 +264,68 @@ export const PublicacoesControle = {
       res.status(500).json({ sucesso: false, erro: erro.message });
     }
   },
+
+  /**
+   * Endpoint: GET /api/publicacoes/historico/usuario
+   * Retorna todos os conteúdos visualizados, curtidos, clicados e o calculador de interesses (ontem, 10d, 30d)
+   */
+  async obterHistoricoUsuario(req: Request, res: Response): Promise<void> {
+    try {
+      const usuarioId =
+        (req.query.usuarioId as string) ||
+        (req.headers["x-user-id"] as string) ||
+        "usr_anonimo";
+
+      const { RepositorioInteracoesUsuario } = await import(
+        "../repositorios/repositorio.interacoes.usuario"
+      );
+
+      const conteudos = await RepositorioInteracoesUsuario.obterConteudosDoUsuario(usuarioId);
+
+      const calcOntem = RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "ontem");
+      const calc10d = RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "10d");
+      const calc30d = RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "30d");
+
+      res.status(200).json({
+        sucesso: true,
+        usuarioId,
+        conteudos,
+        calculadorInteresses: {
+          ontem: calcOntem,
+          dezDias: calc10d,
+          trintaDias: calc30d,
+        },
+      });
+    } catch (erro: any) {
+      res.status(500).json({ sucesso: false, erro: erro.message });
+    }
+  },
+
+  /**
+   * Endpoint: POST /api/publicacoes/historico/reset-vistos
+   * Permite resetar as publicações visualizadas para vê-las novamente no feed orgânico
+   */
+  async resetarVisualizados(req: Request, res: Response): Promise<void> {
+    try {
+      const usuarioId =
+        req.body?.usuarioId ||
+        (req.query.usuarioId as string) ||
+        (req.headers["x-user-id"] as string) ||
+        "usr_anonimo";
+
+      const { RepositorioInteracoesUsuario } = await import(
+        "../repositorios/repositorio.interacoes.usuario"
+      );
+      RepositorioInteracoesUsuario.limparVisualizacoes(usuarioId);
+
+      res.status(200).json({
+        sucesso: true,
+        mensagem: "Histórico de visualizações resetado com sucesso.",
+      });
+    } catch (erro: any) {
+      res.status(500).json({ sucesso: false, erro: erro.message });
+    }
+  },
 };
 
 export default PublicacoesControle;

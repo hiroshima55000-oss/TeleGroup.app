@@ -2,6 +2,7 @@ import {
   Megaphone,
   FileText,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -166,6 +167,17 @@ function TelaConfiguracoes() {
 
         {/* CARD DE PERFIL E IDENTIDADE DO USUÁRIO ISOLADO */}
         <CardPerfilUsuario usuario={usuario} onAtualizar={setUsuario} />
+
+        {/* CATEGORIA: HISTÓRICO & INTERESSES */}
+        <Categoria titulo="Comportamento & Interesses">
+          <ItemConfiguracao
+            primeiro
+            icone={<Sparkles size={19} color="#38bdf8" />}
+            titulo="Meu Histórico e Calculador de Interesses"
+            descricao="Veja conteúdos visualizados, curtidos, clicados e afinidades de ontem, 10d e 30d"
+            aoClicar={() => navigate("/historico")}
+          />
+        </Categoria>
 
         {/* CATEGORIA: GERENCIAR CONTEÚDO */}
         <Categoria titulo="Conteúdo e Publicações">

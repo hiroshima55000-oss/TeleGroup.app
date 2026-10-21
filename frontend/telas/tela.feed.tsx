@@ -454,6 +454,27 @@ function TelaDivulgacaoTelegram() {
                     Limpar Filtro
                   </button>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/historico")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "13px 20px",
+                    borderRadius: "12px",
+                    background: "rgba(56, 189, 248, 0.08)",
+                    border: "1px solid rgba(56, 189, 248, 0.25)",
+                    color: "#38bdf8",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Sparkles size={16} />
+                  Ver Histórico & Interesses
+                </button>
               </div>
             </div>
           ) : (

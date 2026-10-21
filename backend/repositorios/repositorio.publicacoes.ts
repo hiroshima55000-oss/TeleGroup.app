@@ -333,6 +333,14 @@ export const RepositorioPublicacoes = {
     }
     return false;
   },
+
+  /**
+   * Retorna todas as publicações cadastradas
+   */
+  async buscarTodas(): Promise<Publicacao[]> {
+    const res = await this.buscarComFiltros({ limite: 10000 });
+    return res.itens;
+  },
 };
 
 export default RepositorioPublicacoes;

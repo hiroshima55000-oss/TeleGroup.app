@@ -53,9 +53,23 @@ export const PublicacoesServico = {
       limite: 1000, // Recupera pool para ranqueamento
     });
 
-    // 2. Aplica o Ranqueamento Equilibrado (Recência, Sequência, Hashtags, Qualidade e Exploração Anti-Bolha)
+    // 2. REGRA DO USUÁRIO: Se a pessoa já viu o conteúdo 1 vez, ele NÃO aparece de novo (exceto campanhas pagas)
+    const { RepositorioInteracoesUsuario } = await import(
+      "../repositorios/repositorio.interacoes.usuario"
+    );
+    const usuarioId = (filtros.usuarioId || "usr_anonimo").trim();
+    const idsVistos = RepositorioInteracoesUsuario.obterIdsVistos(usuarioId);
+    const idsCurtidos = RepositorioInteracoesUsuario.obterIdsCurtidos(usuarioId);
+
+    // Filtra para remover orgânicos já visualizados (anúncios pagos sempre passam)
+    const candidatosAExibir = todosCandidatos.filter((item) => {
+      if (item.isAnuncio) return true;
+      return !idsVistos.has(item.id);
+    });
+
+    // 3. Aplica o Ranqueamento Equilibrado (Recência, Sequência, Hashtags, Qualidade e Exploração Anti-Bolha)
     const { itensOrdenados, scoresPorId } = RanqueamentoFeedServico.ranquear(
-      todosCandidatos,
+      candidatosAExibir,
       filtros.usuarioId
     );
 
@@ -63,6 +77,12 @@ export const PublicacoesServico = {
     const totalPaginas = Math.ceil(total / limite) || 1;
     let paginados = itensOrdenados.slice(offset, offset + limite);
     const temMais = pagina < totalPaginas;
+
+    // Sincroniza estado de curtido consistente com as curtidas reais do usuário
+    paginados = paginados.map((p) => ({
+      ...p,
+      curtido: idsCurtidos.has(p.id),
+    }));
 
     // 3. Vantagem Competitiva Paga Flexível (Condicionada à Relevância e Qualidade)
     if (!filtros.apenasMinhas) {
@@ -270,26 +290,54 @@ export const PublicacoesServico = {
   },
 
   /**
-   * Gerencia curtidas de uma publicação e atualiza o histórico de interesse do usuário
+   * Gerencia curtidas de forma idempotente (impede múltiplos likes pelo mesmo usuário)
    */
   async curtir(
     id: string,
     descurtir = false,
     usuarioId?: string
   ): Promise<{ likes: number; curtido: boolean; perfilInteresse?: PerfilInteresseUsuario }> {
-    const likes = await RepositorioPublicacoes.incrementarCurtida(id, descurtir);
+    const { RepositorioInteracoesUsuario } = await import(
+      "../repositorios/repositorio.interacoes.usuario"
+    );
+    const uid = (usuarioId || "usr_anonimo").trim();
+
+    const pub = await RepositorioPublicacoes.buscarPorId(id);
+    const jaCurtiuAntes = RepositorioInteracoesUsuario.jaCurtiu(uid, id);
+
+    let likesAtual = pub?.likes || 0;
+
+    if (!descurtir) {
+      // Solicitação para dar Like: apenas incrementa se o usuário AINDA NÃO curtiu
+      if (!jaCurtiuAntes) {
+        RepositorioInteracoesUsuario.registrarCurtida(
+          uid,
+          id,
+          pub?.tags,
+          pub?.categoria,
+          pub?.nicho
+        );
+        likesAtual = await RepositorioPublicacoes.incrementarCurtida(id, false);
+      }
+    } else {
+      // Solicitação para Descurtir: apenas decrementa se o usuário REALMENTE havia curtido
+      if (jaCurtiuAntes) {
+        RepositorioInteracoesUsuario.removerCurtida(uid, id);
+        likesAtual = await RepositorioPublicacoes.incrementarCurtida(id, true);
+      }
+    }
 
     let perfilInteresse: PerfilInteresseUsuario | undefined;
-    if (usuarioId) {
+    if (uid) {
       perfilInteresse = await RastreadorEventosServico.rastrearAcao({
-        usuarioId,
+        usuarioId: uid,
         tipo: descurtir ? "descurtir" : "like",
         publicacaoId: id,
       });
     }
 
     return {
-      likes,
+      likes: likesAtual,
       curtido: !descurtir,
       perfilInteresse,
     };
@@ -299,9 +347,20 @@ export const PublicacoesServico = {
    * Registra clique no link do canal/grupo e atualiza interesse (ação de alta conversão)
    */
   async registrarClique(id: string, usuarioId?: string): Promise<number> {
+    const { RepositorioInteracoesUsuario } = await import(
+      "../repositorios/repositorio.interacoes.usuario"
+    );
     const totalCliques = await RepositorioPublicacoes.incrementarClique(id);
+    const pub = await RepositorioPublicacoes.buscarPorId(id).catch(() => null);
 
     if (usuarioId) {
+      RepositorioInteracoesUsuario.registrarClique(
+        usuarioId,
+        id,
+        pub?.tags,
+        pub?.categoria,
+        pub?.nicho
+      );
       RastreadorEventosServico.rastrearAcao({
         usuarioId,
         tipo: "clique_link",
@@ -316,9 +375,20 @@ export const PublicacoesServico = {
    * Registra visualização no card da publicação e atualiza histórico do usuário
    */
   async registrarVisualizacao(id: string, usuarioId?: string): Promise<number> {
+    const { RepositorioInteracoesUsuario } = await import(
+      "../repositorios/repositorio.interacoes.usuario"
+    );
     const totalVisualizacoes = await RepositorioPublicacoes.incrementarVisualizacao(id);
+    const pub = await RepositorioPublicacoes.buscarPorId(id).catch(() => null);
 
     if (usuarioId) {
+      RepositorioInteracoesUsuario.registrarVisualizacao(
+        usuarioId,
+        id,
+        pub?.tags,
+        pub?.categoria,
+        pub?.nicho
+      );
       RastreadorEventosServico.rastrearAcao({
         usuarioId,
         tipo: "visualizacao",

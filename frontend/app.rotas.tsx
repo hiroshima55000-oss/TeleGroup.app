@@ -15,12 +15,16 @@ import TelaBloqueioLoginGoogle from "./telas/tela.b";
 import TelaRankingTags from "./telas/tela.ranking.tags";
 import TelaTeste from "./telas/tela.teste";
 import TelaBanido from "./telas/tela.banido";
+import TelaHistoricoInteresses from "./telas/tela.historico.interesses";
 
 function AppRotas() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<TelaHomeTelegram />} />
+        <Route path="/historico" element={<TelaHistoricoInteresses />} />
+        <Route path="/interesses" element={<TelaHistoricoInteresses />} />
+        <Route path="/meu-historico" element={<TelaHistoricoInteresses />} />
         <Route path="/lista-campanhas" element={<TelaCampanhas />} />
         <Route path="/lista-publicacoes" element={<TelaMinhasPublicacoes />} />
         <Route path="/dashboard" element={<TelaPainel />} />
