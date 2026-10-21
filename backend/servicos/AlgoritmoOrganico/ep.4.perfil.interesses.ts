@@ -340,4 +340,98 @@ export const PerfilInteressesServico = {
 
     return perfil;
   },
+
+  /**
+   * Mantém e migra os interesses aprendidos enquanto o usuário navegava anonimamente
+   * para a conta autenticada pelo Google, atualizando o @ para o novo nickname.
+   */
+  vincularOuMigrarInteresses(
+    idAnonimo: string,
+    idFinal: string,
+    novoNickname: string
+  ): PerfilInteresseUsuario {
+    const todos = lerInteressesPersistidos();
+    const idAnonimoLimpo = (idAnonimo || "").trim();
+    const idFinalLimpo = (idFinal || "").trim();
+    const nickLimpo = novoNickname.startsWith("@") ? novoNickname : `@${novoNickname}`;
+
+    // Obtém o perfil anônimo se existir
+    const perfilAnonimo = idAnonimoLimpo ? todos[idAnonimoLimpo] : null;
+    const perfilFinalExistente = idFinalLimpo ? todos[idFinalLimpo] : null;
+
+    let perfilFinal: PerfilInteresseUsuario;
+
+    if (perfilAnonimo && idAnonimoLimpo !== idFinalLimpo) {
+      if (perfilFinalExistente) {
+        // Usuário já tinha perfil anterior na conta Google: mescla interesses da sessão anônima com os anteriores
+        perfilFinal = {
+          ...perfilFinalExistente,
+          usuarioId: idFinalLimpo,
+          nickname: nickLimpo,
+          totalInteracoes:
+            (perfilFinalExistente.totalInteracoes || 0) + (perfilAnonimo.totalInteracoes || 0),
+          totalLikes: (perfilFinalExistente.totalLikes || 0) + (perfilAnonimo.totalLikes || 0),
+          totalCliques:
+            (perfilFinalExistente.totalCliques || 0) + (perfilAnonimo.totalCliques || 0),
+          totalVisualizacoes:
+            (perfilFinalExistente.totalVisualizacoes || 0) +
+            (perfilAnonimo.totalVisualizacoes || 0),
+          tempoRetencaoEstimadoSegundos:
+            (perfilFinalExistente.tempoRetencaoEstimadoSegundos || 0) +
+            (perfilAnonimo.tempoRetencaoEstimadoSegundos || 0),
+          hashtags: { ...perfilFinalExistente.hashtags },
+          sequenciaSessao: [
+            ...(perfilAnonimo.sequenciaSessao || []),
+            ...(perfilFinalExistente.sequenciaSessao || []),
+          ].slice(0, CONFIG_INTERESSES.MAX_ITENS_SEQUENCIA_SESSAO),
+          primeiraInteracao:
+            perfilFinalExistente.primeiraInteracao || perfilAnonimo.primeiraInteracao,
+          ultimaAtualizacao: new Date().toISOString(),
+        };
+
+        // Mescla hashtags
+        for (const [tag, dadosTag] of Object.entries(perfilAnonimo.hashtags || {})) {
+          if (!perfilFinal.hashtags[tag]) {
+            perfilFinal.hashtags[tag] = { ...dadosTag };
+          } else {
+            perfilFinal.hashtags[tag].pontosBrutos += dadosTag.pontosBrutos;
+            perfilFinal.hashtags[tag].totalInteracoes += dadosTag.totalInteracoes;
+            perfilFinal.hashtags[tag].likes += dadosTag.likes;
+            perfilFinal.hashtags[tag].cliques += dadosTag.cliques;
+            perfilFinal.hashtags[tag].visualizacoes += dadosTag.visualizacoes;
+            perfilFinal.hashtags[tag].ultimaInteracao = dadosTag.ultimaInteracao;
+          }
+        }
+      } else {
+        // Transfere integralmente o perfil anônimo para o novo ID com o novo @
+        perfilFinal = {
+          ...perfilAnonimo,
+          usuarioId: idFinalLimpo,
+          nickname: nickLimpo,
+          ultimaAtualizacao: new Date().toISOString(),
+        };
+      }
+
+      delete todos[idAnonimoLimpo];
+    } else if (perfilFinalExistente) {
+      perfilFinal = perfilFinalExistente;
+      perfilFinal.nickname = nickLimpo;
+      perfilFinal.ultimaAtualizacao = new Date().toISOString();
+    } else if (perfilAnonimo) {
+      perfilFinal = perfilAnonimo;
+      perfilFinal.nickname = nickLimpo;
+      perfilFinal.ultimaAtualizacao = new Date().toISOString();
+    } else {
+      perfilFinal = this.obterPerfil(idFinalLimpo || idAnonimoLimpo, nickLimpo);
+    }
+
+    this.recalcularPercentuais(perfilFinal);
+    todos[perfilFinal.usuarioId] = perfilFinal;
+    salvarInteressesPersistidos(todos);
+
+    console.log(
+      `🎯 [PerfilInteresses] Interesses preservados para ${perfilFinal.usuarioId} (${perfilFinal.nickname}). Total interações: ${perfilFinal.totalInteracoes}`
+    );
+    return perfilFinal;
+  },
 };

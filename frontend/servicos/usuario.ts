@@ -47,6 +47,18 @@ export function ouvirMudancaUsuario(callback: () => void): () => void {
   };
 }
 
+export function extrairArrobaDoEmail(email: string): string {
+  if (!email || !email.includes("@")) return "@usuario";
+  const prefixo = email.split("@")[0].trim().toLowerCase();
+  const limpo = prefixo.replace(/[^a-zA-Z0-9_]/g, "");
+  return `@${limpo || "usuario"}`;
+}
+
+export function gerarNicknameAleatorio(): string {
+  const sufixo = Math.random().toString(36).replace(/[^a-z0-9]/g, "").substring(0, 5);
+  return `@usuario_${sufixo}`;
+}
+
 export function obterGoogleUsuario(): InfoUsuarioGoogle | null {
   if (typeof localStorage === "undefined") return null;
   const logado = localStorage.getItem(CHAVE_GOOGLE_LOGADO) === "true";
@@ -97,12 +109,13 @@ export function salvarLoginGoogle(dados: {
     localStorage.setItem(CHAVE_GOOGLE_TOKEN, dados.token);
   }
 
-  // Se o nickname foi gerado pelo banco de dados (único e aleatório), salva ele no perfil
-  if (dados.nickname) {
-    let nick = dados.nickname.trim();
-    if (!nick.startsWith("@")) nick = `@${nick}`;
-    localStorage.setItem(CHAVE_NICKNAME, nick);
-  }
+  // O @ da pessoa atualiza e se torna o @ prefixo do email (ex: deepweb3036@gmail.com -> @deepweb3036)
+  const arrobaGoogle = extrairArrobaDoEmail(emailLimpo);
+  const nickFinal = dados.nickname && !dados.nickname.startsWith("@usuario_")
+    ? (dados.nickname.startsWith("@") ? dados.nickname : `@${dados.nickname}`)
+    : arrobaGoogle;
+
+  localStorage.setItem(CHAVE_NICKNAME, nickFinal);
 
   dispararEventoUsuarioMudou();
   return obterOuCriarUsuario();
@@ -117,6 +130,10 @@ export function fazerLogoutGoogle(): InfoUsuario {
   localStorage.removeItem(CHAVE_GOOGLE_CONECTADO_EM);
   localStorage.removeItem(CHAVE_GOOGLE_TOKEN);
 
+  // Ao sair do Google, gera um novo @ aleatório para o uso anônimo
+  const novoNick = gerarNicknameAleatorio();
+  localStorage.setItem(CHAVE_NICKNAME, novoNick);
+
   dispararEventoUsuarioMudou();
   return obterOuCriarUsuario();
 }
@@ -127,27 +144,27 @@ export function obterOuCriarUsuario(): InfoUsuario {
   let nickname = localStorage.getItem(CHAVE_NICKNAME);
   let ePrimeiroAcesso = false;
 
-  // Se o usuário não possui ID ou está com identificador anônimo sem login Google
-  const precisaVincularContaAtiva =
-    !id ||
-    (!localStorage.getItem(CHAVE_GOOGLE_LOGADO) &&
-      (!nickname || nickname.startsWith("@usuario_")));
+  // Limpeza de resquício legado de mock caso ainda exista
+  if (
+    id === "usr_deutscher3036_mvfos8lr" &&
+    localStorage.getItem(CHAVE_GOOGLE_EMAIL) === "hiroshima55000@gmail.com"
+  ) {
+    localStorage.removeItem(CHAVE_GOOGLE_LOGADO);
+    localStorage.removeItem(CHAVE_GOOGLE_EMAIL);
+    localStorage.removeItem(CHAVE_GOOGLE_NOME);
+    localStorage.removeItem(CHAVE_GOOGLE_FOTO);
+    localStorage.removeItem(CHAVE_GOOGLE_ID);
+    localStorage.removeItem(CHAVE_GOOGLE_CONECTADO_EM);
+    localStorage.removeItem(CHAVE_NICKNAME);
+    localStorage.removeItem(CHAVE_ID);
+    id = null;
+    nickname = null;
+  }
 
-  if (precisaVincularContaAtiva) {
-    id = "usr_deutscher3036_mvfos8lr";
-    criadoEm = criadoEm || new Date().toISOString();
-    nickname = "@deutscher3036";
-    ePrimeiroAcesso = false;
+  const logadoGoogle = estaLogadoGoogle();
+  const google = obterGoogleUsuario();
 
-    localStorage.setItem(CHAVE_ID, id);
-    localStorage.setItem(CHAVE_CRIADO_EM, criadoEm);
-    localStorage.setItem(CHAVE_NICKNAME, nickname);
-    localStorage.setItem(CHAVE_NOME, "Deutscher3036");
-    localStorage.setItem(CHAVE_GOOGLE_LOGADO, "true");
-    localStorage.setItem(CHAVE_GOOGLE_EMAIL, "hiroshima55000@gmail.com");
-    localStorage.setItem(CHAVE_GOOGLE_NOME, "Deutscher3036");
-    localStorage.setItem(CHAVE_GOOGLE_ID, "gid_deutscher3036");
-  } else if (!id) {
+  if (!id) {
     const timestamp = Date.now().toString(36);
     const aleatorio = Math.random().toString(36).substring(2, 8);
     id = `usr_${timestamp}_${aleatorio}`;
@@ -162,18 +179,21 @@ export function obterOuCriarUsuario(): InfoUsuario {
   const partes = id.split("_");
   const idCurto = partes.length >= 2 ? `#${partes[1]}` : `#${id.substring(0, 6)}`;
 
-  if (!nickname) {
-    const sufixo = idCurto.replace("#", "");
-    nickname = `@usuario_${sufixo}`;
+  // Quando a pessoa loga com Google: o @ dela atualiza e se torna o @ prefixo do email (ex: deepweb3036@gmail.com -> @deepweb3036)
+  if (logadoGoogle && google?.email) {
+    nickname = extrairArrobaDoEmail(google.email);
+    localStorage.setItem(CHAVE_NICKNAME, nickname);
+  } else if (!nickname) {
+    // Quando a pessoa entra no app: ganha um @ aleatório pra ficar usando (ex: @usuariox ou @usuario_8k2a)
+    nickname = gerarNicknameAleatorio();
     localStorage.setItem(CHAVE_NICKNAME, nickname);
   } else if (!nickname.startsWith("@")) {
     nickname = `@${nickname}`;
     localStorage.setItem(CHAVE_NICKNAME, nickname);
   }
 
-  const google = obterGoogleUsuario();
   const nomeSalvo = localStorage.getItem(CHAVE_NOME);
-  const nomeFinal = nomeSalvo || (google ? google.nome : nickname);
+  const nomeFinal = (logadoGoogle && google?.nome) ? google.nome : (nomeSalvo || nickname);
 
   return {
     id,

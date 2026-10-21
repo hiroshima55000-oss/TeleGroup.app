@@ -26,6 +26,7 @@ import {
   InfoUsuario,
   obterOuCriarUsuario,
   estaLogadoGoogle,
+  ouvirMudancaUsuario,
 } from "../servicos/usuario";
 
 const LIMITE_POR_PAGINA = 12;
@@ -58,6 +59,11 @@ function TelaDivulgacaoTelegram() {
   useEffect(() => {
     const info = obterOuCriarUsuario();
     setUsuario(info);
+
+    const removerOuvinte = ouvirMudancaUsuario(() => {
+      setUsuario(obterOuCriarUsuario());
+    });
+    return removerOuvinte;
   }, []);
 
   const carregarFeedInicial = useCallback(async (tag?: string) => {

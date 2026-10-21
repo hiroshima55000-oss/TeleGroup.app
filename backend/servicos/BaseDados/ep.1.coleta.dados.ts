@@ -101,6 +101,26 @@ export const ColetaDadosServico = {
       historicoGeralEventos.length = 0;
     }
   },
+
+  /**
+   * Transfere buffer de eventos de usuário anônimo para conta autenticada
+   */
+  migrarUsuario(idAnonimo: string, idFinal: string, novoNickname?: string): void {
+    if (!idAnonimo || !idFinal || idAnonimo === idFinal) return;
+    const eventosAnonimos = bufferEventosPorUsuario.get(idAnonimo) || [];
+    if (eventosAnonimos.length > 0) {
+      const eventosFinal = bufferEventosPorUsuario.get(idFinal) || [];
+      eventosAnonimos.forEach((e) => {
+        e.usuarioId = idFinal;
+        if (novoNickname) e.nickname = novoNickname;
+      });
+      bufferEventosPorUsuario.set(
+        idFinal,
+        [...eventosAnonimos, ...eventosFinal].slice(0, LIMITE_BUFFER_USUARIO)
+      );
+      bufferEventosPorUsuario.delete(idAnonimo);
+    }
+  },
 };
 
 export default ColetaDadosServico;

@@ -169,20 +169,19 @@ export const RepositorioUsuario = {
     const metricas = lerJson<any>(ARQUIVO_USUARIOS_METRICAS, { visitas: {} });
     if (!metricas.visitas) metricas.visitas = {};
 
-    // Procura se já existe algum usuário com este email cadastrado OU com o nickname/usuarioId
+    const emailAlvo = dados.email.toLowerCase().trim();
+    const prefixoEmail = emailAlvo.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").toLowerCase();
+    const nicknameGoogle = `@${prefixoEmail || "usuario"}`;
+
+    // Procura se já existe algum usuário com este email cadastrado OU com o idAnonimo
     const usuariosExistentes = Object.entries(metricas.visitas) as [string, any][];
     const match = usuariosExistentes.find(([id, u]) => {
-      const uEmail = (u.email || "").toLowerCase();
-      const uNick = (u.nickname || "").replace(/^@/, "").toLowerCase();
-      const uId = (u.usuarioId || id || "").toLowerCase();
-      const emailAlvo = dados.email.toLowerCase();
-      const prefixoEmail = emailAlvo.split("@")[0];
+      const uEmail = (u.email || "").toLowerCase().trim();
+      const uId = (u.usuarioId || id || "").toLowerCase().trim();
 
       return (
         uEmail === emailAlvo ||
-        (dados.usuarioId && uId === dados.usuarioId.toLowerCase()) ||
-        (dados.nickname && uNick === dados.nickname.replace(/^@/, "").toLowerCase()) ||
-        uNick === prefixoEmail
+        (dados.usuarioId && uId === dados.usuarioId.toLowerCase().trim())
       );
     });
 
@@ -192,11 +191,11 @@ export const RepositorioUsuario = {
     const usuarioAtualizado: any = {
       ...existente,
       usuarioId,
-      email: dados.email.toLowerCase(),
-      nome: dados.nome || existente?.nome || dados.email.split("@")[0],
+      email: emailAlvo,
+      nome: dados.nome || existente?.nome || emailAlvo.split("@")[0],
       foto: dados.foto || existente?.foto,
       googleId: dados.googleId || existente?.googleId,
-      nickname: existente?.nickname || dados.nickname || `@${dados.email.split("@")[0]}`,
+      nickname: nicknameGoogle, // Sempre atualiza para o @ derivado da conta Google (ex: @deepweb3036)
       cadastrado: true,
       primeiroAcesso: existente?.primeiroAcesso || agora,
       ultimoAcesso: agora,
@@ -209,6 +208,12 @@ export const RepositorioUsuario = {
     };
 
     metricas.visitas[usuarioId] = usuarioAtualizado;
+
+    // Se o ID da conta for diferente do ID anônimo temporário, limpa o nó anônimo
+    if (dados.usuarioId && dados.usuarioId !== usuarioId && metricas.visitas[dados.usuarioId]) {
+      delete metricas.visitas[dados.usuarioId];
+    }
+
     metricas.ultimaAtualizacao = agora;
     salvarJson(ARQUIVO_USUARIOS_METRICAS, metricas);
 
@@ -224,7 +229,7 @@ export const RepositorioUsuario = {
              nome = EXCLUDED.nome,
              foto = COALESCE(EXCLUDED.foto, usuarios.foto),
              google_id = COALESCE(EXCLUDED.google_id, usuarios.google_id),
-             nickname = COALESCE(EXCLUDED.nickname, usuarios.nickname),
+             nickname = EXCLUDED.nickname,
              cadastrado = TRUE,
              ultimo_acesso = NOW()`,
           [

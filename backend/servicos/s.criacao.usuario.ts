@@ -86,7 +86,7 @@ export const UsuarioServico = {
     const googleId = dados.googleId || `gid_${Date.now()}`;
     const foto = dados.picture || dados.foto;
 
-    const nickLimpo = emailLimpo.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").substring(0, 15);
+    const nickLimpo = emailLimpo.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "");
     const nickname = `@${nickLimpo || "usuario"}`;
 
     const usuario = await RepositorioUsuario.salvarOuAtualizarGoogle({
@@ -97,6 +97,25 @@ export const UsuarioServico = {
       googleId,
       nickname,
     });
+
+    // Mantém e migra os interesses aprendidos enquanto o usuário não tinha conta (anônimo)
+    try {
+      const { PerfilInteressesServico } = await import("./AlgoritmoOrganico/ep.4.perfil.interesses");
+      PerfilInteressesServico.vincularOuMigrarInteresses(
+        dados.idAnonimo || usuario.usuarioId,
+        usuario.usuarioId,
+        nickname
+      );
+
+      const { ColetaDadosServico } = await import("./BaseDados/ep.1.coleta.dados");
+      ColetaDadosServico.migrarUsuario(
+        dados.idAnonimo || usuario.usuarioId,
+        usuario.usuarioId,
+        nickname
+      );
+    } catch (err) {
+      console.warn("[UsuarioServico] Aviso na migração de interesses ao conectar Google:", err);
+    }
 
     // Notifica o Website 1 em tempo real sobre o login/cadastro
     ComunicacaoServico.dispararWebhookParaWebsite1("login_google", "usuarios", {
