@@ -5,7 +5,7 @@ import {
   RelatoriosMetricasServico,
   SimuladorLeilaoServico,
   SlotExibicao,
-} from "../servicos/AlgoritmoPago";
+} from "../servicos/CampanhasPagas";
 
 export const TrafegoControle = {
   /**
