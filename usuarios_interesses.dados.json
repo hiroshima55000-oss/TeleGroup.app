@@ -50,5 +50,23 @@
     "scoreEngajamento": 13,
     "versaoCiclo": 1,
     "ultimaOtimizacao": "2026-10-21T17:45:36.544Z"
+  },
+  "usr_anonimo": {
+    "usuarioId": "usr_anonimo",
+    "nickname": "@usr_anonimo",
+    "totalInteracoes": 0,
+    "totalLikes": 0,
+    "totalCliques": 0,
+    "totalVisualizacoes": 0,
+    "tempoRetencaoEstimadoSegundos": 0,
+    "classificacaoPublico": "Passivo",
+    "taxaCliquesCTR": 0,
+    "descricaoQualificacao": "Usuário novo sem histórico recente de interações.",
+    "hashtags": {},
+    "distribuicaoGrupos": [],
+    "distribuicaoPercentual": {},
+    "sequenciaSessao": [],
+    "primeiraInteracao": "2026-10-22T00:55:19.188Z",
+    "ultimaAtualizacao": "2026-10-22T00:55:19.188Z"
   }
 }

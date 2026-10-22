@@ -228,6 +228,13 @@ function TelaDivulgacaoTelegram() {
 
   function handleEntrar(grupo: PublicacaoItem) {
     registrarCliqueLink(grupo.id);
+
+    // Nova regra: o conteúdo orgânico desaparece assim que a pessoa clica para entrar no grupo
+    if (!grupo.isAnuncio) {
+      setGrupos((prev) => prev.filter((item) => item.id !== grupo.id));
+      setTotalPublicacoes((prev) => Math.max(0, prev - 1));
+    }
+
     const linkFinal = grupo.link.startsWith("http")
       ? grupo.link
       : `https://${grupo.link}`;

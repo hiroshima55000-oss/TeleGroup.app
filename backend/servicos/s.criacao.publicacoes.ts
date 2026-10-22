@@ -53,18 +53,18 @@ export const PublicacoesServico = {
       limite: 1000, // Recupera pool para ranqueamento
     });
 
-    // 2. REGRA DO USUÁRIO: Se a pessoa já viu o conteúdo 1 vez, ele NÃO aparece de novo (exceto campanhas pagas)
+    // 2. NOVA REGRA DO FEED: O conteúdo orgânico só some quando a pessoa clica para entrar no grupo (gera clique). Visualizar mantém a publicação no feed para estimular cliques. Anúncios pagos continuam elegíveis.
     const { RepositorioInteracoesUsuario } = await import(
       "../repositorios/repositorio.interacoes.usuario"
     );
     const usuarioId = (filtros.usuarioId || "usr_anonimo").trim();
-    const idsVistos = RepositorioInteracoesUsuario.obterIdsVistos(usuarioId);
+    const idsClicados = RepositorioInteracoesUsuario.obterIdsClicados(usuarioId);
     const idsCurtidos = RepositorioInteracoesUsuario.obterIdsCurtidos(usuarioId);
 
-    // Filtra para remover orgânicos já visualizados (anúncios pagos sempre passam)
+    // Filtra para remover orgânicos em que o usuário já clicou para entrar (anúncios pagos sempre passam)
     const candidatosAExibir = todosCandidatos.filter((item) => {
       if (item.isAnuncio) return true;
-      return !idsVistos.has(item.id);
+      return !idsClicados.has(item.id);
     });
 
     // 3. Aplica o Ranqueamento Equilibrado (Recência, Sequência, Hashtags, Qualidade e Exploração Anti-Bolha)

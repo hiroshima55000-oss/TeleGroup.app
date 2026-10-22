@@ -191,7 +191,31 @@ export function CardConteudosInteresses({
         </div>
       </div>
 
-      {/* NOTA INFORMATIVA DA REGRA DO FEED (SEM BOTÃO DE RESET) */}
+      {/* NOTA INFORMATIVA DA NOVA REGRA DO FEED */}
+      {abaAtiva === "clicados" && (
+        <div
+          style={{
+            padding: "12px 14px",
+            borderRadius: "12px",
+            background: "rgba(34, 197, 94, 0.08)",
+            border: "1px solid rgba(34, 197, 94, 0.22)",
+            fontSize: "12.5px",
+            color: "#86efac",
+            marginBottom: "18px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <MousePointerClick size={16} color="#4ade80" style={{ flexShrink: 0 }} />
+          <span>
+            <strong>Regra ativa do feed:</strong> Quando você clica para entrar em uma comunidade,
+            a publicação orgânica deixa de se repetir no feed (dando espaço a novos grupos).
+            Você pode revê-la e acessá-la por aqui a qualquer momento.
+          </span>
+        </div>
+      )}
+
       {abaAtiva === "visualizados" && (
         <div
           style={{
@@ -209,9 +233,8 @@ export function CardConteudosInteresses({
         >
           <Sparkles size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
           <span>
-            <strong>Regra do feed:</strong> Publicações já visualizadas 1 vez
-            não se repetem no seu feed orgânico (somente anúncios pagos podem
-            reaparecer). Você pode revê-las aqui a qualquer momento.
+            <strong>Visualizações no feed:</strong> As publicações continuam ativas no seu feed
+            mesmo após visualizadas. Elas só deixam de se repetir após você clicar para entrar no grupo!
           </span>
         </div>
       )}
