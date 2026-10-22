@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Layers, ArrowRight } from "lucide-react";
 import {
   RespostaHistoricoUsuario,
   CalculoInteressePeriodoItem,
@@ -128,68 +127,6 @@ export function TelaHistoricoInteresses() {
           carregando={carregando}
           aoClicarTag={handleClicarTag}
         />
-
-        {/* ATALHO PARA A NOVA PÁGINA PRÓPRIA DE CONTEÚDOS */}
-        <section
-          style={{
-            background: "rgba(21, 26, 33, 0.6)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "18px",
-            padding: "20px 22px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "14px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "12px",
-                background: "rgba(56, 189, 248, 0.1)",
-                color: "#38bdf8",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Layers size={20} />
-            </div>
-            <div>
-              <strong style={{ fontSize: "15px", color: "#ffffff", display: "block" }}>
-                Ver Conteúdos Interagidos
-              </strong>
-              <span style={{ fontSize: "12.5px", color: "#94a3b8" }}>
-                Página dedicada para navegar em publicações vistas, curtidas e clicadas.
-              </span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigate("/conteudos")}
-            style={{
-              padding: "10px 18px",
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #229ED9, #168AC0)",
-              color: "#ffffff",
-              border: "none",
-              fontWeight: 750,
-              fontSize: "13px",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <span>Acessar Vistos, Likes e Cliques</span>
-            <ArrowRight size={14} />
-          </button>
-        </section>
       </main>
     </div>
   );

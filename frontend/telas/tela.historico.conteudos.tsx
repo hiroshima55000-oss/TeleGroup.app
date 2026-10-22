@@ -195,7 +195,7 @@ export function TelaHistoricoConteudos() {
                   letterSpacing: "-0.4px",
                 }}
               >
-                Conteúdos Interagidos
+                Conteúdo Visualizados
               </h2>
               <p
                 style={{
@@ -229,13 +229,16 @@ export function TelaHistoricoConteudos() {
         >
           <div
             style={{
-              display: "inline-flex",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              width: "100%",
+              maxWidth: "500px",
               background: "rgba(15, 20, 26, 0.8)",
               border: "1px solid rgba(255, 255, 255, 0.08)",
               borderRadius: "12px",
               padding: "4px",
               gap: "4px",
-              flexWrap: "wrap",
+              boxSizing: "border-box",
             }}
           >
             {/* ABA 1: VISTOS */}
@@ -243,7 +246,7 @@ export function TelaHistoricoConteudos() {
               type="button"
               onClick={() => handleMudarAba("vistos")}
               style={{
-                padding: "9px 18px",
+                padding: "9px 12px",
                 borderRadius: "9px",
                 border: "none",
                 background:
@@ -256,15 +259,17 @@ export function TelaHistoricoConteudos() {
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "7px",
+                justifyContent: "center",
+                gap: "6px",
+                whiteSpace: "nowrap",
                 transition: "all 0.15s ease",
               }}
             >
-              <Eye size={16} />
+              <Eye size={15} style={{ flexShrink: 0 }} />
               <span>Vistos</span>
               <span
                 style={{
-                  padding: "1px 7px",
+                  padding: "1px 6px",
                   borderRadius: "999px",
                   background:
                     abaAtiva === "vistos"
@@ -273,6 +278,7 @@ export function TelaHistoricoConteudos() {
                   color: abaAtiva === "vistos" ? "#38bdf8" : "#cbd5e1",
                   fontSize: "11px",
                   fontWeight: 750,
+                  flexShrink: 0,
                 }}
               >
                 {totalVistos}
@@ -284,7 +290,7 @@ export function TelaHistoricoConteudos() {
               type="button"
               onClick={() => handleMudarAba("likes")}
               style={{
-                padding: "9px 18px",
+                padding: "9px 12px",
                 borderRadius: "9px",
                 border: "none",
                 background:
@@ -297,15 +303,21 @@ export function TelaHistoricoConteudos() {
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "7px",
+                justifyContent: "center",
+                gap: "6px",
+                whiteSpace: "nowrap",
                 transition: "all 0.15s ease",
               }}
             >
-              <Heart size={16} fill={abaAtiva === "likes" ? "#f43f5e" : "none"} />
+              <Heart
+                size={15}
+                fill={abaAtiva === "likes" ? "#f43f5e" : "none"}
+                style={{ flexShrink: 0 }}
+              />
               <span>Likes</span>
               <span
                 style={{
-                  padding: "1px 7px",
+                  padding: "1px 6px",
                   borderRadius: "999px",
                   background:
                     abaAtiva === "likes"
@@ -314,6 +326,7 @@ export function TelaHistoricoConteudos() {
                   color: abaAtiva === "likes" ? "#f43f5e" : "#cbd5e1",
                   fontSize: "11px",
                   fontWeight: 750,
+                  flexShrink: 0,
                 }}
               >
                 {totalLikes}
@@ -325,7 +338,7 @@ export function TelaHistoricoConteudos() {
               type="button"
               onClick={() => handleMudarAba("cliques")}
               style={{
-                padding: "9px 18px",
+                padding: "9px 12px",
                 borderRadius: "9px",
                 border: "none",
                 background:
@@ -338,15 +351,17 @@ export function TelaHistoricoConteudos() {
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "7px",
+                justifyContent: "center",
+                gap: "6px",
+                whiteSpace: "nowrap",
                 transition: "all 0.15s ease",
               }}
             >
-              <MousePointerClick size={16} />
+              <MousePointerClick size={15} style={{ flexShrink: 0 }} />
               <span>Cliques</span>
               <span
                 style={{
-                  padding: "1px 7px",
+                  padding: "1px 6px",
                   borderRadius: "999px",
                   background:
                     abaAtiva === "cliques"
@@ -355,6 +370,7 @@ export function TelaHistoricoConteudos() {
                   color: abaAtiva === "cliques" ? "#4ade80" : "#cbd5e1",
                   fontSize: "11px",
                   fontWeight: 750,
+                  flexShrink: 0,
                 }}
               >
                 {totalCliques}

@@ -174,15 +174,13 @@ function TelaConfiguracoes() {
           <ItemConfiguracao
             primeiro
             icone={<Sparkles size={19} color="#38bdf8" />}
-            titulo="Meu Histórico e Calculador de Interesses"
-            descricao="Veja afinidades algorítmicas e tags rankeadas de ontem, 10d e 30d"
+            titulo="Histórico de Interesses"
             aoClicar={() => navigate("/historico")}
           />
 
           <ItemConfiguracao
             icone={<Layers size={19} color="#38bdf8" />}
-            titulo="Meus Conteúdos Interagidos"
-            descricao="Acesse publicações organizadas em abas: vistos, likes e cliques"
+            titulo="Conteúdo Visualizados"
             aoClicar={() => navigate("/conteudos")}
           />
         </Categoria>

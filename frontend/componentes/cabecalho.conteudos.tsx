@@ -8,7 +8,7 @@ export interface CabecalhoConteudosProps {
 }
 
 export function CabecalhoConteudos({
-  titulo = "Conteúdos Interagidos",
+  titulo = "Conteúdo Visualizados",
   onVoltar,
 }: CabecalhoConteudosProps) {
   const navigate = useNavigate();

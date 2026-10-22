@@ -8,7 +8,7 @@ export interface CabecalhoInteressesProps {
 }
 
 export function CabecalhoInteresses({
-  titulo = "Calculador de Interesses",
+  titulo = "Histórico de Interesses",
   onVoltar,
 }: CabecalhoInteressesProps) {
   const navigate = useNavigate();
