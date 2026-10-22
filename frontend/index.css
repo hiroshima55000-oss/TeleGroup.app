@@ -4,9 +4,38 @@
   box-sizing: border-box;
 }
 
+html {
+  color-scheme: dark;
+  background-color: #11151b;
+}
+
 body {
   margin: 0;
   padding: 0;
+  color-scheme: dark;
+  background-color: #11151b;
+  color: #e7edf5;
+}
+
+/* Barra de rolagem escura padrão integrada idêntica ao feed */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #11151b;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.18) #11151b;
+  scrollbar-width: thin;
 }
 
 /* Responsividade da grade da tela de pesquisa */

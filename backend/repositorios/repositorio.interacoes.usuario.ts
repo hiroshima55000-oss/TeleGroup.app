@@ -15,6 +15,19 @@ export interface RegistroInteracaoItem {
   nicho?: string;
 }
 
+export interface TagRankeadaInteresse {
+  posicao: number;
+  tag: string;
+  slug: string;
+  pontos: number;
+  percentual: number;
+  totalAcoes: number;
+  visualizacoes: number;
+  likes: number;
+  cliques: number;
+  nivelAfinidade: "Alta" | "Média" | "Em Alta";
+}
+
 export interface CalculoInteressePeriodo {
   periodo: "ontem" | "10d" | "30d";
   label: string;
@@ -35,6 +48,7 @@ export interface CalculoInteressePeriodo {
     acoes: number;
   }>;
   topTags: string[];
+  tagsRankeadas: TagRankeadaInteresse[];
 }
 
 const ARQUIVO_INTERACOES = path.resolve(
@@ -342,13 +356,28 @@ export const RepositorioInteracoesUsuario = {
    * CALCULADOR DE INTERESSES (ONTEM, 10 DIAS, 30 DIAS)
    * =========================================================
    */
-  calcularInteresses(
+  async calcularInteresses(
     usuarioId: string,
-    periodo: "ontem" | "10d" | "30d"
-  ): CalculoInteressePeriodo {
+    periodo: "ontem" | "10d" | "30d",
+    mapaPubsExterno?: Map<string, Publicacao>
+  ): Promise<CalculoInteressePeriodo> {
     const uid = (usuarioId || "usr_anonimo").trim();
     const dados = lerDadosInteracoes();
     const agora = Date.now();
+
+    // Carrega mapa de publicações para resolver tags completas de cada post interagido
+    let mapaPubs = mapaPubsExterno;
+    if (!mapaPubs) {
+      try {
+        const todas = await RepositorioPublicacoes.buscarTodas();
+        mapaPubs = new Map<string, Publicacao>();
+        for (const p of todas) {
+          mapaPubs.set(p.id, p);
+        }
+      } catch {
+        mapaPubs = new Map<string, Publicacao>();
+      }
+    }
 
     let inicioMs = 0;
     let fimMs = agora;
@@ -390,7 +419,7 @@ export const RepositorioInteracoesUsuario = {
       });
     }
 
-    // Pesos do algoritmo
+    // Pesos do algoritmo de engajamento
     const PESO_VISUALIZACAO = 1.0;
     const PESO_LIKE = 4.0;
     const PESO_CLIQUE = 6.0;
@@ -400,9 +429,43 @@ export const RepositorioInteracoesUsuario = {
     let totalLikes = 0;
     let totalCliques = 0;
 
-    const mapaCategorias: Record<string, { pontos: number; acoes: number }> =
-      {};
-    const mapaTags: Record<string, number> = {};
+    const mapaCategorias: Record<string, { pontos: number; acoes: number }> = {};
+    const mapaTagsDetalhe: Record<
+      string,
+      {
+        pontos: number;
+        totalAcoes: number;
+        visualizacoes: number;
+        likes: number;
+        cliques: number;
+      }
+    > = {};
+
+    function computarTags(tags: string[] | undefined, peso: number, tipo: "visualizacao" | "like" | "clique") {
+      if (!Array.isArray(tags)) return;
+      for (const t of tags) {
+        const tLimpa = (t || "").toLowerCase().replace(/^#+/, "").trim();
+        if (!tLimpa) continue;
+        if (!mapaTagsDetalhe[tLimpa]) {
+          mapaTagsDetalhe[tLimpa] = {
+            pontos: 0,
+            totalAcoes: 0,
+            visualizacoes: 0,
+            likes: 0,
+            cliques: 0,
+          };
+        }
+        mapaTagsDetalhe[tLimpa].pontos += peso;
+        mapaTagsDetalhe[tLimpa].totalAcoes += 1;
+        if (tipo === "like") {
+          mapaTagsDetalhe[tLimpa].likes += 1;
+        } else if (tipo === "clique") {
+          mapaTagsDetalhe[tLimpa].cliques += 1;
+        } else {
+          mapaTagsDetalhe[tLimpa].visualizacoes += 1;
+        }
+      }
+    }
 
     for (const ev of eventosParaCalculo) {
       let peso = PESO_VISUALIZACAO;
@@ -426,19 +489,19 @@ export const RepositorioInteracoesUsuario = {
       mapaCategorias[cat].pontos += peso;
       mapaCategorias[cat].acoes += 1;
 
-      // Tags
-      if (Array.isArray(ev.tags)) {
-        for (const t of ev.tags) {
-          const tLimpa = t.toLowerCase().replace(/^#/, "").trim();
-          if (tLimpa) {
-            mapaTags[tLimpa] = (mapaTags[tLimpa] || 0) + peso;
-          }
+      // Tags: utiliza as do evento ou busca na publicação vinculada
+      let tagsParaProcessar = ev.tags;
+      if (!tagsParaProcessar || tagsParaProcessar.length === 0) {
+        const pubRef = mapaPubs?.get(ev.publicacaoId);
+        if (pubRef?.tags && pubRef.tags.length > 0) {
+          tagsParaProcessar = pubRef.tags;
         }
       }
+      computarTags(tagsParaProcessar, peso, ev.tipo);
     }
 
-    // Se ainda não houver eventos registrados, injeta dados com base nos grupos vistos
-    // ou curtidos para que o calculador demonstre valores reais do usuário
+    // Se ainda não houver eventos registrados no intervalo exato, injeta dados
+    // com base nas curtidas, cliques e visualizações já salvas do usuário
     if (totalPontos === 0) {
       const vistos = dados.visualizadosPorUsuario[uid] || [];
       const curtidos = dados.curtidasPorUsuario[uid] || [];
@@ -452,13 +515,66 @@ export const RepositorioInteracoesUsuario = {
         totalLikes * PESO_LIKE +
         totalCliques * PESO_CLIQUE;
 
+      // Processa tags das publicações interagidas
+      for (const pid of curtidos) {
+        const pub = mapaPubs?.get(pid);
+        if (pub) {
+          const cat = (pub.categoria || pub.nicho || "Geral").toLowerCase().trim();
+          mapaCategorias[cat] = mapaCategorias[cat] || { pontos: 0, acoes: 0 };
+          mapaCategorias[cat].pontos += PESO_LIKE;
+          mapaCategorias[cat].acoes += 1;
+          computarTags(pub.tags, PESO_LIKE, "like");
+        }
+      }
+      for (const pid of clicados) {
+        const pub = mapaPubs?.get(pid);
+        if (pub) {
+          const cat = (pub.categoria || pub.nicho || "Geral").toLowerCase().trim();
+          mapaCategorias[cat] = mapaCategorias[cat] || { pontos: 0, acoes: 0 };
+          mapaCategorias[cat].pontos += PESO_CLIQUE;
+          mapaCategorias[cat].acoes += 1;
+          computarTags(pub.tags, PESO_CLIQUE, "clique");
+        }
+      }
+      for (const pid of vistos) {
+        const pub = mapaPubs?.get(pid);
+        if (pub) {
+          const cat = (pub.categoria || pub.nicho || "Geral").toLowerCase().trim();
+          mapaCategorias[cat] = mapaCategorias[cat] || { pontos: 0, acoes: 0 };
+          mapaCategorias[cat].pontos += PESO_VISUALIZACAO;
+          mapaCategorias[cat].acoes += 1;
+          computarTags(pub.tags, PESO_VISUALIZACAO, "visualizacao");
+        }
+      }
+
       if (totalPontos === 0) {
         totalPontos = 1;
         mapaCategorias["comunidades"] = { pontos: 1, acoes: 1 };
       }
     }
 
-    // Distribuição percentual
+    // Se as tags ainda estiverem vazias mas o usuário tem itens curtidos/vistos globais,
+    // calcula também para garantir que as tags ranqueadas por interesse sejam sempre exibidas
+    if (Object.keys(mapaTagsDetalhe).length === 0) {
+      const curtidos = dados.curtidasPorUsuario[uid] || [];
+      const clicados = dados.clicadosPorUsuario[uid] || [];
+      const vistos = dados.visualizadosPorUsuario[uid] || [];
+
+      for (const pid of curtidos) {
+        const pub = mapaPubs?.get(pid);
+        if (pub?.tags) computarTags(pub.tags, PESO_LIKE, "like");
+      }
+      for (const pid of clicados) {
+        const pub = mapaPubs?.get(pid);
+        if (pub?.tags) computarTags(pub.tags, PESO_CLIQUE, "clique");
+      }
+      for (const pid of vistos) {
+        const pub = mapaPubs?.get(pid);
+        if (pub?.tags) computarTags(pub.tags, PESO_VISUALIZACAO, "visualizacao");
+      }
+    }
+
+    // Distribuição percentual por grupo / categoria
     const distribuicao: Record<string, number> = {};
     const distribuicaoGrupos: Array<{
       grupoNome: string;
@@ -480,11 +596,47 @@ export const RepositorioInteracoesUsuario = {
 
     distribuicaoGrupos.sort((a, b) => b.percentual - a.percentual);
 
-    // Top tags ordenadas
-    const topTags = Object.entries(mapaTags)
-      .sort((a, b) => b[1] - a[1])
-      .map(([t]) => t)
-      .slice(0, 6);
+    // Constrói o ranking de tags por afinidade e peso de interesse do usuário
+    const totalPontosTags = Object.values(mapaTagsDetalhe).reduce(
+      (acc, cur) => acc + cur.pontos,
+      0
+    );
+
+    const tagsRankeadas: TagRankeadaInteresse[] = Object.entries(mapaTagsDetalhe)
+      .map(([slug, dadosTag]) => {
+        const pct =
+          totalPontosTags > 0
+            ? Number(((dadosTag.pontos / totalPontosTags) * 100).toFixed(1))
+            : 0;
+        return {
+          posicao: 0,
+          tag: slug,
+          slug,
+          pontos: Number(dadosTag.pontos.toFixed(1)),
+          percentual: pct,
+          totalAcoes: dadosTag.totalAcoes,
+          visualizacoes: dadosTag.visualizacoes,
+          likes: dadosTag.likes,
+          cliques: dadosTag.cliques,
+          nivelAfinidade: "Em Alta" as const,
+        };
+      })
+      .sort((a, b) => b.pontos - a.pontos || b.totalAcoes - a.totalAcoes)
+      .map((item, idx) => {
+        let nivelAfinidade: "Alta" | "Média" | "Em Alta" = "Em Alta";
+        if (idx < 3 || item.percentual >= 25) {
+          nivelAfinidade = "Alta";
+        } else if (idx < 7 || item.percentual >= 10) {
+          nivelAfinidade = "Média";
+        }
+        return {
+          ...item,
+          posicao: idx + 1,
+          nivelAfinidade,
+        };
+      });
+
+    const topTags = tagsRankeadas.map((t) => t.slug).slice(0, 8);
 
     const taxaCTR =
       totalVis > 0 ? Number(((totalCliques / totalVis) * 100).toFixed(1)) : 0;
@@ -513,6 +665,7 @@ export const RepositorioInteracoesUsuario = {
       distribuicao,
       distribuicaoGrupos,
       topTags,
+      tagsRankeadas,
     };
   },
 };

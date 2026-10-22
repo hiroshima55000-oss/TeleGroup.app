@@ -282,9 +282,9 @@ export const PublicacoesControle = {
 
       const conteudos = await RepositorioInteracoesUsuario.obterConteudosDoUsuario(usuarioId);
 
-      const calcOntem = RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "ontem");
-      const calc10d = RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "10d");
-      const calc30d = RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "30d");
+      const calcOntem = await RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "ontem");
+      const calc10d = await RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "10d");
+      const calc30d = await RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "30d");
 
       res.status(200).json({
         sucesso: true,

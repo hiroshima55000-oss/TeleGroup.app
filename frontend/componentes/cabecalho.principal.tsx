@@ -88,35 +88,6 @@ function CabecalhoDivulgacaoTelegram() {
           }}
         >
           <Link
-            to="/historico"
-            title="Histórico e Calculador de Interesses"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "7px",
-              height: "38px",
-              padding: "0 12px",
-              borderRadius: "10px",
-              background: "rgba(56, 189, 248, 0.08)",
-              border: "1px solid rgba(56, 189, 248, 0.22)",
-              textDecoration: "none",
-              boxSizing: "border-box",
-              color: "#38bdf8",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "12.5px",
-                fontWeight: 750,
-                color: "#38bdf8",
-              }}
-            >
-              Interesses
-            </span>
-          </Link>
-
-          <Link
             to="/dashboard"
             title="Painel"
             style={{

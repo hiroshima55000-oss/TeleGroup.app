@@ -661,6 +661,19 @@ export async function enviarDenunciaPublicacao(
   }
 }
 
+export interface TagRankeadaInteresse {
+  posicao: number;
+  tag: string;
+  slug: string;
+  pontos: number;
+  percentual: number;
+  totalAcoes: number;
+  visualizacoes: number;
+  likes: number;
+  cliques: number;
+  nivelAfinidade: "Alta" | "Média" | "Em Alta";
+}
+
 export interface CalculoInteressePeriodoItem {
   periodo: "ontem" | "10d" | "30d";
   label: string;
@@ -679,6 +692,7 @@ export interface CalculoInteressePeriodoItem {
     acoes: number;
   }>;
   topTags: string[];
+  tagsRankeadas?: TagRankeadaInteresse[];
 }
 
 export interface RespostaHistoricoUsuario {
@@ -697,6 +711,7 @@ export interface RespostaHistoricoUsuario {
     dezDias: CalculoInteressePeriodoItem;
     trintaDias: CalculoInteressePeriodoItem;
   };
+  tagsRankeadasGerais?: TagRankeadaInteresse[];
 }
 
 /**
