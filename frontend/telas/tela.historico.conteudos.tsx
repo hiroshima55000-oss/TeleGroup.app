@@ -10,8 +10,6 @@ import {
   Send,
   Layers,
   ArrowRight,
-  PlusCircle,
-  FileText,
 } from "lucide-react";
 import {
   PublicacaoItem,
@@ -19,12 +17,11 @@ import {
   obterHistoricoUsuarioApi,
   curtirPublicacao,
   registrarCliqueLink,
-  buscarPublicacoes,
 } from "../servicos/api.publicacoes";
-import { obterOuCriarUsuario, InfoUsuario, estaLogadoGoogle } from "../servicos/usuario";
+import { obterOuCriarUsuario, InfoUsuario } from "../servicos/usuario";
 import CardDenunciar from "../componentes/card.denunciar";
 
-type AbaAtiva = "vistos" | "likes" | "cliques" | "criados";
+export type AbaAtiva = "vistos" | "likes" | "cliques";
 
 export function TelaHistoricoConteudos() {
   const navigate = useNavigate();
@@ -34,13 +31,10 @@ export function TelaHistoricoConteudos() {
   const [usuario, setUsuario] = useState<InfoUsuario | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [historico, setHistorico] = useState<RespostaHistoricoUsuario | null>(null);
-  const [minhasPubs, setMinhasPubs] = useState<PublicacaoItem[]>([]);
 
-  // As abas principais solicitadas: vistos - likes - cliques
+  // Exclusivamente as 3 abas solicitadas: vistos - likes - cliques
   const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>(
-    abaParam === "likes" || abaParam === "cliques" || abaParam === "criados"
-      ? abaParam
-      : "vistos"
+    abaParam === "likes" || abaParam === "cliques" ? abaParam : "vistos"
   );
 
   // Estado do modal de denúncia
@@ -54,13 +48,8 @@ export function TelaHistoricoConteudos() {
       const user = obterOuCriarUsuario();
       setUsuario(user);
 
-      const [resHistorico, resMinhas] = await Promise.all([
-        obterHistoricoUsuarioApi(user.id),
-        buscarPublicacoes(true).catch(() => []),
-      ]);
-
+      const resHistorico = await obterHistoricoUsuarioApi(user.id);
       setHistorico(resHistorico);
-      setMinhasPubs(resMinhas || []);
     } catch (err) {
       console.error("Erro ao carregar conteúdos do usuário:", err);
     } finally {
@@ -109,14 +98,6 @@ export function TelaHistoricoConteudos() {
           },
         };
       });
-
-      setMinhasPubs((prev) =>
-        prev.map((item) =>
-          item.id === pub.id
-            ? { ...item, curtido: res.curtido, likes: res.totalLikes }
-            : item
-        )
-      );
     } catch (err) {
       console.error("Erro ao alternar curtida:", err);
     }
@@ -134,20 +115,17 @@ export function TelaHistoricoConteudos() {
     navigate(`/?tag=${encodeURIComponent(tag.replace(/^#/, ""))}`);
   }
 
-  // Lista da aba atualmente selecionada
+  // Lista da aba atualmente selecionada (estritamente vistos, likes ou cliques)
   const listaAtual: PublicacaoItem[] =
     abaAtiva === "vistos"
       ? historico?.conteudos?.visualizados || []
       : abaAtiva === "likes"
       ? historico?.conteudos?.curtidos || []
-      : abaAtiva === "cliques"
-      ? historico?.conteudos?.clicados || []
-      : minhasPubs;
+      : historico?.conteudos?.clicados || [];
 
   const totalVistos = historico?.conteudos?.totalVisualizados || 0;
   const totalLikes = historico?.conteudos?.totalCurtidos || 0;
   const totalCliques = historico?.conteudos?.totalClicados || 0;
-  const totalCriados = minhasPubs.length;
 
   return (
     <div
@@ -217,7 +195,7 @@ export function TelaHistoricoConteudos() {
                   letterSpacing: "-0.3px",
                 }}
               >
-                Meus Conteúdos & Interações
+                Conteúdos Interagidos
               </h1>
               <span style={{ fontSize: "12px", color: "#94a3b8" }}>
                 Identificador: {usuario?.nickname || usuario?.id || "Visitante"}
@@ -239,7 +217,7 @@ export function TelaHistoricoConteudos() {
                 border: "1px solid rgba(56, 189, 248, 0.22)",
                 color: "#38bdf8",
                 fontSize: "12px",
-                fontWeight: 700,
+                fontWeight: 750,
                 cursor: "pointer",
               }}
             >
@@ -260,7 +238,7 @@ export function TelaHistoricoConteudos() {
                 border: "1px solid rgba(255, 255, 255, 0.12)",
                 color: "#f1f5f9",
                 fontSize: "12px",
-                fontWeight: 700,
+                fontWeight: 750,
                 cursor: "pointer",
               }}
             >
@@ -289,7 +267,7 @@ export function TelaHistoricoConteudos() {
               "linear-gradient(135deg, #18212c 0%, #151a22 55%, #18222d 100%)",
             border: "1px solid rgba(56, 189, 248, 0.18)",
             borderRadius: "20px",
-            padding: "24px 22px",
+            padding: "22px 24px",
             boxShadow: "0 14px 35px rgba(0, 0, 0, 0.25)",
             display: "flex",
             alignItems: "center",
@@ -298,11 +276,11 @@ export function TelaHistoricoConteudos() {
             gap: "16px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <div
               style={{
-                width: "44px",
-                height: "44px",
+                width: "46px",
+                height: "46px",
                 borderRadius: "14px",
                 background: "rgba(56, 189, 248, 0.12)",
                 border: "1px solid rgba(56, 189, 248, 0.25)",
@@ -325,54 +303,23 @@ export function TelaHistoricoConteudos() {
                   letterSpacing: "-0.4px",
                 }}
               >
-                Central de Conteúdos & Interações
+                Conteúdos Interagidos
               </h2>
               <p
                 style={{
-                  margin: "3px 0 0",
+                  margin: "4px 0 0",
                   fontSize: "13px",
                   color: "#94a3b8",
                 }}
               >
-                Acompanhe comunidades que você viu, curtiu, clicou ou publicou.
+                Acompanhe o registro das comunidades que você viu, curtiu ou clicou.
               </p>
             </div>
           </div>
-
-          {/* BOTÃO PARA CRIAR PUBLICAÇÃO */}
-          <button
-            type="button"
-            onClick={() => {
-              if (estaLogadoGoogle()) {
-                navigate("/anunciar-gratuito");
-              } else {
-                navigate("/b?destino=/anunciar-gratuito&aviso=necessario_login", {
-                  state: { destino: "/anunciar-gratuito" },
-                });
-              }
-            }}
-            style={{
-              padding: "9px 18px",
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #229ED9, #168AC0)",
-              color: "#ffffff",
-              border: "none",
-              fontWeight: 750,
-              fontSize: "13px",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "7px",
-              boxShadow: "0 6px 18px rgba(34, 158, 217, 0.25)",
-            }}
-          >
-            <PlusCircle size={15} />
-            <span>Criar Nova Publicação</span>
-          </button>
         </section>
 
         {/* ======================================================== */}
-        {/* NAVEGAÇÃO DE ABAS: VISTOS - LIKES - CLIQUES              */}
+        {/* NAVEGAÇÃO DE ABAS: ESTRITAMENTE VISTOS - LIKES - CLIQUES  */}
         {/* ======================================================== */}
         <section
           style={{
@@ -521,47 +468,6 @@ export function TelaHistoricoConteudos() {
                 {totalCliques}
               </span>
             </button>
-
-            {/* ABA ADICIONAL: CRIADOS POR MIM */}
-            <button
-              type="button"
-              onClick={() => handleMudarAba("criados")}
-              style={{
-                padding: "9px 18px",
-                borderRadius: "9px",
-                border: "none",
-                background:
-                  abaAtiva === "criados"
-                    ? "rgba(168, 85, 247, 0.18)"
-                    : "transparent",
-                color: abaAtiva === "criados" ? "#c084fc" : "#94a3b8",
-                fontWeight: 800,
-                fontSize: "13px",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "7px",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <FileText size={16} />
-              <span>Criados</span>
-              <span
-                style={{
-                  padding: "1px 7px",
-                  borderRadius: "999px",
-                  background:
-                    abaAtiva === "criados"
-                      ? "rgba(168, 85, 247, 0.25)"
-                      : "rgba(255, 255, 255, 0.08)",
-                  color: abaAtiva === "criados" ? "#c084fc" : "#cbd5e1",
-                  fontSize: "11px",
-                  fontWeight: 750,
-                }}
-              >
-                {totalCriados}
-              </span>
-            </button>
           </div>
 
           <span style={{ fontSize: "12.5px", color: "#64748b" }}>
@@ -636,28 +542,6 @@ export function TelaHistoricoConteudos() {
           </div>
         )}
 
-        {abaAtiva === "criados" && (
-          <div
-            style={{
-              padding: "12px 16px",
-              borderRadius: "14px",
-              background: "rgba(168, 85, 247, 0.06)",
-              border: "1px solid rgba(168, 85, 247, 0.18)",
-              fontSize: "13px",
-              color: "#cbd5e1",
-              display: "flex",
-              alignItems: "center",
-              gap: "9px",
-            }}
-          >
-            <FileText size={17} color="#c084fc" style={{ flexShrink: 0 }} />
-            <span>
-              <strong>Conteúdos Criados:</strong> Suas comunidades cadastradas na plataforma.
-              Gerencie suas postagens públicas e visualize o engajamento recebido.
-            </span>
-          </div>
-        )}
-
         {/* GRADE DE PUBLICAÇÕES */}
         {carregando ? (
           <div
@@ -708,20 +592,12 @@ export function TelaHistoricoConteudos() {
                 ? "Navegue pelo feed para explorar novos grupos e registrar suas visualizações aqui."
                 : abaAtiva === "likes"
                 ? "Curta publicações que você achou interessantes para salvá-las nesta aba."
-                : abaAtiva === "cliques"
-                ? "Ao clicar para entrar em um grupo, ele será registrado aqui e deixará de se repetir no feed orgânico."
-                : "Você ainda não criou publicações. Comece divulgando seu canal ou grupo do Telegram!"}
+                : "Ao clicar para entrar em um grupo, ele será registrado aqui e deixará de se repetir no feed orgânico."}
             </p>
 
             <button
               type="button"
-              onClick={() => {
-                if (abaAtiva === "criados") {
-                  navigate("/anunciar-gratuito");
-                } else {
-                  navigate("/");
-                }
-              }}
+              onClick={() => navigate("/")}
               style={{
                 padding: "10px 22px",
                 borderRadius: "10px",
@@ -736,7 +612,7 @@ export function TelaHistoricoConteudos() {
                 gap: "7px",
               }}
             >
-              <span>{abaAtiva === "criados" ? "Publicar Agora" : "Explorar Feed"}</span>
+              <span>Explorar Feed</span>
               <ArrowRight size={15} />
             </button>
           </div>
