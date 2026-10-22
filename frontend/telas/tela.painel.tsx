@@ -3,6 +3,7 @@ import {
   FileText,
   ChevronRight,
   Sparkles,
+  Layers,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -174,8 +175,15 @@ function TelaConfiguracoes() {
             primeiro
             icone={<Sparkles size={19} color="#38bdf8" />}
             titulo="Meu Histórico e Calculador de Interesses"
-            descricao="Veja conteúdos visualizados, curtidos, clicados e afinidades de ontem, 10d e 30d"
+            descricao="Veja afinidades algorítmicas e tags rankeadas de ontem, 10d e 30d"
             aoClicar={() => navigate("/historico")}
+          />
+
+          <ItemConfiguracao
+            icone={<Layers size={19} color="#38bdf8" />}
+            titulo="Meus Conteúdos Interagidos"
+            descricao="Acesse publicações organizadas em abas: vistos, likes e cliques"
+            aoClicar={() => navigate("/conteudos")}
           />
         </Categoria>
 

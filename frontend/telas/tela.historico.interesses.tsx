@@ -1,22 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Layers, ArrowRight } from "lucide-react";
 import {
-  PublicacaoItem,
   RespostaHistoricoUsuario,
   CalculoInteressePeriodoItem,
   TagRankeadaInteresse,
   obterHistoricoUsuarioApi,
-  curtirPublicacao,
 } from "../servicos/api.publicacoes";
 import { obterOuCriarUsuario, InfoUsuario } from "../servicos/usuario";
-import CardDenunciar from "../componentes/card.denunciar";
 import CardCalculadorInteresses from "../componentes/card.interesses.calculador";
 import CardDistribuicaoInteresses from "../componentes/card.interesses.distribuicao";
 import CardTagsRankeadasInteresses from "../componentes/card.interesses.tags.rankeadas";
-import CardConteudosInteresses from "../componentes/card.interesses.conteudos";
 
-type AbaAtiva = "visualizados" | "curtidos" | "clicados";
 type PeriodoCalculador = "ontem" | "10d" | "30d";
 
 export function TelaHistoricoInteresses() {
@@ -24,14 +19,7 @@ export function TelaHistoricoInteresses() {
   const [usuario, setUsuario] = useState<InfoUsuario | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [historico, setHistorico] = useState<RespostaHistoricoUsuario | null>(null);
-
-  const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>("visualizados");
   const [periodoCalculo, setPeriodoCalculo] = useState<PeriodoCalculador>("10d");
-
-  // Estado do modal de denúncia
-  const [modalDenunciarAberto, setModalDenunciarAberto] = useState(false);
-  const [publicacaoParaDenunciar, setPublicacaoParaDenunciar] =
-    useState<PublicacaoItem | null>(null);
 
   const carregarDados = useCallback(async () => {
     try {
@@ -51,51 +39,6 @@ export function TelaHistoricoInteresses() {
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
-
-  async function handleCurtirItem(pub: PublicacaoItem) {
-    const novoStatus = !pub.curtido;
-    try {
-      const res = await curtirPublicacao(pub.id, novoStatus);
-      // Atualiza localmente nas listas do histórico
-      setHistorico((prev) => {
-        if (!prev) return prev;
-        const atualizarLista = (lista: PublicacaoItem[]) =>
-          lista.map((item) =>
-            item.id === pub.id
-              ? {
-                  ...item,
-                  curtido: res.curtido,
-                  likes: res.totalLikes,
-                }
-              : item
-          );
-
-        return {
-          ...prev,
-          conteudos: {
-            ...prev.conteudos,
-            visualizados: atualizarLista(prev.conteudos.visualizados),
-            curtidos: novoStatus
-              ? [...prev.conteudos.curtidos, { ...pub, curtido: true, likes: res.totalLikes }]
-              : prev.conteudos.curtidos.filter((item) => item.id !== pub.id),
-            clicados: atualizarLista(prev.conteudos.clicados),
-            totalCurtidos: novoStatus
-              ? prev.conteudos.totalCurtidos + 1
-              : Math.max(0, prev.conteudos.totalCurtidos - 1),
-          },
-        };
-      });
-    } catch (err) {
-      console.error("Erro ao alternar curtida no histórico:", err);
-    }
-  }
-
-  function handleEntrarGrupo(pub: PublicacaoItem) {
-    if (pub.link) {
-      const urlFinal = pub.link.startsWith("http") ? pub.link : `https://${pub.link}`;
-      window.open(urlFinal, "_blank", "noopener,noreferrer");
-    }
-  }
 
   function handleClicarTag(tag: string) {
     navigate(`/?tag=${encodeURIComponent(tag.replace(/^#/, ""))}`);
@@ -138,13 +81,6 @@ export function TelaHistoricoInteresses() {
           cliques: idx <= 1 ? 1 : 0,
           nivelAfinidade: idx < 2 ? "Alta" : idx < 4 ? "Média" : "Em Alta",
         }));
-
-  const listaAtual =
-    abaAtiva === "visualizados"
-      ? historico?.conteudos?.visualizados || []
-      : abaAtiva === "curtidos"
-      ? historico?.conteudos?.curtidos || []
-      : historico?.conteudos?.clicados || [];
 
   return (
     <div
@@ -214,7 +150,7 @@ export function TelaHistoricoInteresses() {
                   letterSpacing: "-0.3px",
                 }}
               >
-                Histórico & Calculador de Interesses
+                Calculador de Interesses
               </h1>
               <span style={{ fontSize: "12px", color: "#94a3b8" }}>
                 Identificador: {usuario?.nickname || usuario?.id || "Visitante"}
@@ -222,29 +158,52 @@ export function TelaHistoricoInteresses() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/dashboard")}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "7px 14px",
-              borderRadius: "8px",
-              background: "rgba(56, 189, 248, 0.08)",
-              border: "1px solid rgba(56, 189, 248, 0.22)",
-              color: "#38bdf8",
-              fontSize: "12px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Painel
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              type="button"
+              onClick={() => navigate("/conteudos")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 14px",
+                borderRadius: "8px",
+                background: "rgba(56, 189, 248, 0.08)",
+                border: "1px solid rgba(56, 189, 248, 0.22)",
+                color: "#38bdf8",
+                fontSize: "12px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <Layers size={14} />
+              Meus Conteúdos
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 14px",
+                borderRadius: "8px",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "#f1f5f9",
+                fontSize: "12px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Painel
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* CONTEÚDO PRINCIPAL - CARDS MODULARES E ISOLADOS */}
+      {/* CONTEÚDO PRINCIPAL - CARDS ISOLADOS DE INTERESSES */}
       <main
         style={{
           maxWidth: "1120px",
@@ -277,31 +236,68 @@ export function TelaHistoricoInteresses() {
           aoClicarTag={handleClicarTag}
         />
 
-        {/* CARD 4: CONTEÚDOS COM QUE VOCÊ INTERAGIU */}
-        <CardConteudosInteresses
-          abaAtiva={abaAtiva}
-          aoMudarAba={setAbaAtiva}
-          listaAtual={listaAtual}
-          totalVisualizados={historico?.conteudos?.totalVisualizados || 0}
-          totalCurtidos={historico?.conteudos?.totalCurtidos || 0}
-          totalClicados={historico?.conteudos?.totalClicados || 0}
-          carregando={carregando}
-          aoCurtir={handleCurtirItem}
-          aoEntrar={handleEntrarGrupo}
-          aoClicarTag={handleClicarTag}
-          aoExplorarFeed={() => navigate("/")}
-        />
-      </main>
+        {/* ATALHO PARA A NOVA PÁGINA PRÓPRIA DE CONTEÚDOS */}
+        <section
+          style={{
+            background: "rgba(21, 26, 33, 0.6)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "18px",
+            padding: "20px 22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "14px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                background: "rgba(56, 189, 248, 0.1)",
+                color: "#38bdf8",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Layers size={20} />
+            </div>
+            <div>
+              <strong style={{ fontSize: "15px", color: "#ffffff", display: "block" }}>
+                Ver Conteúdos Interagidos
+              </strong>
+              <span style={{ fontSize: "12.5px", color: "#94a3b8" }}>
+                Página dedicada para navegar em publicações vistas, curtidas e clicadas.
+              </span>
+            </div>
+          </div>
 
-      {/* MODAL DE DENÚNCIA */}
-      <CardDenunciar
-        aberto={modalDenunciarAberto}
-        publicacao={publicacaoParaDenunciar}
-        onFechar={() => {
-          setModalDenunciarAberto(false);
-          setPublicacaoParaDenunciar(null);
-        }}
-      />
+          <button
+            type="button"
+            onClick={() => navigate("/conteudos")}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, #229ED9, #168AC0)",
+              color: "#ffffff",
+              border: "none",
+              fontWeight: 750,
+              fontSize: "13px",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>Acessar Vistos, Likes e Cliques</span>
+            <ArrowRight size={14} />
+          </button>
+        </section>
+      </main>
     </div>
   );
 }

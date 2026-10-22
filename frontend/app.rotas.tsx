@@ -16,6 +16,7 @@ import TelaRankingTags from "./telas/tela.ranking.tags";
 import TelaTeste from "./telas/tela.teste";
 import TelaBanido from "./telas/tela.banido";
 import TelaHistoricoInteresses from "./telas/tela.historico.interesses";
+import TelaHistoricoConteudos from "./telas/tela.historico.conteudos";
 
 function AppRotas() {
   return (
@@ -25,6 +26,10 @@ function AppRotas() {
         <Route path="/historico" element={<TelaHistoricoInteresses />} />
         <Route path="/interesses" element={<TelaHistoricoInteresses />} />
         <Route path="/meu-historico" element={<TelaHistoricoInteresses />} />
+        <Route path="/conteudos" element={<TelaHistoricoConteudos />} />
+        <Route path="/meus-conteudos" element={<TelaHistoricoConteudos />} />
+        <Route path="/historico-conteudos" element={<TelaHistoricoConteudos />} />
+        <Route path="/interacoes" element={<TelaHistoricoConteudos />} />
         <Route path="/lista-campanhas" element={<TelaCampanhas />} />
         <Route path="/lista-publicacoes" element={<TelaMinhasPublicacoes />} />
         <Route path="/dashboard" element={<TelaPainel />} />
