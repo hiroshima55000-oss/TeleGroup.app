@@ -1,12 +1,192 @@
 import React from "react";
-import { Sparkles, Calendar, TrendingUp, Loader2 } from "lucide-react";
+import {
+  Sparkles,
+  CalendarDays,
+  TrendingUp,
+  LoaderCircle,
+  MousePointerClick,
+  Eye,
+  Heart,
+  Target,
+} from "lucide-react";
+
 import { CalculoInteressePeriodoItem } from "../servicos/api.publicacoes";
 
+type PeriodoCalculo = "ontem" | "10d" | "30d";
+
 export interface CardCalculadorInteressesProps {
-  periodoCalculo: "ontem" | "10d" | "30d";
-  aoMudarPeriodo: (periodo: "ontem" | "10d" | "30d") => void;
+  periodoCalculo: PeriodoCalculo;
+  aoMudarPeriodo: (periodo: PeriodoCalculo) => void;
   calculoAtual?: CalculoInteressePeriodoItem;
   carregando: boolean;
+}
+
+const CORES = {
+  fundo: "#151b24",
+  card: "rgba(255,255,255,0.035)",
+  borda: "rgba(255,255,255,0.08)",
+  azul: "#38bdf8",
+  texto: "#f1f5f9",
+  secundario: "#94a3b8",
+  verde: "#4ade80",
+  amarelo: "#fbbf24",
+};
+
+const periodos: { valor: PeriodoCalculo; label: string }[] = [
+  { valor: "ontem", label: "Ontem" },
+  { valor: "10d", label: "10 dias" },
+  { valor: "30d", label: "30 dias" },
+];
+
+const estilos = {
+  card: {
+    width: "100%",
+    boxSizing: "border-box" as const,
+    padding: "22px",
+    borderRadius: "18px",
+    background: `linear-gradient(145deg, #1b2531, ${CORES.fundo})`,
+    border: `1px solid ${CORES.borda}`,
+    color: CORES.texto,
+    fontFamily: "Inter, Arial, sans-serif",
+  },
+
+  cabecalho: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap" as const,
+    gap: "18px",
+    paddingBottom: "20px",
+    borderBottom: `1px solid ${CORES.borda}`,
+  },
+
+  tituloGrupo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    minWidth: 0,
+    flex: "1 1 260px",
+  },
+
+  icone: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "44px",
+    height: "44px",
+    flexShrink: 0,
+    borderRadius: "13px",
+    background: "rgba(56,189,248,0.12)",
+    border: "1px solid rgba(56,189,248,0.22)",
+    color: CORES.azul,
+  },
+
+  titulo: {
+    margin: 0,
+    fontSize: "18px",
+    fontWeight: 800,
+    letterSpacing: "-0.4px",
+  },
+
+  descricao: {
+    margin: "5px 0 0",
+    color: CORES.secundario,
+    fontSize: "12px",
+    lineHeight: 1.6,
+  },
+
+  seletor: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "4px",
+    padding: "4px",
+    borderRadius: "11px",
+    background: "rgba(0,0,0,0.2)",
+    border: `1px solid ${CORES.borda}`,
+  },
+
+  conteudo: {
+    paddingTop: "20px",
+  },
+
+  subtitulo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    margin: "0 0 15px",
+    fontSize: "14px",
+    fontWeight: 750,
+  },
+
+  grade: {
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: "12px",
+  },
+
+  metrica: {
+    minWidth: 0,
+    padding: "16px",
+    borderRadius: "13px",
+    background: CORES.card,
+    border: `1px solid ${CORES.borda}`,
+  },
+
+  rotulo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    color: CORES.secundario,
+    fontSize: "12px",
+    fontWeight: 600,
+  },
+
+  valor: {
+    marginTop: "12px",
+    fontSize: "27px",
+    lineHeight: 1.2,
+    fontWeight: 800,
+    letterSpacing: "-0.7px",
+    overflowWrap: "anywhere" as const,
+  },
+
+  detalhe: {
+    marginTop: "7px",
+    color: "#718096",
+    fontSize: "11px",
+    lineHeight: 1.5,
+  },
+};
+
+interface MetricaProps {
+  titulo: string;
+  valor: React.ReactNode;
+  detalhe: string;
+  icone: React.ReactNode;
+  cor?: string;
+}
+
+function Metrica({
+  titulo,
+  valor,
+  detalhe,
+  icone,
+  cor = CORES.texto,
+}: MetricaProps) {
+  return (
+    <div style={estilos.metrica}>
+      <div style={estilos.rotulo}>
+        {icone}
+        <span>{titulo}</span>
+      </div>
+
+      <div style={{ ...estilos.valor, color: cor }}>
+        {valor}
+      </div>
+
+      <div style={estilos.detalhe}>{detalhe}</div>
+    </div>
+  );
 }
 
 export function CardCalculadorInteresses({
@@ -15,323 +195,145 @@ export function CardCalculadorInteresses({
   calculoAtual,
   carregando,
 }: CardCalculadorInteressesProps) {
+  const dados = calculoAtual;
+
   return (
-    <section
-      style={{
-        background:
-          "linear-gradient(135deg, #18212c 0%, #151a22 55%, #18222d 100%)",
-        border: "1px solid rgba(56, 189, 248, 0.20)",
-        borderRadius: "20px",
-        padding: "24px 22px",
-        boxShadow: "0 14px 35px rgba(0, 0, 0, 0.25)",
-      }}
-    >
-      {/* ======================================================== */}
-      {/* PARTE 1: CALCULADOR DINÂMICO DE INTERESSES + SELETOR     */}
-      {/* ======================================================== */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: "16px",
-          paddingBottom: "20px",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.07)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "14px",
-              background: "rgba(56, 189, 248, 0.12)",
-              border: "1px solid rgba(56, 189, 248, 0.25)",
-              color: "#38bdf8",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Sparkles size={22} />
+    <section style={estilos.card}>
+      {/* Cabeçalho */}
+      <header style={estilos.cabecalho}>
+        <div style={estilos.tituloGrupo}>
+          <div style={estilos.icone}>
+            <Sparkles size={21} />
           </div>
+
           <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "20px",
-                fontWeight: 800,
-                color: "#ffffff",
-                letterSpacing: "-0.4px",
-              }}
-            >
-              Calculador Dinâmico de Interesses
+            <h2 style={estilos.titulo}>
+              Calculador de Interesses
             </h2>
-            <p
-              style={{
-                margin: "3px 0 0",
-                fontSize: "13px",
-                color: "#94a3b8",
-              }}
-            >
-              Algoritmo de afinidade baseado nas suas visualizações, curtidas e cliques.
+
+            <p style={estilos.descricao}>
+              Afinidade calculada com base nas interações.
             </p>
           </div>
         </div>
 
-        {/* SELETOR DE PERÍODO: ONTEM, 10D, 30 DIAS */}
-        <div
-          style={{
-            display: "inline-flex",
-            background: "rgba(15, 20, 26, 0.8)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "12px",
-            padding: "4px",
-            gap: "4px",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => aoMudarPeriodo("ontem")}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "9px",
-              border: "none",
-              background:
-                periodoCalculo === "ontem"
-                  ? "linear-gradient(135deg, #229ED9, #168AC0)"
-                  : "transparent",
-              color: periodoCalculo === "ontem" ? "#ffffff" : "#94a3b8",
-              fontWeight: 750,
-              fontSize: "12.5px",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <Calendar size={13} />
-            Ontem
-          </button>
+        {/* Seleção de período */}
+        <div style={estilos.seletor}>
+          {periodos.map((periodo) => {
+            const selecionado =
+              periodoCalculo === periodo.valor;
 
-          <button
-            type="button"
-            onClick={() => aoMudarPeriodo("10d")}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "9px",
-              border: "none",
-              background:
-                periodoCalculo === "10d"
-                  ? "linear-gradient(135deg, #229ED9, #168AC0)"
-                  : "transparent",
-              color: periodoCalculo === "10d" ? "#ffffff" : "#94a3b8",
-              fontWeight: 750,
-              fontSize: "12.5px",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <Calendar size={13} />
-            10 Dias
-          </button>
-
-          <button
-            type="button"
-            onClick={() => aoMudarPeriodo("30d")}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "9px",
-              border: "none",
-              background:
-                periodoCalculo === "30d"
-                  ? "linear-gradient(135deg, #229ED9, #168AC0)"
-                  : "transparent",
-              color: periodoCalculo === "30d" ? "#ffffff" : "#94a3b8",
-              fontWeight: 750,
-              fontSize: "12.5px",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <Calendar size={13} />
-            30 Dias
-          </button>
+            return (
+              <button
+                key={periodo.valor}
+                type="button"
+                aria-pressed={selecionado}
+                onClick={() => aoMudarPeriodo(periodo.valor)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "9px 12px",
+                  border: "none",
+                  borderRadius: "8px",
+                  background: selecionado
+                    ? "linear-gradient(135deg, #229ed9, #168ac0)"
+                    : "transparent",
+                  color: selecionado ? "#fff" : CORES.secundario,
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "background 0.15s ease",
+                }}
+              >
+                <CalendarDays size={13} />
+                {periodo.label}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </header>
 
-      {/* ======================================================== */}
-      {/* PARTE 2: MÉTRICAS DO PERÍODO NO MESMO COMPONENTE         */}
-      {/* ======================================================== */}
-      <div style={{ paddingTop: "20px" }}>
+      {/* Métricas */}
+      <div style={estilos.conteudo}>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
+            ...estilos.subtitulo,
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "8px",
-            marginBottom: "16px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <TrendingUp size={18} color="#38bdf8" />
-            <h3
-              style={{
-                margin: 0,
-                fontSize: "15px",
-                fontWeight: 800,
-                color: "#ffffff",
-              }}
-            >
-              Métricas do Período ({calculoAtual?.label || "10 Dias"})
-            </h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <TrendingUp size={17} color={CORES.azul} />
+            <span>
+              Métricas · {dados?.label || "10 dias"}
+            </span>
           </div>
-          <span style={{ fontSize: "12px", color: "#64748b" }}>
-            Ponderação: Visualização = 1 • Like = 4 • Clique = 6
+
+          <span
+            style={{
+              color: CORES.secundario,
+              fontSize: "11px",
+              fontWeight: 500,
+            }}
+          >
+            Visualização 1 · Like 4 · Clique 6
           </span>
         </div>
 
         {carregando ? (
           <div
+            role="status"
             style={{
-              padding: "36px",
-              textAlign: "center",
-              color: "#94a3b8",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "10px",
+              justifyContent: "center",
+              gap: "12px",
+              padding: "40px 12px",
+              color: CORES.secundario,
+              fontSize: "13px",
             }}
           >
-            <Loader2 size={24} className="animate-spin" color="#38bdf8" />
-            <span>Calculando métricas do período...</span>
+            <LoaderCircle
+              size={27}
+              color={CORES.azul}
+              className="animate-spin"
+            />
+            Calculando métricas...
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "14px",
-            }}
-          >
-            {/* TOTAL DE AÇÕES */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                border: "1px solid rgba(255, 255, 255, 0.07)",
-                borderRadius: "14px",
-                padding: "16px",
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
-                Total de Ações
-              </span>
-              <div
-                style={{
-                  fontSize: "26px",
-                  fontWeight: 800,
-                  color: "#ffffff",
-                  marginTop: "4px",
-                }}
-              >
-                {calculoAtual?.totalAcoes || 0}
-              </div>
-              <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "3px" }}>
-                {calculoAtual?.totalVisualizacoes || 0} vistos • {calculoAtual?.totalLikes || 0} likes • {calculoAtual?.totalCliques || 0} cliques
-              </div>
-            </div>
+          <div style={estilos.grade}>
+            <Metrica
+              titulo="Total de ações"
+              valor={dados?.totalAcoes ?? 0}
+              detalhe={`${dados?.totalVisualizacoes ?? 0} visualizações · ${dados?.totalLikes ?? 0} likes · ${dados?.totalCliques ?? 0} cliques`}
+              icone={<MousePointerClick size={15} />}
+            />
 
-            {/* PONTOS PONDERADOS */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                border: "1px solid rgba(255, 255, 255, 0.07)",
-                borderRadius: "14px",
-                padding: "16px",
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
-                Pontos Ponderados
-              </span>
-              <div
-                style={{
-                  fontSize: "26px",
-                  fontWeight: 800,
-                  color: "#38bdf8",
-                  marginTop: "4px",
-                }}
-              >
-                {calculoAtual?.totalPontos || 0} pts
-              </div>
-              <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "3px" }}>
-                Score acumulado de afinidade
-              </div>
-            </div>
+            <Metrica
+              titulo="Pontos ponderados"
+              valor={`${dados?.totalPontos ?? 0} pts`}
+              detalhe="Pontuação acumulada de afinidade"
+              icone={<Sparkles size={15} />}
+              cor={CORES.azul}
+            />
 
-            {/* TAXA DE CONVERSÃO CTR */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                border: "1px solid rgba(255, 255, 255, 0.07)",
-                borderRadius: "14px",
-                padding: "16px",
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
-                Taxa de Conversão (CTR)
-              </span>
-              <div
-                style={{
-                  fontSize: "26px",
-                  fontWeight: 800,
-                  color: "#22c55e",
-                  marginTop: "4px",
-                }}
-              >
-                {calculoAtual?.taxaCTR || 0}%
-              </div>
-              <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "3px" }}>
-                Cliques / Visualizações no período
-              </div>
-            </div>
+            <Metrica
+              titulo="Taxa de cliques (CTR)"
+              valor={`${dados?.taxaCTR ?? 0}%`}
+              detalhe="Cliques em relação às visualizações"
+              icone={<TrendingUp size={15} />}
+              cor={CORES.verde}
+            />
 
-            {/* CLASSIFICAÇÃO DO PERFIL */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                border: "1px solid rgba(255, 255, 255, 0.07)",
-                borderRadius: "14px",
-                padding: "16px",
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
-                Classificação do Perfil
-              </span>
-              <div
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 800,
-                  color: "#f59e0b",
-                  marginTop: "8px",
-                  lineHeight: "1.3",
-                }}
-              >
-                {calculoAtual?.classificacao || "Visitante"}
-              </div>
-              <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "3px" }}>
-                Qualificação algorítmica
-              </div>
-            </div>
+            <Metrica
+              titulo="Classificação do perfil"
+              valor={dados?.classificacao || "Visitante"}
+              detalhe="Qualificação algorítmica"
+              icone={<Target size={15} />}
+              cor={CORES.amarelo}
+            />
           </div>
         )}
       </div>
@@ -340,3 +342,5 @@ export function CardCalculadorInteresses({
 }
 
 export default CardCalculadorInteresses;
+
+

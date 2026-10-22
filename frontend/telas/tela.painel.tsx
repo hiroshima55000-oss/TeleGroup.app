@@ -5,11 +5,17 @@ import {
   Sparkles,
   Layers,
 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import CabecalhoConfiguracoes from "../componentes/cabecalho.painel";
 import CardPerfilUsuario from "../componentes/card.perfil.usuario";
-import { InfoUsuario, obterOuCriarUsuario } from "../servicos/usuario";
+
+import {
+  InfoUsuario,
+  obterOuCriarUsuario,
+} from "../servicos/usuario";
 
 function Categoria({
   titulo,
@@ -70,7 +76,9 @@ function ItemConfiguracao({
         gap: "15px",
         padding: "18px 21px",
         cursor: "pointer",
-        borderTop: primeiro ? "none" : "1px solid rgba(255,255,255,0.07)",
+        borderTop: primeiro
+          ? "none"
+          : "1px solid rgba(255,255,255,0.07)",
         transition: "background 0.15s ease",
       }}
     >
@@ -124,6 +132,7 @@ function ItemConfiguracao({
 
 function TelaConfiguracoes() {
   const navigate = useNavigate();
+
   const [usuario, setUsuario] = useState<InfoUsuario | null>(null);
 
   useEffect(() => {
@@ -135,7 +144,8 @@ function TelaConfiguracoes() {
     <div
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(circle at top left, #202a35 0%, #151a21 38%, #11151b 100%)",
+        background:
+          "radial-gradient(circle at top left, #202a35 0%, #151a21 38%, #11151b 100%)",
         color: "#e7edf5",
         fontFamily: "Inter, Arial, sans-serif",
       }}
@@ -161,31 +171,25 @@ function TelaConfiguracoes() {
           >
             Painel da Conta
           </h1>
-          <p style={{ margin: "6px 0 0", color: "#8b98a9", fontSize: "14px" }}>
+
+          <p
+            style={{
+              margin: "6px 0 0",
+              color: "#8b98a9",
+              fontSize: "14px",
+            }}
+          >
             Gerencie sua identidade de usuário, suas postagens e campanhas ativas.
           </p>
         </div>
 
-        {/* CARD DE PERFIL E IDENTIDADE DO USUÁRIO ISOLADO */}
-        <CardPerfilUsuario usuario={usuario} onAtualizar={setUsuario} />
+        {/* CARD DE PERFIL E IDENTIDADE DO USUÁRIO */}
+        <CardPerfilUsuario
+          usuario={usuario}
+          onAtualizar={setUsuario}
+        />
 
-        {/* CATEGORIA: HISTÓRICO & INTERESSES */}
-        <Categoria titulo="Comportamento & Interesses">
-          <ItemConfiguracao
-            primeiro
-            icone={<Sparkles size={19} color="#38bdf8" />}
-            titulo="Histórico de Interesses"
-            aoClicar={() => navigate("/historico")}
-          />
-
-          <ItemConfiguracao
-            icone={<Layers size={19} color="#38bdf8" />}
-            titulo="Conteúdo Visualizados"
-            aoClicar={() => navigate("/conteudos")}
-          />
-        </Categoria>
-
-        {/* CATEGORIA: GERENCIAR CONTEÚDO */}
+        {/* CATEGORIA: CONTEÚDO E PUBLICAÇÕES */}
         <Categoria titulo="Conteúdo e Publicações">
           <ItemConfiguracao
             primeiro
@@ -200,10 +204,27 @@ function TelaConfiguracoes() {
             aoClicar={() => navigate("/lista-publicacoes")}
           />
         </Categoria>
+
+        {/* CATEGORIA: COMPORTAMENTO & INTERESSES */}
+        <Categoria titulo="Comportamento & Interesses">
+          <ItemConfiguracao
+            primeiro
+            icone={<Sparkles size={19} color="#38bdf8" />}
+            titulo="Histórico de Interesses"
+            aoClicar={() => navigate("/historico")}
+          />
+
+          <ItemConfiguracao
+            icone={<Layers size={19} color="#38bdf8" />}
+            titulo="Conteúdo Visualizados"
+            aoClicar={() => navigate("/conteudos")}
+          />
+        </Categoria>
       </main>
     </div>
   );
 }
 
 export default TelaConfiguracoes;
+
 
