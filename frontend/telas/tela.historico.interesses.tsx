@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Layers, ArrowRight } from "lucide-react";
+import { Layers, ArrowRight } from "lucide-react";
 import {
   RespostaHistoricoUsuario,
   CalculoInteressePeriodoItem,
@@ -8,6 +8,7 @@ import {
   obterHistoricoUsuarioApi,
 } from "../servicos/api.publicacoes";
 import { obterOuCriarUsuario, InfoUsuario } from "../servicos/usuario";
+import CabecalhoInteresses from "../componentes/cabecalho.interesses";
 import CardCalculadorInteresses from "../componentes/card.interesses.calculador";
 import CardDistribuicaoInteresses from "../componentes/card.interesses.distribuicao";
 import CardTagsRankeadasInteresses from "../componentes/card.interesses.tags.rankeadas";
@@ -92,116 +93,8 @@ export function TelaHistoricoInteresses() {
         fontFamily: "Inter, Arial, sans-serif",
       }}
     >
-      {/* CABEÇALHO */}
-      <header
-        style={{
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 20px",
-          background: "rgba(17, 21, 27, 0.94)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          backdropFilter: "blur(14px)",
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1120px",
-            width: "100%",
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              aria-label="Voltar para o feed"
-              style={{
-                width: "38px",
-                height: "38px",
-                borderRadius: "11px",
-                border: "1px solid rgba(255, 255, 255, 0.09)",
-                background: "rgba(255, 255, 255, 0.05)",
-                color: "#e2e8f0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            <div>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: "17px",
-                  fontWeight: 800,
-                  color: "#ffffff",
-                  letterSpacing: "-0.3px",
-                }}
-              >
-                Calculador de Interesses
-              </h1>
-              <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-                Identificador: {usuario?.nickname || usuario?.id || "Visitante"}
-              </span>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <button
-              type="button"
-              onClick={() => navigate("/conteudos")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "7px 14px",
-                borderRadius: "8px",
-                background: "rgba(56, 189, 248, 0.08)",
-                border: "1px solid rgba(56, 189, 248, 0.22)",
-                color: "#38bdf8",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              <Layers size={14} />
-              Meus Conteúdos
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "7px 14px",
-                borderRadius: "8px",
-                background: "rgba(255, 255, 255, 0.06)",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
-                color: "#f1f5f9",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Painel
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* CABEÇALHO LIMPO COM BOTÃO VOLTAR PARA O PAINEL */}
+      <CabecalhoInteresses />
 
       {/* CONTEÚDO PRINCIPAL - CARDS ISOLADOS DE INTERESSES */}
       <main

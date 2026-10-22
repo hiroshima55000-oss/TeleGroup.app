@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  ChevronLeft,
   Eye,
   Heart,
   MousePointerClick,
@@ -11,6 +10,7 @@ import {
   Layers,
   ArrowRight,
 } from "lucide-react";
+import CabecalhoConteudos from "../componentes/cabecalho.conteudos";
 import {
   PublicacaoItem,
   RespostaHistoricoUsuario,
@@ -137,116 +137,8 @@ export function TelaHistoricoConteudos() {
         fontFamily: "Inter, Arial, sans-serif",
       }}
     >
-      {/* CABEÇALHO */}
-      <header
-        style={{
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 20px",
-          background: "rgba(17, 21, 27, 0.94)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          backdropFilter: "blur(14px)",
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1120px",
-            width: "100%",
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              aria-label="Voltar para o feed"
-              style={{
-                width: "38px",
-                height: "38px",
-                borderRadius: "11px",
-                border: "1px solid rgba(255, 255, 255, 0.09)",
-                background: "rgba(255, 255, 255, 0.05)",
-                color: "#e2e8f0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            <div>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: "17px",
-                  fontWeight: 800,
-                  color: "#ffffff",
-                  letterSpacing: "-0.3px",
-                }}
-              >
-                Conteúdos Interagidos
-              </h1>
-              <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-                Identificador: {usuario?.nickname || usuario?.id || "Visitante"}
-              </span>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <button
-              type="button"
-              onClick={() => navigate("/historico")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "7px 12px",
-                borderRadius: "8px",
-                background: "rgba(56, 189, 248, 0.08)",
-                border: "1px solid rgba(56, 189, 248, 0.22)",
-                color: "#38bdf8",
-                fontSize: "12px",
-                fontWeight: 750,
-                cursor: "pointer",
-              }}
-            >
-              <Sparkles size={14} />
-              Interesses
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "7px 12px",
-                borderRadius: "8px",
-                background: "rgba(255, 255, 255, 0.06)",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
-                color: "#f1f5f9",
-                fontSize: "12px",
-                fontWeight: 750,
-                cursor: "pointer",
-              }}
-            >
-              Painel
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* CABEÇALHO LIMPO COM BOTÃO DE VOLTAR PARA O PAINEL */}
+      <CabecalhoConteudos />
 
       {/* CONTEÚDO PRINCIPAL */}
       <main

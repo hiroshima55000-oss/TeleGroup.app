@@ -33,6 +33,7 @@ function AppRotas() {
         <Route path="/lista-campanhas" element={<TelaCampanhas />} />
         <Route path="/lista-publicacoes" element={<TelaMinhasPublicacoes />} />
         <Route path="/dashboard" element={<TelaPainel />} />
+        <Route path="/painel" element={<TelaPainel />} />
         <Route path="/anunciar" element={<TelaEscolherAnuncio />} />
         <Route path="/anunciar-gratuito" element={<TelaCriarPostagem />} />
         <Route path="/anunciar-pago" element={<TelaAnunciar />} />
