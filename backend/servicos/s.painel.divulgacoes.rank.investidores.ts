@@ -84,26 +84,61 @@ function lerJsonSeguro<T>(caminho: string, padrao: T): T {
 
 export const RankInvestidoresServico = {
   /**
-   * Obtém o ranking formatado de investidores
+   * Obtém o ranking real de investidores baseado nas campanhas pagas
    */
   async obterRankingInvestidores(): Promise<RespostaRankingInvestidores> {
     const dadosArquivo = lerJsonSeguro<any>(ARQUIVO_RANKINGS, {});
-    const lista: ItemRankingInvestidor[] =
-      dadosArquivo.investidores && Array.isArray(dadosArquivo.investidores) && dadosArquivo.investidores.length > 0
-        ? dadosArquivo.investidores
-        : DADOS_PADRAO_INVESTIDORES;
+    let lista: ItemRankingInvestidor[] = [];
+
+    if (dadosArquivo.investidores && Array.isArray(dadosArquivo.investidores) && dadosArquivo.investidores.length > 0) {
+      lista = dadosArquivo.investidores;
+    } else {
+      try {
+        const { RepositorioCampanhas } = await import("../repositorios/repositorio.campanhas");
+        const todasCampanhas = await RepositorioCampanhas.buscarTodas();
+        const somaPorUsuario = new Map<string, number>();
+
+        for (const c of todasCampanhas) {
+          const usr = ((c as any).usuario || c.usuarioId || "investidor").trim();
+          const handle = usr.startsWith("@") ? usr : `@${usr}`;
+          const valor = Number(c.gastoTotal || (c.orcamentoDiario ? c.orcamentoDiario * 30 : 0) || 0);
+          if (valor > 0) {
+            somaPorUsuario.set(handle, (somaPorUsuario.get(handle) || 0) + valor);
+          }
+        }
+
+        lista = Array.from(somaPorUsuario.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([usuario, valor], idx) => {
+            const valorFormatado = valor.toLocaleString("pt-BR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            return {
+              posicao: idx + 1,
+              usuario,
+              valor,
+              valorFormatado,
+              linha: `foi investido ${valorFormatado} por ${usuario}`,
+            };
+          });
+      } catch {
+        lista = [];
+      }
+    }
 
     const titulo = "rank de investidores:";
     const linhas = lista.map((item) => item.linha || `foi investido ${item.valorFormatado} por ${item.usuario}`);
-
-    // Preserva o espaçamento visual do painel se houver quebra entre grupos
-    const textoFormatado = `${titulo}\n${linhas.slice(0, 4).join("\n")}\n\n${linhas.slice(4).join("\n")}`.trim();
+    const textoFormatado =
+      linhas.length > 0
+        ? `${titulo}\n${linhas.join("\n")}`
+        : `${titulo}\nnenhum investimento registrado ainda`;
 
     return {
       sucesso: true,
       area: "rank_investidores",
       titulo,
-      fonte: dadosArquivo.investidores ? "arquivo_persistente" : "padrao",
+      fonte: "banco_real",
       totalInvestidores: lista.length,
       ranking: lista,
       linhas,

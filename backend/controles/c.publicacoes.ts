@@ -168,7 +168,13 @@ export const PublicacoesControle = {
         (req.headers["x-user-id"] as string) ||
         "usr_anonimo";
 
-      const perfil = PublicacoesServico.obterPerfilInteresses(usuarioId);
+      const { RepositorioInteresses } = await import(
+        "../repositorios/repositorio.interesses"
+      );
+      let perfil = await RepositorioInteresses.obterPerfil(usuarioId);
+      if (!perfil) {
+        perfil = PublicacoesServico.obterPerfilInteresses(usuarioId);
+      }
       res.json({
         sucesso: true,
         perfil,

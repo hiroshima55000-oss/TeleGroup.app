@@ -265,6 +265,39 @@ export const OtimizacaoInteressesServico = {
     arquivo[usuarioId] = perfilOtimizado;
     salvarPerfisArquivo(arquivo);
 
+    // Persiste no banco de dados PostgreSQL
+    import("../../repositorios/repositorio.interesses")
+      .then((m) => {
+        m.RepositorioInteresses.salvarPerfil(
+          {
+            usuarioId,
+            nickname: `@${usuarioId}`,
+            totalInteracoes: perfilOtimizado.totalEventosColetados,
+            totalLikes,
+            totalCliques,
+            totalVisualizacoes,
+            tempoRetencaoEstimadoSegundos: 0,
+            classificacaoPublico: (classificacaoPublico as any) || "Passivo",
+            taxaCliquesCTR,
+            descricaoQualificacao: "Perfil otimizado pela base de dados.",
+            hashtags: {},
+            distribuicaoGrupos: distribuicaoGrupos.map((g) => ({
+              grupoNome: g.grupoNome,
+              tags: [],
+              percentual: g.percentual,
+              pontosPonderados: g.pontosPonderados,
+              totalAcoes: g.totalAcoes,
+            })),
+            distribuicaoPercentual,
+            sequenciaSessao: [],
+            primeiraInteracao: new Date().toISOString(),
+            ultimaAtualizacao: new Date().toISOString(),
+          },
+          perfilOtimizado
+        ).catch(() => {});
+      })
+      .catch(() => {});
+
     return perfilOtimizado;
   },
 

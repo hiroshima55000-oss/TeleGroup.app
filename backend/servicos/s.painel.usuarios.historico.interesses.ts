@@ -191,8 +191,19 @@ export const PainelUsuariosHistoricoInteressesServico = {
    * Consolida todos os perfis de interesses de usuários e o ranking geral de categorias
    */
   async obterHistoricoGeral(): Promise<RespostaHistoricoInteresses> {
+    const { RepositorioInteresses } = await import("../repositorios/repositorio.interesses");
+    const perfisBanco = await RepositorioInteresses.obterTodosPerfis();
     const dadosArquivo = lerJsonSeguro<Record<string, PerfilInteresseUsuario>>(ARQUIVO_INTERESSES, {});
-    const perfisIds = Object.keys(dadosArquivo);
+
+    const mapaTodos = new Map<string, PerfilInteresseUsuario>();
+    for (const p of perfisBanco) {
+      if (p.usuarioId) mapaTodos.set(p.usuarioId, p);
+    }
+    for (const [id, p] of Object.entries(dadosArquivo)) {
+      if (!mapaTodos.has(id)) mapaTodos.set(id, p);
+    }
+
+    const perfisIds = Array.from(mapaTodos.keys());
 
     const perfis: PerfilInteressePainel[] = perfisIds.map((id) =>
       this.obterPerfilUsuario(id)

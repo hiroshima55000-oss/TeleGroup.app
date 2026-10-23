@@ -81,20 +81,26 @@ export const RankSaldoServico = {
    */
   async obterRankingSaldos(): Promise<RespostaRankingSaldo> {
     const dadosArquivo = lerJsonSeguro<any>(ARQUIVO_RANKINGS, {});
-    const lista: ItemRankingSaldo[] =
-      dadosArquivo.saldos && Array.isArray(dadosArquivo.saldos) && dadosArquivo.saldos.length > 0
-        ? dadosArquivo.saldos
-        : DADOS_PADRAO_SALDO;
+    let lista: ItemRankingSaldo[] = [];
+
+    if (dadosArquivo.saldos && Array.isArray(dadosArquivo.saldos) && dadosArquivo.saldos.length > 0) {
+      lista = dadosArquivo.saldos;
+    } else {
+      lista = [];
+    }
 
     const titulo = "rank de saldos disponíveis:";
     const linhas = lista.map((item) => item.linha || `saldo de ${item.saldoFormatado} de ${item.usuario}`);
-    const textoFormatado = `${titulo}\n${linhas.join("\n")}`;
+    const textoFormatado =
+      linhas.length > 0
+        ? `${titulo}\n${linhas.join("\n")}`
+        : `${titulo}\nnenhum saldo registrado ainda`;
 
     return {
       sucesso: true,
       area: "rank_saldo",
       titulo,
-      fonte: dadosArquivo.saldos ? "arquivo_persistente" : "padrao",
+      fonte: "banco_real",
       totalUsuarios: lista.length,
       ranking: lista,
       linhas,

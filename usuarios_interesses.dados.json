@@ -17,40 +17,6 @@
     "primeiraInteracao": "2026-10-21T16:36:05.039Z",
     "ultimaAtualizacao": "2026-10-21T16:36:05.039Z"
   },
-  "usr_teste": {
-    "usuarioId": "usr_teste",
-    "nickname": "",
-    "classificacaoPublico": "Público de Alto Clique (Tráfego Focado)",
-    "taxaCliquesCTR": 100,
-    "totalEventosColetados": 1,
-    "totalVisualizacoes": 0,
-    "totalCliques": 1,
-    "totalLikes": 0,
-    "distribuicaoPercentual": {
-      "tecnologia e dev": 100
-    },
-    "distribuicaoGrupos": [
-      {
-        "grupoNome": "tecnologia e dev",
-        "percentual": 100,
-        "pontosPonderados": 11,
-        "totalAcoes": 2
-      }
-    ],
-    "topHashtags": {
-      "tecnologia": {
-        "pontos": 5,
-        "percentual": 100,
-        "usos": 1
-      }
-    },
-    "afinidadesNichos": {
-      "tecnologia": 4.999999995833333
-    },
-    "scoreEngajamento": 13,
-    "versaoCiclo": 1,
-    "ultimaOtimizacao": "2026-10-21T17:45:36.544Z"
-  },
   "usr_anonimo": {
     "usuarioId": "usr_anonimo",
     "nickname": "@usr_anonimo",
@@ -68,5 +34,71 @@
     "sequenciaSessao": [],
     "primeiraInteracao": "2026-10-22T00:55:19.188Z",
     "ultimaAtualizacao": "2026-10-22T00:55:19.188Z"
+  },
+  "usr_mvkhvyyr_szj9k0": {
+    "usuarioId": "usr_mvkhvyyr_szj9k0",
+    "nickname": "@usr_mvkhvyyr_szj9k0",
+    "totalInteracoes": 0,
+    "totalLikes": 0,
+    "totalCliques": 0,
+    "totalVisualizacoes": 0,
+    "tempoRetencaoEstimadoSegundos": 0,
+    "classificacaoPublico": "Passivo",
+    "taxaCliquesCTR": 0,
+    "descricaoQualificacao": "Usuário novo sem histórico recente de interações.",
+    "hashtags": {},
+    "distribuicaoGrupos": [],
+    "distribuicaoPercentual": {},
+    "sequenciaSessao": [],
+    "primeiraInteracao": "2026-10-23T16:58:08.169Z",
+    "ultimaAtualizacao": "2026-10-23T16:58:08.169Z"
+  },
+  "usr_teste_real": {
+    "usuarioId": "usr_teste_real",
+    "nickname": "@usr_teste_real",
+    "totalInteracoes": 1,
+    "totalLikes": 0,
+    "totalCliques": 1,
+    "totalVisualizacoes": 0,
+    "tempoRetencaoEstimadoSegundos": 0,
+    "classificacaoPublico": "Passivo",
+    "taxaCliquesCTR": 100,
+    "descricaoQualificacao": "Perfil novo ou de navegação esporádica com baixo volume de ações registradas.",
+    "hashtags": {
+      "tecnologia": {
+        "tag": "tecnologia",
+        "pontosBrutos": 5,
+        "pontosDecaidos": 5,
+        "percentual": 100,
+        "totalInteracoes": 1,
+        "likes": 0,
+        "cliques": 1,
+        "visualizacoes": 0,
+        "ultimaInteracao": "2026-10-23T17:10:58.378Z"
+      }
+    },
+    "distribuicaoGrupos": [
+      {
+        "grupoNome": "tecnologia & dev",
+        "tags": [
+          "tecnologia"
+        ],
+        "percentual": 100,
+        "pontosPonderados": 5,
+        "totalAcoes": 1
+      }
+    ],
+    "distribuicaoPercentual": {
+      "tecnologia": 100
+    },
+    "sequenciaSessao": [
+      {
+        "tag": "tecnologia",
+        "tipo": "clique_link",
+        "timestamp": "2026-10-23T17:10:58.378Z"
+      }
+    ],
+    "primeiraInteracao": "2026-10-23T17:10:58.378Z",
+    "ultimaAtualizacao": "2026-10-23T17:10:58.379Z"
   }
 }

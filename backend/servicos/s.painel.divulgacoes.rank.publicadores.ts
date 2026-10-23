@@ -70,24 +70,49 @@ function lerJsonSeguro<T>(caminho: string, padrao: T): T {
 
 export const RankPublicadoresServico = {
   /**
-   * Obtém o ranking formatado de publicadores
+   * Obtém o ranking real de publicadores baseado nas publicações salvas
    */
   async obterRankingPublicadores(): Promise<RespostaRankingPublicadores> {
     const dadosArquivo = lerJsonSeguro<any>(ARQUIVO_RANKINGS, {});
-    const lista: ItemRankingPublicador[] =
-      dadosArquivo.publicadores && Array.isArray(dadosArquivo.publicadores) && dadosArquivo.publicadores.length > 0
-        ? dadosArquivo.publicadores
-        : DADOS_PADRAO_PUBLICADORES;
+    let lista: ItemRankingPublicador[] = [];
+
+    if (dadosArquivo.publicadores && Array.isArray(dadosArquivo.publicadores) && dadosArquivo.publicadores.length > 0) {
+      lista = dadosArquivo.publicadores;
+    } else {
+      try {
+        const { RepositorioPublicacoes } = await import("../repositorios/repositorio.publicacoes");
+        const todasPublicacoes = await RepositorioPublicacoes.buscarTodas();
+        const contagemPorUsuario = new Map<string, number>();
+
+        for (const p of todasPublicacoes) {
+          const usr = (p.nome || p.usuarioId || "publicador").trim();
+          const handle = usr.startsWith("@") ? usr : `@${usr}`;
+          contagemPorUsuario.set(handle, (contagemPorUsuario.get(handle) || 0) + 1);
+        }
+
+        lista = Array.from(contagemPorUsuario.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([usuario, quantidade], idx) => ({
+            posicao: idx + 1,
+            usuario,
+            quantidade,
+            quantidadeFormatada: String(quantidade),
+            linha: `${quantidade} publicações de ${usuario}`,
+          }));
+      } catch {
+        lista = [];
+      }
+    }
 
     const titulo = "rank de publicadores:";
     const linhas = lista.map((item) => item.linha || `${item.quantidade} publicações de ${item.usuario}`);
-    const textoFormatado = `${titulo}\n${linhas.join("\n")}`;
+    const textoFormatado = linhas.length > 0 ? `${titulo}\n${linhas.join("\n")}` : `${titulo}\nnenhum publicador registrado ainda`;
 
     return {
       sucesso: true,
       area: "rank_publicadores",
       titulo,
-      fonte: dadosArquivo.publicadores ? "arquivo_persistente" : "padrao",
+      fonte: "banco_real",
       totalPublicadores: lista.length,
       ranking: lista,
       linhas,

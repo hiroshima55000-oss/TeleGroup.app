@@ -153,7 +153,7 @@ export async function executarQuery<T = any>(
   parametros: any[] = []
 ): Promise<pg.QueryResult<T>> {
   if (!DATABASE_URL) {
-    console.warn("⚠️ [PostgreSQL] executarQuery chamado sem DATABASE_URL. Retornando resultado simulado.");
+    console.warn("⚠️ [PostgreSQL] executarQuery chamado sem DATABASE_URL.");
     return {
       rows: [],
       command: "SELECT",

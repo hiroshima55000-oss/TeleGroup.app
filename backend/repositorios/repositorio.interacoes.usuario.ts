@@ -2,17 +2,19 @@ import fs from "fs";
 import path from "path";
 import { pool, obterStatusBanco } from "../banco.dados";
 import { RepositorioPublicacoes } from "./repositorio.publicacoes";
+import { RepositorioInteresses } from "./repositorio.interesses";
 import { Publicacao } from "../schemas/schema.publicacoes";
 
 export interface RegistroInteracaoItem {
   id: string;
   usuarioId: string;
   publicacaoId: string;
-  tipo: "visualizacao" | "like" | "clique";
+  tipo: "visualizacao" | "like" | "clique" | "descurtir" | "dwell";
   timestamp: string; // ISO string
   tags?: string[];
   categoria?: string;
   nicho?: string;
+  duracaoSegundos?: number;
 }
 
 export interface TagRankeadaInteresse {
@@ -170,6 +172,10 @@ export const RepositorioInteracoesUsuario = {
     dados.historicoEventos.unshift(evento);
 
     salvarDadosInteracoes(dados);
+
+    // Registra imediatamente no banco de dados PostgreSQL
+    RepositorioInteresses.registrarInteracaoBanco(evento).catch(() => {});
+
     return true;
   },
 
@@ -188,8 +194,18 @@ export const RepositorioInteracoesUsuario = {
     lista.splice(index, 1);
     dados.curtidasPorUsuario[uid] = lista;
 
-    // Registra no histórico remoção ou apenas atualiza
+    // Registra no histórico remoção e sincroniza no PostgreSQL
+    const eventoRemocao: RegistroInteracaoItem = {
+      id: `evt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      usuarioId: uid,
+      publicacaoId: pid,
+      tipo: "descurtir" as any,
+      timestamp: new Date().toISOString(),
+    };
+    dados.historicoEventos.unshift(eventoRemocao);
     salvarDadosInteracoes(dados);
+    RepositorioInteresses.registrarInteracaoBanco(eventoRemocao).catch(() => {});
+
     return true;
   },
 
@@ -249,6 +265,10 @@ export const RepositorioInteracoesUsuario = {
     dados.historicoEventos.unshift(evento);
 
     salvarDadosInteracoes(dados);
+
+    // Registra imediatamente no banco de dados PostgreSQL
+    RepositorioInteresses.registrarInteracaoBanco(evento).catch(() => {});
+
     return !jaVisto;
   },
 
@@ -303,6 +323,9 @@ export const RepositorioInteracoesUsuario = {
     dados.historicoEventos.unshift(evento);
 
     salvarDadosInteracoes(dados);
+
+    // Registra imediatamente no banco de dados PostgreSQL
+    RepositorioInteresses.registrarInteracaoBanco(evento).catch(() => {});
   },
 
   obterIdsClicados(usuarioId: string): Set<string> {
@@ -327,9 +350,23 @@ export const RepositorioInteracoesUsuario = {
     const uid = (usuarioId || "usr_anonimo").trim();
     const dados = lerDadosInteracoes();
 
-    const idsVistos = dados.visualizadosPorUsuario[uid] || [];
-    const idsCurtidos = dados.curtidasPorUsuario[uid] || [];
-    const idsClicados = dados.clicadosPorUsuario[uid] || [];
+    const idsVistos = [...(dados.visualizadosPorUsuario[uid] || [])];
+    const idsCurtidos = [...(dados.curtidasPorUsuario[uid] || [])];
+    const idsClicados = [...(dados.clicadosPorUsuario[uid] || [])];
+
+    // Sincroniza dados com o PostgreSQL
+    try {
+      const eventosBanco = await RepositorioInteresses.obterInteracoesDoUsuarioBanco(uid);
+      for (const ev of eventosBanco) {
+        if (ev.tipo === "like" && !idsCurtidos.includes(ev.publicacaoId)) {
+          idsCurtidos.push(ev.publicacaoId);
+        } else if (ev.tipo === "visualizacao" && !idsVistos.includes(ev.publicacaoId)) {
+          idsVistos.push(ev.publicacaoId);
+        } else if (ev.tipo === "clique" && !idsClicados.includes(ev.publicacaoId)) {
+          idsClicados.push(ev.publicacaoId);
+        }
+      }
+    } catch {}
 
     const todas = await RepositorioPublicacoes.buscarTodas();
     const mapaPubs = new Map<string, Publicacao>();
@@ -378,6 +415,20 @@ export const RepositorioInteracoesUsuario = {
     const uid = (usuarioId || "usr_anonimo").trim();
     const dados = lerDadosInteracoes();
     const agora = Date.now();
+
+    // Sincroniza eventos armazenados no PostgreSQL para este usuário
+    try {
+      const eventosBanco = await RepositorioInteresses.obterInteracoesDoUsuarioBanco(uid);
+      if (eventosBanco.length > 0) {
+        const idsExistentes = new Set(dados.historicoEventos.map((e) => e.id));
+        for (const eb of eventosBanco) {
+          if (!idsExistentes.has(eb.id)) {
+            dados.historicoEventos.push(eb);
+            idsExistentes.add(eb.id);
+          }
+        }
+      }
+    } catch {}
 
     // Carrega mapa de publicações para resolver tags completas de cada post interagido
     let mapaPubs = mapaPubsExterno;
@@ -455,7 +506,7 @@ export const RepositorioInteracoesUsuario = {
       }
     > = {};
 
-    function computarTags(tags: string[] | undefined, peso: number, tipo: "visualizacao" | "like" | "clique") {
+    function computarTags(tags: string[] | undefined, peso: number, tipo: string) {
       if (!Array.isArray(tags)) return;
       for (const t of tags) {
         const tLimpa = (t || "").toLowerCase().replace(/^#+/, "").trim();

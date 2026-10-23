@@ -70,24 +70,49 @@ function lerJsonSeguro<T>(caminho: string, padrao: T): T {
 
 export const RankAnunciantesServico = {
   /**
-   * Obtém o ranking formatado de anunciantes
+   * Obtém o ranking real de anunciantes baseado nas campanhas salvas
    */
   async obterRankingAnunciantes(): Promise<RespostaRankingAnunciantes> {
     const dadosArquivo = lerJsonSeguro<any>(ARQUIVO_RANKINGS, {});
-    const lista: ItemRankingAnunciante[] =
-      dadosArquivo.anunciantes && Array.isArray(dadosArquivo.anunciantes) && dadosArquivo.anunciantes.length > 0
-        ? dadosArquivo.anunciantes
-        : DADOS_PADRAO_ANUNCIANTES;
+    let lista: ItemRankingAnunciante[] = [];
+
+    if (dadosArquivo.anunciantes && Array.isArray(dadosArquivo.anunciantes) && dadosArquivo.anunciantes.length > 0) {
+      lista = dadosArquivo.anunciantes;
+    } else {
+      try {
+        const { RepositorioCampanhas } = await import("../repositorios/repositorio.campanhas");
+        const todasCampanhas = await RepositorioCampanhas.buscarTodas();
+        const contagemPorUsuario = new Map<string, number>();
+
+        for (const c of todasCampanhas) {
+          const usr = ((c as any).usuario || c.usuarioId || "anunciante").trim();
+          const handle = usr.startsWith("@") ? usr : `@${usr}`;
+          contagemPorUsuario.set(handle, (contagemPorUsuario.get(handle) || 0) + 1);
+        }
+
+        lista = Array.from(contagemPorUsuario.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([usuario, quantidade], idx) => ({
+            posicao: idx + 1,
+            usuario,
+            quantidade,
+            quantidadeFormatada: String(quantidade),
+            linha: `${quantidade} campanhas de ${usuario}`,
+          }));
+      } catch {
+        lista = [];
+      }
+    }
 
     const titulo = "rank de anunciantes:";
     const linhas = lista.map((item) => item.linha || `${item.quantidade} campanhas de ${item.usuario}`);
-    const textoFormatado = `${titulo}\n${linhas.join("\n")}`;
+    const textoFormatado = linhas.length > 0 ? `${titulo}\n${linhas.join("\n")}` : `${titulo}\nnenhum anunciante registrado ainda`;
 
     return {
       sucesso: true,
       area: "rank_anunciantes",
       titulo,
-      fonte: dadosArquivo.anunciantes ? "arquivo_persistente" : "padrao",
+      fonte: "banco_real",
       totalAnunciantes: lista.length,
       ranking: lista,
       linhas,

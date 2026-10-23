@@ -316,12 +316,8 @@ export const HistoricoBanidoServico = {
         };
       });
     } else {
-      // Caso não existam banidos reais, usa os padrões informativos
-      historico = DADOS_PADRAO_BANIDOS.map((item, index) => ({
-        ...item,
-        posicao: index + 1,
-      }));
-      fonte = "padrao";
+      historico = [];
+      fonte = "banco_real";
     }
 
     // Filtro por busca

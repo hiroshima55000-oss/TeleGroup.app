@@ -263,17 +263,8 @@ export const RankDenunciadosServico = {
         };
       });
     } else {
-      // Se não há denúncias reais cadastradas, utiliza os dados padrão com status atualizado
-      ranking = DADOS_PADRAO_DENUNCIADOS.map((item, index) => {
-        const puro = item.usuario.replace(/^@/, "").toLowerCase();
-        const estaBanido = setBanidos.has(puro);
-        return {
-          ...item,
-          posicao: index + 1,
-          status: estaBanido ? "banido" : item.status,
-        };
-      });
-      fonte = "padrao";
+      ranking = [];
+      fonte = "banco_real";
     }
 
     // Filtro por busca se informado

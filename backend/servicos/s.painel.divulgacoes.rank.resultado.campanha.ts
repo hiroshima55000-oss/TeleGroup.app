@@ -188,9 +188,49 @@ export const RankResultadoCampanhaServico = {
       lista = dadosArquivo.campanhasCustoBeneficio;
       fonte = "arquivo_persistente";
     } else {
-      // 2. Se não houver configuração manual, usa os dados padrão de referência
-      lista = DADOS_PADRAO_RESULTADOS;
-      fonte = "padrao";
+      // 2. Calcula métricas reais das campanhas cadastradas no banco
+      try {
+        const { RepositorioCampanhas } = await import("../repositorios/repositorio.campanhas");
+        const todasCampanhas = await RepositorioCampanhas.buscarTodas();
+        lista = todasCampanhas.map((c) => {
+          const clicks = c.cliques || 0;
+          const vis = c.visualizacoes || 0;
+          const ctr = vis > 0 ? (clicks / vis) * 100 : 0;
+          const orcamentoDiario = Number(c.orcamentoDiario || 10);
+          const gastoTotal = Number(c.gastoTotal || orcamentoDiario * 30);
+          const cpc = clicks > 0 ? gastoTotal / clicks : 0.5;
+          const score = Number(Math.min(10, Math.max(1, (ctr * 1.5 + (clicks / Math.max(1, cpc)) * 0.1))).toFixed(1));
+          const classificacao: "Excelente" | "Muito Bom" | "Bom" | "Regular" =
+            score >= 8 ? "Excelente" : score >= 5 ? "Muito Bom" : score >= 3 ? "Bom" : "Regular";
+          const usr = ((c as any).usuario || c.usuarioId || "campanha").trim();
+          const handle = usr.startsWith("@") ? usr : `@${usr}`;
+
+          return {
+            posicao: 0,
+            campanhaId: c.id,
+            nome: c.nome,
+            usuario: handle,
+            categoria: c.categoria || "Geral",
+            orcamentoDiario,
+            orcamentoDiarioFormatado: `R$ ${orcamentoDiario.toFixed(2).replace(".", ",")}`,
+            gastoTotal,
+            gastoTotalFormatado: `R$ ${gastoTotal.toFixed(2).replace(".", ",")}`,
+            cliques: clicks,
+            visualizacoes: vis,
+            ctr: Number(ctr.toFixed(2)),
+            ctrFormatado: `${ctr.toFixed(2).replace(".", ",")}%`,
+            cpc: Number(cpc.toFixed(2)),
+            cpcFormatado: `R$ ${cpc.toFixed(2).replace(".", ",")}`,
+            scoreCustoBeneficio: score,
+            classificacao,
+            linha: "",
+          };
+        });
+        fonte = "banco_real";
+      } catch {
+        lista = [];
+        fonte = "banco_real";
+      }
     }
 
     // Ordena do maior score de custo-benefício para o menor (ou menor CPC como critério de desempate)

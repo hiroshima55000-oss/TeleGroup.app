@@ -9,6 +9,7 @@ import {
 } from "./tipos.interesses";
 import { CONFIG_INTERESSES } from "./ep.1.pesos";
 import { QualificacaoPublicoServico } from "./ep.2.qualificacao";
+import { RepositorioInteresses } from "../../repositorios/repositorio.interesses";
 
 const ARQUIVO_INTERESSES = path.resolve(process.cwd(), "usuarios_interesses.dados.json");
 
@@ -150,7 +151,22 @@ export const PerfilInteressesServico = {
 
     todos[idLimpo] = novoPerfil;
     salvarInteressesPersistidos(todos);
+    RepositorioInteresses.salvarPerfil(novoPerfil).catch(() => {});
     return novoPerfil;
+  },
+
+  /**
+   * Obtém o perfil de interesses buscando primeiro no PostgreSQL
+   */
+  async obterPerfilAsync(usuarioId: string, nickname?: string): Promise<PerfilInteresseUsuario> {
+    const idLimpo = (usuarioId || "anonimo").trim();
+    const doBanco = await RepositorioInteresses.obterPerfil(idLimpo);
+    if (doBanco) {
+      const todos = lerInteressesPersistidos();
+      todos[idLimpo] = doBanco;
+      return doBanco;
+    }
+    return this.obterPerfil(idLimpo, nickname);
   },
 
   /**
@@ -338,6 +354,11 @@ export const PerfilInteressesServico = {
     todos[perfil.usuarioId] = perfil;
     salvarInteressesPersistidos(todos);
 
+    // Salva imediatamente no banco de dados PostgreSQL
+    RepositorioInteresses.salvarPerfil(perfil).catch((err) => {
+      console.warn("[PerfilInteresses] Erro ao salvar perfil no PostgreSQL:", err?.message);
+    });
+
     return perfil;
   },
 
@@ -428,6 +449,12 @@ export const PerfilInteressesServico = {
     this.recalcularPercentuais(perfilFinal);
     todos[perfilFinal.usuarioId] = perfilFinal;
     salvarInteressesPersistidos(todos);
+
+    // Salva e migra no PostgreSQL
+    RepositorioInteresses.salvarPerfil(perfilFinal).catch(() => {});
+    if (idAnonimoLimpo && idFinalLimpo && idAnonimoLimpo !== idFinalLimpo) {
+      RepositorioInteresses.migrarInteressesBanco(idAnonimoLimpo, idFinalLimpo, nickLimpo).catch(() => {});
+    }
 
     console.log(
       `🎯 [PerfilInteresses] Interesses preservados para ${perfilFinal.usuarioId} (${perfilFinal.nickname}). Total interações: ${perfilFinal.totalInteracoes}`
