@@ -10,8 +10,10 @@ import {
   Loader2,
   Sparkles,
   SlidersHorizontal,
+  ClipboardPaste,
+  Upload,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { converterArquivoParaBase64, criarPublicacao } from "../servicos/api.publicacoes";
 import { estaLogadoGoogle, checarStatusBanimento } from "../servicos/usuario";
@@ -79,22 +81,84 @@ function TelaCriarPostagem() {
     checarPermissao();
   }, [navigate]);
 
+  const adicionarArquivosImagem = useCallback((novosArquivos: File[]) => {
+    setImagens((anteriores) => {
+      const espacoDisponivel = 5 - anteriores.length;
+      if (espacoDisponivel <= 0) {
+        alert("Limite de 5 fotos atingido.");
+        return anteriores;
+      }
+
+      const arquivosFiltrados = novosArquivos
+        .filter((arq) => arq.type.startsWith("image/"))
+        .slice(0, espacoDisponivel);
+
+      if (arquivosFiltrados.length === 0) return anteriores;
+
+      const novasPrevias = arquivosFiltrados.map((arq) => URL.createObjectURL(arq));
+      setPrevias((prevAnteriores) => [...prevAnteriores, ...novasPrevias]);
+      return [...anteriores, ...arquivosFiltrados];
+    });
+  }, []);
+
+  // Lógica de colar imagem (Ctrl+V ou Cmd+V) capturada da área de transferência
+  useEffect(() => {
+    function handlePaste(event: ClipboardEvent) {
+      const itens = event.clipboardData?.items;
+      if (!itens || itens.length === 0) return;
+
+      const arquivosColados: File[] = [];
+      for (let i = 0; i < itens.length; i++) {
+        const item = itens[i];
+        if (item.type.startsWith("image/")) {
+          const arquivo = item.getAsFile();
+          if (arquivo) {
+            arquivosColados.push(arquivo);
+          }
+        }
+      }
+
+      if (arquivosColados.length > 0) {
+        event.preventDefault();
+        adicionarArquivosImagem(arquivosColados);
+      }
+    }
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [adicionarArquivosImagem]);
+
+  async function colarDaAreaTransferencia() {
+    try {
+      if (navigator.clipboard?.read) {
+        const itens = await navigator.clipboard.read();
+        const arquivosColados: File[] = [];
+        for (const item of itens) {
+          for (const tipo of item.types) {
+            if (tipo.startsWith("image/")) {
+              const blob = await item.getType(tipo);
+              const extensao = tipo.split("/")[1]?.replace("jpeg", "jpg") || "png";
+              const arquivo = new File([blob], `imagem-colada-${Date.now()}.${extensao}`, { type: tipo });
+              arquivosColados.push(arquivo);
+            }
+          }
+        }
+        if (arquivosColados.length > 0) {
+          adicionarArquivosImagem(arquivosColados);
+          return;
+        }
+      }
+      alert("Nenhuma imagem detectada. Pressione Ctrl+V no teclado para colar a imagem copiada!");
+    } catch {
+      alert("Pressione Ctrl+V no teclado para colar a imagem copiada diretamente aqui!");
+    }
+  }
+
   function selecionarImagens(event: React.ChangeEvent<HTMLInputElement>) {
     const arquivos = Array.from(event.target.files || []);
-    if (arquivos.length === 0) return;
-
-    const espacoDisponivel = 5 - imagens.length;
-    const novasImagens = arquivos
-      .filter((arquivo) => arquivo.type.startsWith("image/"))
-      .slice(0, espacoDisponivel);
-
-    if (novasImagens.length === 0) return;
-
-    const novasPrevias = novasImagens.map((arquivo) => URL.createObjectURL(arquivo));
-
-    setImagens((anteriores) => [...anteriores, ...novasImagens]);
-    setPrevias((anteriores) => [...anteriores, ...novasPrevias]);
-
+    if (arquivos.length > 0) {
+      adicionarArquivosImagem(arquivos);
+    }
     event.target.value = "";
   }
 
@@ -371,37 +435,119 @@ function TelaCriarPostagem() {
               </div>
 
               {previas.length === 0 ? (
-                <label
-                  style={{
-                    height: "120px",
-                    border: "1px dashed rgba(255,255,255,0.18)",
-                    borderRadius: "12px",
-                    background: "#151b22",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    cursor: "pointer",
-                    color: "#94a3b8",
-                    transition: "border-color 0.2s ease",
-                  }}
-                >
-                  <ImageIcon size={26} color="#38bdf8" />
-                  <span style={{ fontSize: "13px", fontWeight: 600 }}>
-                    Clique para selecionar imagens do seu dispositivo
-                  </span>
-                  <span style={{ fontSize: "11px", color: "#64748b" }}>
-                    PNG, JPG, WebP ou GIF
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={selecionarImagens}
-                    style={{ display: "none" }}
-                  />
-                </label>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <label
+                    style={{
+                      padding: "24px 16px",
+                      border: "2px dashed rgba(56,189,248,0.32)",
+                      borderRadius: "14px",
+                      background: "rgba(56,189,248,0.03)",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      color: "#94a3b8",
+                      transition: "all 0.2s ease",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "10px",
+                          background: "rgba(56,189,248,0.12)",
+                          color: "#38bdf8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Upload size={20} />
+                      </div>
+                      <div
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "10px",
+                          background: "rgba(56,189,248,0.12)",
+                          color: "#38bdf8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ClipboardPaste size={20} />
+                      </div>
+                    </div>
+
+                    <span style={{ fontSize: "14px", fontWeight: 700, color: "#f1f5f9" }}>
+                      Selecione nos arquivos ou Cole a imagem (Ctrl+V)
+                    </span>
+                    <span style={{ fontSize: "11.5px", color: "#808ea3" }}>
+                      Tanto copiar e colar (Ctrl+V) quanto selecionar arquivos são suportados (PNG, JPG, WebP)
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={selecionarImagens}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+
+                  <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                    <label
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: "10px",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        color: "#e2e8f0",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <Upload size={14} />
+                      Selecionar nos Arquivos
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={selecionarImagens}
+                        style={{ display: "none" }}
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={colarDaAreaTransferencia}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: "10px",
+                        background: "rgba(56, 189, 248, 0.12)",
+                        border: "1px solid rgba(56, 189, 248, 0.35)",
+                        color: "#38bdf8",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <ClipboardPaste size={14} />
+                      Colar Imagem Copiada (Ctrl+V)
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div>
                   <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
@@ -574,37 +720,75 @@ function TelaCriarPostagem() {
                       </div>
                     ))}
 
-                    {/* BOTÃO ADICIONAR MAIS */}
+                    {/* BOTÕES ADICIONAR / COLAR MAIS */}
                     {previas.length < 5 && (
-                      <label
+                      <div
                         style={{
                           width: "140px",
                           minHeight: "155px",
-                          border: "1px dashed rgba(255,255,255,0.18)",
                           borderRadius: "14px",
                           background: "#151b22",
+                          border: "1px dashed rgba(255,255,255,0.18)",
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          color: "#94a3b8",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                          gap: "6px",
-                          transition: "border-color 0.2s ease",
+                          gap: "8px",
+                          padding: "10px",
+                          boxSizing: "border-box",
                         }}
                       >
-                        <ImageIcon size={22} color="#38bdf8" />
-                        <span style={{ fontWeight: 600 }}>+ Adicionar</span>
-                        <span style={{ fontSize: "10px", color: "#64748b" }}>Mais fotos</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={selecionarImagens}
-                          style={{ display: "none" }}
-                        />
-                      </label>
+                        <label
+                          style={{
+                            width: "100%",
+                            padding: "8px 6px",
+                            borderRadius: "8px",
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            color: "#cbd5e1",
+                            cursor: "pointer",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <Upload size={13} color="#38bdf8" />
+                          <span>+ Arquivo</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={selecionarImagens}
+                            style={{ display: "none" }}
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={colarDaAreaTransferencia}
+                          style={{
+                            width: "100%",
+                            padding: "8px 6px",
+                            borderRadius: "8px",
+                            background: "rgba(56,189,248,0.12)",
+                            border: "1px solid rgba(56,189,248,0.3)",
+                            color: "#38bdf8",
+                            cursor: "pointer",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <ClipboardPaste size={13} />
+                          <span>+ Colar (Ctrl+V)</span>
+                        </button>
+                      </div>
                     )}
                   </div>
 

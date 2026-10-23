@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   FileText,
   Image as ImageIcon,
@@ -8,6 +8,7 @@ import {
   Link as LinkIcon,
   SlidersHorizontal,
   Sparkles,
+  ClipboardPaste,
 } from "lucide-react";
 
 import { ComponenteAjusteImagem } from "./componente.ajuste.imagem";
@@ -36,6 +37,61 @@ export function CardCriarCampConteudo({
   const inputArquivoRef = useRef<HTMLInputElement>(null);
   const [modalAjusteAberto, setModalAjusteAberto] = useState(false);
 
+  // Captura automática de imagens coladas da área de transferência (Ctrl+V / Cmd+V)
+  useEffect(() => {
+    function handlePaste(event: ClipboardEvent) {
+      const itens = event.clipboardData?.items;
+      if (!itens || itens.length === 0) return;
+
+      for (let i = 0; i < itens.length; i++) {
+        const item = itens[i];
+        if (item.type.startsWith("image/")) {
+          const arquivo = item.getAsFile();
+          if (arquivo) {
+            event.preventDefault();
+            const leitor = new FileReader();
+            leitor.onload = () => {
+              if (typeof leitor.result === "string") {
+                setFoto(leitor.result);
+              }
+            };
+            leitor.readAsDataURL(arquivo);
+            break;
+          }
+        }
+      }
+    }
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [setFoto]);
+
+  async function colarDaAreaTransferencia() {
+    try {
+      if (navigator.clipboard?.read) {
+        const itens = await navigator.clipboard.read();
+        for (const item of itens) {
+          for (const tipo of item.types) {
+            if (tipo.startsWith("image/")) {
+              const blob = await item.getType(tipo);
+              const leitor = new FileReader();
+              leitor.onload = () => {
+                if (typeof leitor.result === "string") {
+                  setFoto(leitor.result);
+                }
+              };
+              leitor.readAsDataURL(blob);
+              return;
+            }
+          }
+        }
+      }
+      alert("Nenhuma imagem detectada. Pressione Ctrl+V no teclado para colar a imagem copiada!");
+    } catch {
+      alert("Pressione Ctrl+V no teclado para colar a imagem copiada diretamente aqui!");
+    }
+  }
+
   function handleSelecionarArquivo(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
@@ -58,7 +114,6 @@ export function CardCriarCampConteudo({
     leitor.onload = () => {
       if (typeof leitor.result === "string") {
         setFoto(leitor.result);
-        setModalAjusteAberto(true);
       }
     };
 
@@ -146,55 +201,124 @@ export function CardCriarCampConteudo({
         />
 
         {!foto ? (
-          <div
-            onClick={() => inputArquivoRef.current?.click()}
-            style={{
-              padding: "22px 18px",
-              borderRadius: "12px",
-              border: "2px dashed rgba(56,189,248,0.30)",
-              background: "rgba(56,189,248,0.03)",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <div
+              onClick={() => inputArquivoRef.current?.click()}
               style={{
-                width: "44px",
-                height: "44px",
-                margin: "0 auto 10px",
-                borderRadius: "11px",
-                background: "rgba(34,158,217,0.12)",
-                color: "#38bdf8",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                padding: "24px 18px",
+                borderRadius: "14px",
+                border: "2px dashed rgba(56,189,248,0.30)",
+                background: "rgba(56,189,248,0.03)",
+                textAlign: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
               }}
             >
-              <Upload size={20} />
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                  margin: "0 auto 10px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "11px",
+                    background: "rgba(34,158,217,0.12)",
+                    color: "#38bdf8",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Upload size={20} />
+                </div>
+                <div
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "11px",
+                    background: "rgba(34,158,217,0.12)",
+                    color: "#38bdf8",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <ClipboardPaste size={20} />
+                </div>
+              </div>
+
+              <strong
+                style={{
+                  display: "block",
+                  color: "#e2e8f0",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  marginBottom: "4px",
+                }}
+              >
+                Selecione nos arquivos ou cole uma imagem com Ctrl+V
+              </strong>
+
+              <span
+                style={{
+                  display: "block",
+                  color: "#808ea3",
+                  fontSize: "12px",
+                }}
+              >
+                Tanto copiar e colar (Ctrl+V) quanto selecionar arquivos são suportados (PNG, JPG, WEBP)
+              </span>
             </div>
 
-            <strong
-              style={{
-                display: "block",
-                color: "#e2e8f0",
-                fontSize: "13px",
-                fontWeight: 700,
-                marginBottom: "3px",
-              }}
-            >
-              Clique para selecionar uma foto
-            </strong>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => inputArquivoRef.current?.click()}
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: "10px",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#e2e8f0",
+                  fontSize: "12.5px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "7px",
+                }}
+              >
+                <Upload size={14} />
+                Selecionar nos Arquivos
+              </button>
 
-            <span
-              style={{
-                display: "block",
-                color: "#808ea3",
-                fontSize: "11px",
-              }}
-            >
-              PNG, JPG, JPEG ou WEBP (até 5MB)
-            </span>
+              <button
+                type="button"
+                onClick={colarDaAreaTransferencia}
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: "10px",
+                  background: "rgba(56, 189, 248, 0.12)",
+                  border: "1px solid rgba(56, 189, 248, 0.35)",
+                  color: "#38bdf8",
+                  fontSize: "12.5px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "7px",
+                }}
+              >
+                <ClipboardPaste size={14} />
+                Colar Imagem Copiada (Ctrl+V)
+              </button>
+            </div>
           </div>
         ) : (
           <div
@@ -302,7 +426,29 @@ export function CardCriarCampConteudo({
                   cursor: "pointer",
                 }}
               >
-                Trocar
+                Trocar Arquivo
+              </button>
+
+              <button
+                type="button"
+                onClick={colarDaAreaTransferencia}
+                title="Colar outra imagem da área de transferência (Ctrl+V)"
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(56,189,248,0.3)",
+                  background: "rgba(56,189,248,0.1)",
+                  color: "#38bdf8",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                <ClipboardPaste size={13} />
+                Colar Nova (Ctrl+V)
               </button>
 
               <button
