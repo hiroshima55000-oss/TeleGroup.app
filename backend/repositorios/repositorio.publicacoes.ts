@@ -9,24 +9,38 @@ import {
 
 const ARQUIVO_PUBLICACOES = path.resolve(process.cwd(), "publicacoes.dados.json");
 
+let cachePublicacoes: Publicacao[] | null = null;
+let timerSalvarPublicacoes: NodeJS.Timeout | null = null;
+
 function lerPublicacoes(): Publicacao[] {
+  if (cachePublicacoes) {
+    return cachePublicacoes;
+  }
   try {
     if (fs.existsSync(ARQUIVO_PUBLICACOES)) {
       const conteudo = fs.readFileSync(ARQUIVO_PUBLICACOES, "utf-8");
-      return JSON.parse(conteudo || "[]");
+      cachePublicacoes = JSON.parse(conteudo || "[]");
+      return cachePublicacoes || [];
     }
   } catch (err) {
     console.warn("[RepositorioPublicacoes] Falha ao ler publicacoes.dados.json:", err);
   }
-  return [];
+  cachePublicacoes = [];
+  return cachePublicacoes;
 }
 
 function salvarPublicacoes(lista: Publicacao[]): void {
-  try {
-    fs.writeFileSync(ARQUIVO_PUBLICACOES, JSON.stringify(lista, null, 2), "utf-8");
-  } catch (err) {
-    console.error("[RepositorioPublicacoes] Falha ao salvar publicacoes.dados.json:", err);
+  cachePublicacoes = lista;
+  if (timerSalvarPublicacoes) {
+    clearTimeout(timerSalvarPublicacoes);
   }
+  timerSalvarPublicacoes = setTimeout(() => {
+    try {
+      fs.writeFileSync(ARQUIVO_PUBLICACOES, JSON.stringify(lista, null, 2), "utf-8");
+    } catch (err) {
+      console.error("[RepositorioPublicacoes] Falha ao salvar publicacoes.dados.json:", err);
+    }
+  }, 100);
 }
 
 export const RepositorioPublicacoes = {

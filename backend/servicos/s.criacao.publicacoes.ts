@@ -1,4 +1,7 @@
 import { RepositorioPublicacoes } from "../repositorios/repositorio.publicacoes";
+import { RepositorioCampanhas } from "../repositorios/repositorio.campanhas";
+import { RepositorioInteracoesUsuario } from "../repositorios/repositorio.interacoes.usuario";
+import { LeilaoAdRankServico, CONFIG_VANTAGEM_PAGA } from "./AlgoritmoPago";
 import {
   Publicacao,
   CriarPublicacaoInput,
@@ -54,9 +57,6 @@ export const PublicacoesServico = {
     });
 
     // 2. NOVA REGRA DO FEED: O conteúdo orgânico só some quando a pessoa clica para entrar no grupo (gera clique). Visualizar mantém a publicação no feed para estimular cliques. Anúncios pagos continuam elegíveis.
-    const { RepositorioInteracoesUsuario } = await import(
-      "../repositorios/repositorio.interacoes.usuario"
-    );
     const usuarioId = (filtros.usuarioId || "usr_anonimo").trim();
     const idsClicados = RepositorioInteracoesUsuario.obterIdsClicados(usuarioId);
     const idsCurtidos = RepositorioInteracoesUsuario.obterIdsCurtidos(usuarioId);
@@ -87,8 +87,6 @@ export const PublicacoesServico = {
     // 3. Vantagem Competitiva Paga Flexível (Condicionada à Relevância e Qualidade)
     if (!filtros.apenasMinhas) {
       try {
-        const { RepositorioCampanhas } = await import("../repositorios/repositorio.campanhas");
-        const { LeilaoAdRankServico, CONFIG_VANTAGEM_PAGA } = await import("./AlgoritmoPago");
         const todasCampanhas = await RepositorioCampanhas.buscarTodas();
 
         // Limite estrito de saturação (máximo 20% do feed exibido)

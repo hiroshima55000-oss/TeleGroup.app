@@ -6,7 +6,7 @@ import {
   Sparkles,
   Loader2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import CabecalhoListaCampanhas from "../componentes/cabecalho.lista.campanhas";
 import ContainerCampanha from "../componentes/container.l.campanha";
@@ -25,6 +25,8 @@ import {
 } from "../servicos/api.campanhas";
 import { estaLogadoGoogle, checarStatusBanimento } from "../servicos/usuario";
 
+const LIMITE_POR_PAGINA = 4;
+
 function TelaCampanhas() {
   const navigate = useNavigate();
 
@@ -36,6 +38,8 @@ function TelaCampanhas() {
   const [campanhaRecarga, setCampanhaRecarga] = useState<CampanhaItem | null>(null);
   const [campanhaExclusao, setCampanhaExclusao] = useState<CampanhaItem | null>(null);
   const [excluindoCampanha, setExcluindoCampanha] = useState(false);
+  const [limiteExibicao, setLimiteExibicao] = useState(LIMITE_POR_PAGINA);
+  const sentinelaRef = useRef<HTMLDivElement | null>(null);
 
   async function carregarDados() {
     try {
@@ -46,6 +50,7 @@ function TelaCampanhas() {
       ]);
       setCampanhas(lista);
       setMetricas(stats);
+      setLimiteExibicao(LIMITE_POR_PAGINA);
     } catch (err) {
       console.error("Erro ao carregar campanhas:", err);
     } finally {
@@ -104,6 +109,53 @@ function TelaCampanhas() {
       c.status.toLowerCase().includes(busca.toLowerCase()) ||
       c.categoria.toLowerCase().includes(busca.toLowerCase())
   );
+
+  const temMais = limiteExibicao < campanhasFiltradas.length;
+
+  const carregarMais = useCallback(() => {
+    if (limiteExibicao >= campanhasFiltradas.length) return;
+    setLimiteExibicao((prev) => Math.min(prev + LIMITE_POR_PAGINA, campanhasFiltradas.length));
+  }, [limiteExibicao, campanhasFiltradas.length]);
+
+  // Observer de rolagem infinita
+  useEffect(() => {
+    const sentinela = sentinelaRef.current;
+    if (!sentinela || !temMais) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          carregarMais();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinela);
+    return () => observer.disconnect();
+  }, [carregarMais, temMais]);
+
+  // Scroll listener de fallback
+  useEffect(() => {
+    function handleScroll() {
+      if (!temMais) return;
+      const scrollAtual = window.innerHeight + window.scrollY;
+      const fimPagina = document.documentElement.scrollHeight - 250;
+      if (scrollAtual >= fimPagina) {
+        carregarMais();
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [carregarMais, temMais]);
+
+  // Reseta para 4 ao filtrar
+  useEffect(() => {
+    setLimiteExibicao(LIMITE_POR_PAGINA);
+  }, [busca]);
+
+  const campanhasExibidas = campanhasFiltradas.slice(0, limiteExibicao);
 
   return (
     <div
@@ -198,7 +250,7 @@ function TelaCampanhas() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {campanhasFiltradas.map((campanha) => (
+            {campanhasExibidas.map((campanha) => (
               <ContainerCampanha
                 key={campanha.id}
                 campanha={campanha}
@@ -208,6 +260,9 @@ function TelaCampanhas() {
                 onAdicionarSaldo={(c) => setCampanhaRecarga(c)}
               />
             ))}
+
+            {/* Sentinela de rolagem infinita */}
+            <div ref={sentinelaRef} style={{ width: "100%", height: "20px" }} />
 
             {campanhasFiltradas.length === 0 && (
               <div

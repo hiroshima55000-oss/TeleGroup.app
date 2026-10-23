@@ -9,24 +9,38 @@ import {
 
 const ARQUIVO_CAMPANHAS = path.resolve(process.cwd(), "campanhas.dados.json");
 
+let cacheCampanhas: Campanha[] | null = null;
+let timerSalvarCampanhas: NodeJS.Timeout | null = null;
+
 function lerCampanhas(): Campanha[] {
+  if (cacheCampanhas) {
+    return cacheCampanhas;
+  }
   try {
     if (fs.existsSync(ARQUIVO_CAMPANHAS)) {
       const conteudo = fs.readFileSync(ARQUIVO_CAMPANHAS, "utf-8");
-      return JSON.parse(conteudo || "[]");
+      cacheCampanhas = JSON.parse(conteudo || "[]");
+      return cacheCampanhas || [];
     }
   } catch (err) {
     console.warn("[RepositorioCampanhas] Falha ao ler campanhas.dados.json:", err);
   }
-  return [];
+  cacheCampanhas = [];
+  return cacheCampanhas;
 }
 
 function salvarCampanhas(lista: Campanha[]): void {
-  try {
-    fs.writeFileSync(ARQUIVO_CAMPANHAS, JSON.stringify(lista, null, 2), "utf-8");
-  } catch (err) {
-    console.error("[RepositorioCampanhas] Falha ao salvar campanhas.dados.json:", err);
+  cacheCampanhas = lista;
+  if (timerSalvarCampanhas) {
+    clearTimeout(timerSalvarCampanhas);
   }
+  timerSalvarCampanhas = setTimeout(() => {
+    try {
+      fs.writeFileSync(ARQUIVO_CAMPANHAS, JSON.stringify(lista, null, 2), "utf-8");
+    } catch (err) {
+      console.error("[RepositorioCampanhas] Falha ao salvar campanhas.dados.json:", err);
+    }
+  }, 100);
 }
 
 export const RepositorioCampanhas = {

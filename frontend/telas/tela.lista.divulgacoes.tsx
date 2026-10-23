@@ -5,7 +5,7 @@ import {
   Sparkles,
   Loader2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import CabecalhoListaPublicacoes from "../componentes/cabecalho.lista.publicacoes";
 import ContainerPublicacao from "../componentes/container.l.publicacao";
@@ -20,6 +20,8 @@ import {
 } from "../servicos/api.publicacoes";
 import { estaLogadoGoogle, checarStatusBanimento } from "../servicos/usuario";
 
+const LIMITE_POR_PAGINA = 4;
+
 function TelaPublicarGrupo() {
   const navigate = useNavigate();
 
@@ -29,12 +31,15 @@ function TelaPublicarGrupo() {
   const [deletandoId, setDeletandoId] = useState<string | null>(null);
   const [publicacaoExclusao, setPublicacaoExclusao] = useState<PublicacaoItem | null>(null);
   const [excluindoPublicacao, setExcluindoPublicacao] = useState(false);
+  const [limiteExibicao, setLimiteExibicao] = useState(LIMITE_POR_PAGINA);
+  const sentinelaRef = useRef<HTMLDivElement | null>(null);
 
   async function carregar() {
     try {
       setCarregando(true);
       const lista = await buscarPublicacoes(true);
       setGrupos(lista);
+      setLimiteExibicao(LIMITE_POR_PAGINA);
     } catch (err) {
       console.error("Erro ao carregar publicações:", err);
     } finally {
@@ -45,6 +50,11 @@ function TelaPublicarGrupo() {
   useEffect(() => {
     carregar();
   }, []);
+
+  // Reseta para 4 ao filtrar
+  useEffect(() => {
+    setLimiteExibicao(LIMITE_POR_PAGINA);
+  }, [busca]);
 
   function abrirModalExclusao(grupo: PublicacaoItem) {
     setPublicacaoExclusao(grupo);
@@ -81,6 +91,48 @@ function TelaPublicarGrupo() {
       grupo.descricao.toLowerCase().includes(busca.toLowerCase()) ||
       grupo.categoria.toLowerCase().includes(busca.toLowerCase())
   );
+
+  const temMais = limiteExibicao < gruposFiltrados.length;
+
+  const carregarMais = useCallback(() => {
+    if (limiteExibicao >= gruposFiltrados.length) return;
+    setLimiteExibicao((prev) => Math.min(prev + LIMITE_POR_PAGINA, gruposFiltrados.length));
+  }, [limiteExibicao, gruposFiltrados.length]);
+
+  // Observer para rolar e carregar mais 4 postagens
+  useEffect(() => {
+    const sentinela = sentinelaRef.current;
+    if (!sentinela || !temMais) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          carregarMais();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinela);
+    return () => observer.disconnect();
+  }, [carregarMais, temMais]);
+
+  // Scroll listener de fallback
+  useEffect(() => {
+    function handleScroll() {
+      if (!temMais) return;
+      const scrollAtual = window.innerHeight + window.scrollY;
+      const fimPagina = document.documentElement.scrollHeight - 250;
+      if (scrollAtual >= fimPagina) {
+        carregarMais();
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [carregarMais, temMais]);
+
+  const gruposExibidos = gruposFiltrados.slice(0, limiteExibicao);
 
   return (
     <div
@@ -165,7 +217,7 @@ function TelaPublicarGrupo() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {gruposFiltrados.map((grupo) => (
+            {gruposExibidos.map((grupo) => (
               <ContainerPublicacao
                 key={grupo.id}
                 grupo={grupo}
@@ -174,6 +226,9 @@ function TelaPublicarGrupo() {
                 onDeletar={() => abrirModalExclusao(grupo)}
               />
             ))}
+
+            {/* Sentinela de rolagem infinita */}
+            <div ref={sentinelaRef} style={{ width: "100%", height: "20px" }} />
 
             {gruposFiltrados.length === 0 && (
               <div

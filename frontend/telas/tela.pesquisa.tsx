@@ -13,7 +13,7 @@ import {
   registrarVisualizacoesEmLote,
 } from "../servicos/api.publicacoes";
 
-const LIMITE_POR_PAGINA = 12;
+const LIMITE_POR_PAGINA = 4;
 
 function TelaPesquisaGrupo() {
   const [searchParams] = useSearchParams();
@@ -128,7 +128,7 @@ function TelaPesquisaGrupo() {
           carregarMais();
         }
       },
-      { rootMargin: "450px" }
+      { rootMargin: "200px" }
     );
 
     observer.observe(sentinela);
@@ -140,7 +140,7 @@ function TelaPesquisaGrupo() {
     function handleScroll() {
       if (carregando || carregandoMais || !temMais) return;
       const scrollAtual = window.innerHeight + window.scrollY;
-      const fimPagina = document.documentElement.scrollHeight - 500;
+      const fimPagina = document.documentElement.scrollHeight - 250;
       if (scrollAtual >= fimPagina) {
         carregarMais();
       }

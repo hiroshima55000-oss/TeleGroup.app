@@ -245,6 +245,8 @@ function ContainerGrupoTelegram({
           <img
             src={foto}
             alt="Mídia da postagem"
+            loading="lazy"
+            decoding="async"
             style={{
               width: "100%",
               height: "100%",

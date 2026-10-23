@@ -63,12 +63,18 @@ interface DadosPersistidosInteracoes {
   historicoEventos: RegistroInteracaoItem[]; // Todos os eventos com timestamps
 }
 
+let cacheInteracoes: DadosPersistidosInteracoes | null = null;
+let timerSalvarInteracoes: NodeJS.Timeout | null = null;
+
 function lerDadosInteracoes(): DadosPersistidosInteracoes {
+  if (cacheInteracoes) {
+    return cacheInteracoes;
+  }
   try {
     if (fs.existsSync(ARQUIVO_INTERACOES)) {
       const conteudo = fs.readFileSync(ARQUIVO_INTERACOES, "utf-8");
       const parsed = JSON.parse(conteudo || "{}");
-      return {
+      cacheInteracoes = {
         curtidasPorUsuario: parsed.curtidasPorUsuario || {},
         visualizadosPorUsuario: parsed.visualizadosPorUsuario || {},
         clicadosPorUsuario: parsed.clicadosPorUsuario || {},
@@ -76,32 +82,40 @@ function lerDadosInteracoes(): DadosPersistidosInteracoes {
           ? parsed.historicoEventos
           : [],
       };
+      return cacheInteracoes;
     }
   } catch (err) {
     console.warn("[RepositorioInteracoes] Erro ao ler interações:", err);
   }
-  return {
+  cacheInteracoes = {
     curtidasPorUsuario: {},
     visualizadosPorUsuario: {},
     clicadosPorUsuario: {},
     historicoEventos: [],
   };
+  return cacheInteracoes;
 }
 
 function salvarDadosInteracoes(dados: DadosPersistidosInteracoes): void {
-  try {
-    // Mantém no máximo os últimos 15.000 eventos detalhados para não inflar o disco
-    if (dados.historicoEventos.length > 15000) {
-      dados.historicoEventos = dados.historicoEventos.slice(0, 15000);
-    }
-    fs.writeFileSync(
-      ARQUIVO_INTERACOES,
-      JSON.stringify(dados, null, 2),
-      "utf-8"
-    );
-  } catch (err) {
-    console.error("[RepositorioInteracoes] Erro ao salvar interações:", err);
+  cacheInteracoes = dados;
+  if (timerSalvarInteracoes) {
+    clearTimeout(timerSalvarInteracoes);
   }
+  timerSalvarInteracoes = setTimeout(() => {
+    try {
+      // Mantém no máximo os últimos 15.000 eventos detalhados para não inflar o disco
+      if (dados.historicoEventos.length > 15000) {
+        dados.historicoEventos = dados.historicoEventos.slice(0, 15000);
+      }
+      fs.writeFileSync(
+        ARQUIVO_INTERACOES,
+        JSON.stringify(dados, null, 2),
+        "utf-8"
+      );
+    } catch (err) {
+      console.error("[RepositorioInteracoes] Erro ao salvar interações:", err);
+    }
+  }, 100);
 }
 
 export const RepositorioInteracoesUsuario = {

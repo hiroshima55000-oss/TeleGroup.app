@@ -29,7 +29,7 @@ import {
   ouvirMudancaUsuario,
 } from "../servicos/usuario";
 
-const LIMITE_POR_PAGINA = 12;
+const LIMITE_POR_PAGINA = 4;
 
 function TelaDivulgacaoTelegram() {
   const navigate = useNavigate();
@@ -138,7 +138,7 @@ function TelaDivulgacaoTelegram() {
           carregarMais();
         }
       },
-      { rootMargin: "450px" }
+      { rootMargin: "200px" }
     );
 
     observer.observe(sentinela);
@@ -150,7 +150,7 @@ function TelaDivulgacaoTelegram() {
     function handleScroll() {
       if (carregando || carregandoMais || !temMais) return;
       const scrollAtual = window.innerHeight + window.scrollY;
-      const fimPagina = document.documentElement.scrollHeight - 500;
+      const fimPagina = document.documentElement.scrollHeight - 250;
       if (scrollAtual >= fimPagina) {
         carregarMais();
       }

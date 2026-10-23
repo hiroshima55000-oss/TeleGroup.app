@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Eye,
@@ -23,6 +23,8 @@ import CardDenunciar from "../componentes/card.denunciar";
 
 export type AbaAtiva = "vistos" | "likes" | "cliques";
 
+const LIMITE_POR_PAGINA = 4;
+
 export function TelaHistoricoConteudos() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,6 +39,9 @@ export function TelaHistoricoConteudos() {
     abaParam === "likes" || abaParam === "cliques" ? abaParam : "vistos"
   );
 
+  const [limiteExibicao, setLimiteExibicao] = useState(LIMITE_POR_PAGINA);
+  const sentinelaRef = useRef<HTMLDivElement | null>(null);
+
   // Estado do modal de denúncia
   const [modalDenunciarAberto, setModalDenunciarAberto] = useState(false);
   const [publicacaoParaDenunciar, setPublicacaoParaDenunciar] =
@@ -50,6 +55,7 @@ export function TelaHistoricoConteudos() {
 
       const resHistorico = await obterHistoricoUsuarioApi(user.id);
       setHistorico(resHistorico);
+      setLimiteExibicao(LIMITE_POR_PAGINA);
     } catch (err) {
       console.error("Erro ao carregar conteúdos do usuário:", err);
     } finally {
@@ -63,6 +69,7 @@ export function TelaHistoricoConteudos() {
 
   function handleMudarAba(aba: AbaAtiva) {
     setAbaAtiva(aba);
+    setLimiteExibicao(LIMITE_POR_PAGINA);
     setSearchParams({ aba });
   }
 
@@ -122,6 +129,48 @@ export function TelaHistoricoConteudos() {
       : abaAtiva === "likes"
       ? historico?.conteudos?.curtidos || []
       : historico?.conteudos?.clicados || [];
+
+  const temMais = limiteExibicao < listaAtual.length;
+
+  const carregarMais = useCallback(() => {
+    if (limiteExibicao >= listaAtual.length) return;
+    setLimiteExibicao((prev) => Math.min(prev + LIMITE_POR_PAGINA, listaAtual.length));
+  }, [limiteExibicao, listaAtual.length]);
+
+  // Observer de rolagem infinita
+  useEffect(() => {
+    const sentinela = sentinelaRef.current;
+    if (!sentinela || !temMais) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          carregarMais();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinela);
+    return () => observer.disconnect();
+  }, [carregarMais, temMais]);
+
+  // Listener de scroll na janela como fallback
+  useEffect(() => {
+    function handleScroll() {
+      if (!temMais) return;
+      const scrollAtual = window.innerHeight + window.scrollY;
+      const fimPagina = document.documentElement.scrollHeight - 250;
+      if (scrollAtual >= fimPagina) {
+        carregarMais();
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [carregarMais, temMais]);
+
+  const listaExibida = listaAtual.slice(0, limiteExibicao);
 
   const totalVistos = historico?.conteudos?.totalVisualizados || 0;
   const totalLikes = historico?.conteudos?.totalCurtidos || 0;
@@ -525,14 +574,15 @@ export function TelaHistoricoConteudos() {
             </button>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: "18px",
-            }}
-          >
-            {listaAtual.map((pub) => {
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                gap: "18px",
+              }}
+            >
+            {listaExibida.map((pub) => {
               const foto =
                 pub.imagens && pub.imagens.length > 0 ? pub.imagens[0] : undefined;
               return (
@@ -561,6 +611,8 @@ export function TelaHistoricoConteudos() {
                       <img
                         src={foto}
                         alt={pub.nome}
+                        loading="lazy"
+                        decoding="async"
                         style={{
                           width: "100%",
                           height: "100%",
@@ -762,7 +814,11 @@ export function TelaHistoricoConteudos() {
               );
             })}
           </div>
-        )}
+
+          {/* Sentinela de rolagem infinita */}
+          <div ref={sentinelaRef} style={{ width: "100%", height: "20px" }} />
+        </>
+      )}
       </main>
 
       {/* MODAL DE DENÚNCIA */}

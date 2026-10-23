@@ -30,7 +30,7 @@ export const PublicacoesControle = {
         apenasMinhas,
         usuarioId,
         pagina: isNaN(pagina) ? 1 : pagina,
-        limite: isNaN(limite) ? 15 : limite,
+        limite: isNaN(limite) ? 4 : limite,
       });
 
       res.json(resultado);
