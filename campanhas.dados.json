@@ -1,0 +1,23 @@
+[
+  {
+    "id": "cmp_vip_trader_club",
+    "usuarioId": "usr_mvkhvyyr_szj9k0",
+    "nome": "Canal VIP Trader Pro 📊",
+    "texto": "Receba sinais diários de scalping e swing trade com 82% de assertividade comprovada. Acesso gratuito por tempo limitado!",
+    "orcamentoDiario": 35.0,
+    "link": "https://t.me/vip_trader_pro",
+    "status": "Ativa",
+    "visualizacoes": 3120,
+    "cliques": 245,
+    "gastoTotal": 70.0,
+    "alcanceEstimado": 5000,
+    "dataCriacao": "2026-10-21T12:00:00.000Z",
+    "codigoPix": "00020101021226840014br.gov.bcb.pix...",
+    "categoria": "Investimentos",
+    "imagem": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80",
+    "tags": ["investimentos", "trade", "cripto", "financas"],
+    "saldoCreditos": 150.0,
+    "saldoConsumido": 70.0,
+    "pagoComSaldo": true
+  }
+]

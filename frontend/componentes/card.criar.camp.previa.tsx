@@ -230,20 +230,50 @@ export function CardCriarCampPrevia({
         boxShadow: "0 12px 35px rgba(0,0,0,0.20)",
       }}
     >
-      {/* IMAGEM */}
-      <div
-        style={{
-          width: "100%",
-          aspectRatio: "16 / 9",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: ESTILOS.fundoEscuro,
-        }}
-      >
-        {renderizarFoto("Prévia no feed", 36)}
-      </div>
+      {/* IMAGEM ESTILO TWITTER: EXIBE INTEIRA COM BORDAS ARREDONDADAS */}
+      {foto ? (
+        <div
+          style={{
+            margin: "14px 14px 0",
+            borderRadius: "16px",
+            overflow: "hidden",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#0c1015",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={foto}
+            alt="Prévia no feed"
+            style={{
+              width: "100%",
+              height: "auto",
+              maxHeight: "560px",
+              display: "block",
+              objectFit: "contain",
+              borderRadius: "16px",
+            }}
+          />
+        </div>
+      ) : (
+        <div
+          style={{
+            margin: "14px 14px 0",
+            borderRadius: "16px",
+            overflow: "hidden",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#0c1015",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px 0",
+          }}
+        >
+          {renderizarFoto("Prévia no feed", 36)}
+        </div>
+      )}
 
       {/* DESCRIÇÃO */}
       <div style={{ padding: "16px 14px 14px" }}>

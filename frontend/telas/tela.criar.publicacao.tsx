@@ -404,159 +404,173 @@ function TelaCriarPostagem() {
                 </label>
               ) : (
                 <div>
-                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                     {previas.map((previa, index) => (
                       <div
                         key={previa}
                         style={{
-                          position: "relative",
-                          width: "90px",
-                          height: "90px",
-                          borderRadius: "12px",
+                          width: "140px",
+                          borderRadius: "14px",
                           overflow: "hidden",
                           background: "#151b22",
                           border: "1px solid rgba(255,255,255,0.12)",
+                          padding: "8px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "8px",
                         }}
                       >
-                        <img
-                          src={previa}
-                          alt={`Imagem ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            display: "block",
-                          }}
-                        />
-
-                        {/* BADGE NÚMERO */}
+                        {/* FOTINHA DE PRÉVIA LIMPA E DESOBSTRUÍDA */}
                         <div
                           style={{
-                            position: "absolute",
-                            top: "5px",
-                            left: "5px",
-                            minWidth: "18px",
-                            height: "18px",
-                            padding: "0 4px",
-                            borderRadius: "5px",
-                            background: "rgba(0,0,0,0.8)",
-                            color: "#ffffff",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "10px",
-                            fontWeight: 800,
+                            position: "relative",
+                            width: "100%",
+                            height: "95px",
+                            borderRadius: "10px",
+                            overflow: "hidden",
+                            background: "#0c1015",
                           }}
                         >
-                          {index + 1}
+                          <img
+                            src={previa}
+                            alt={`Imagem ${index + 1}`}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
+                          />
+
+                          {/* BADGE NÚMERO */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "6px",
+                              left: "6px",
+                              minWidth: "20px",
+                              height: "20px",
+                              padding: "0 5px",
+                              borderRadius: "6px",
+                              background: "rgba(0,0,0,0.8)",
+                              color: "#ffffff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "11px",
+                              fontWeight: 800,
+                            }}
+                          >
+                            #{index + 1}
+                          </div>
+
+                          {/* BOTÃO EXCLUIR */}
+                          <button
+                            type="button"
+                            onClick={() => removerImagem(index)}
+                            title="Remover imagem"
+                            style={{
+                              position: "absolute",
+                              top: "6px",
+                              right: "6px",
+                              width: "22px",
+                              height: "22px",
+                              borderRadius: "6px",
+                              background: "rgba(220, 38, 38, 0.88)",
+                              color: "#ffffff",
+                              border: "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              padding: 0,
+                            }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
 
-                        {/* BOTÃO AJUSTAR ENQUADRAMENTO */}
+                        {/* BOTÃO AJUSTAR IMAGEM EM LOCAL FÁCIL E VISÍVEL ABAIXO DA FOTO */}
                         <button
                           type="button"
                           onClick={() => setIndiceImagemAjustando(index)}
-                          title="Ajustar enquadramento da foto"
+                          title="Ajustar enquadramento da imagem na tela de pesquisa (16:9)"
                           style={{
-                            position: "absolute",
-                            top: "5px",
-                            left: "28px",
-                            height: "18px",
-                            padding: "0 5px",
-                            borderRadius: "5px",
-                            background: "rgba(0,0,0,0.85)",
+                            width: "100%",
+                            padding: "7px 8px",
+                            borderRadius: "8px",
+                            background: "rgba(56,189,248,0.12)",
+                            border: "1px solid rgba(56,189,248,0.35)",
                             color: "#38bdf8",
-                            border: "1px solid rgba(56,189,248,0.4)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "3px",
-                            fontSize: "9px",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                          }}
-                        >
-                          <SlidersHorizontal size={10} />
-                          Ajustar
-                        </button>
-
-                        {/* BOTÃO EXCLUIR */}
-                        <button
-                          type="button"
-                          onClick={() => removerImagem(index)}
-                          title="Remover imagem"
-                          style={{
-                            position: "absolute",
-                            top: "5px",
-                            right: "5px",
-                            width: "20px",
-                            height: "20px",
-                            borderRadius: "5px",
-                            background: "rgba(220, 38, 38, 0.85)",
-                            color: "#ffffff",
-                            border: "none",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
+                            gap: "5px",
+                            fontSize: "11px",
+                            fontWeight: 700,
                             cursor: "pointer",
-                            padding: 0,
+                            transition: "all 0.15s ease",
                           }}
                         >
-                          <Trash2 size={12} />
+                          <SlidersHorizontal size={12} />
+                          Ajustar p/ Pesquisa
                         </button>
 
                         {/* CONTROLES DE ORDENAÇÃO */}
-                        <div
-                          style={{
-                            position: "absolute",
-                            left: "4px",
-                            right: "4px",
-                            bottom: "4px",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            disabled={index === 0}
-                            onClick={() => moverImagem(index, "esquerda")}
+                        {previas.length > 1 && (
+                          <div
                             style={{
-                              width: "22px",
-                              height: "22px",
-                              border: "none",
-                              borderRadius: "6px",
-                              background: "rgba(0,0,0,0.75)",
-                              color: index === 0 ? "rgba(255,255,255,0.25)" : "#ffffff",
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "center",
-                              cursor: index === 0 ? "default" : "pointer",
+                              justifyContent: "space-between",
+                              padding: "0 2px",
                             }}
                           >
-                            <ArrowLeftCircle size={15} />
-                          </button>
+                            <button
+                              type="button"
+                              disabled={index === 0}
+                              onClick={() => moverImagem(index, "esquerda")}
+                              title="Mover para esquerda"
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                border: "none",
+                                borderRadius: "6px",
+                                background: "rgba(255,255,255,0.06)",
+                                color: index === 0 ? "rgba(255,255,255,0.2)" : "#cbd5e1",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: index === 0 ? "default" : "pointer",
+                              }}
+                            >
+                              <ArrowLeftCircle size={14} />
+                            </button>
 
-                          <button
-                            type="button"
-                            disabled={index === previas.length - 1}
-                            onClick={() => moverImagem(index, "direita")}
-                            style={{
-                              width: "22px",
-                              height: "22px",
-                              border: "none",
-                              borderRadius: "6px",
-                              background: "rgba(0,0,0,0.75)",
-                              color:
-                                index === previas.length - 1
-                                  ? "rgba(255,255,255,0.25)"
-                                  : "#ffffff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: index === previas.length - 1 ? "default" : "pointer",
-                            }}
-                          >
-                            <ArrowRightCircle size={15} />
-                          </button>
-                        </div>
+                            <span style={{ fontSize: "10px", color: "#64748b" }}>Ordem</span>
+
+                            <button
+                              type="button"
+                              disabled={index === previas.length - 1}
+                              onClick={() => moverImagem(index, "direita")}
+                              title="Mover para direita"
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                border: "none",
+                                borderRadius: "6px",
+                                background: "rgba(255,255,255,0.06)",
+                                color: index === previas.length - 1 ? "rgba(255,255,255,0.2)" : "#cbd5e1",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: index === previas.length - 1 ? "default" : "pointer",
+                              }}
+                            >
+                              <ArrowRightCircle size={14} />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
 
@@ -564,10 +578,10 @@ function TelaCriarPostagem() {
                     {previas.length < 5 && (
                       <label
                         style={{
-                          width: "90px",
-                          height: "90px",
+                          width: "140px",
+                          minHeight: "155px",
                           border: "1px dashed rgba(255,255,255,0.18)",
-                          borderRadius: "12px",
+                          borderRadius: "14px",
                           background: "#151b22",
                           display: "flex",
                           flexDirection: "column",
@@ -575,12 +589,14 @@ function TelaCriarPostagem() {
                           justifyContent: "center",
                           color: "#94a3b8",
                           cursor: "pointer",
-                          fontSize: "11px",
-                          gap: "4px",
+                          fontSize: "12px",
+                          gap: "6px",
+                          transition: "border-color 0.2s ease",
                         }}
                       >
-                        <ImageIcon size={20} color="#38bdf8" />
-                        <span>+ Foto</span>
+                        <ImageIcon size={22} color="#38bdf8" />
+                        <span style={{ fontWeight: 600 }}>+ Adicionar</span>
+                        <span style={{ fontSize: "10px", color: "#64748b" }}>Mais fotos</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -590,6 +606,28 @@ function TelaCriarPostagem() {
                         />
                       </label>
                     )}
+                  </div>
+
+                  {/* INFORMATIVO SOBRE O PAPEL DO AJUSTE */}
+                  <div
+                    style={{
+                      marginTop: "14px",
+                      padding: "10px 14px",
+                      borderRadius: "10px",
+                      background: "rgba(56, 189, 248, 0.06)",
+                      border: "1px solid rgba(56, 189, 248, 0.20)",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "10px",
+                      fontSize: "12px",
+                      color: "#94a3b8",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    <Sparkles size={16} color="#38bdf8" style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <div>
+                      <strong style={{ color: "#e2e8f0" }}>Visualização da foto:</strong> No feed principal a foto aparecerá <strong>inteira</strong> com bordas arredondadas estilo Twitter. O botão <strong>Ajustar p/ Pesquisa</strong> serve exclusivamente para definir o corte (16:9) que aparecerá na tela de pesquisa.
+                    </div>
                   </div>
                 </div>
               )}

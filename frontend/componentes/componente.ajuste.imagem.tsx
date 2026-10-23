@@ -313,24 +313,41 @@ export function ComponenteAjusteImagem({
           }}
         >
           <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 700,
-              }}
-            >
-              Ajustar imagem
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: cores.texto,
+                }}
+              >
+                Ajustar Enquadramento para a Pesquisa
+              </h2>
+              <span
+                style={{
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                  background: "rgba(56,189,248,0.14)",
+                  border: "1px solid rgba(56,189,248,0.30)",
+                  color: cores.azul,
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                16:9 Pesquisa
+              </span>
+            </div>
 
             <p
               style={{
-                margin: "5px 0 0",
+                margin: 0,
                 color: cores.textoSecundario,
-                fontSize: 12,
+                fontSize: 12.5,
+                lineHeight: 1.4,
               }}
             >
-              Mova, amplie ou gire a imagem sem recortá-la.
+              Defina o enquadramento (16:9) que aparecerá nos resultados da tela de pesquisa. No feed principal a imagem sempre será exibida inteira com bordas arredondadas tipo Twitter.
             </p>
           </div>
 
@@ -427,6 +444,27 @@ export function ComponenteAjusteImagem({
                 style={imagemEstilo}
               />
             )}
+
+            <div
+              style={{
+                position: "absolute",
+                top: 10,
+                left: 10,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "4px 8px",
+                borderRadius: 6,
+                background: "rgba(2, 6, 23, 0.82)",
+                border: "1px solid rgba(56, 189, 248, 0.35)",
+                color: "#38bdf8",
+                fontSize: 10.5,
+                fontWeight: 700,
+                pointerEvents: "none",
+              }}
+            >
+              Enquadramento Pesquisa (16:9)
+            </div>
 
             <div
               style={{

@@ -232,14 +232,18 @@ function ContainerGrupoTelegram({
         >
           <MoreVertical size={16} />
         </button>
-      {/* FOTO (OPCIONAL: EXIBIDA SE HOUVER FOTO - PROPORÇÃO 16:9) */}
+      {/* FOTO ESTILO TWITTER: EXIBE A IMAGEM INTEIRA COM BORDAS ARREDONDADAS */}
       {foto ? (
         <div
           style={{
-            width: "100%",
-            aspectRatio: "16 / 9",
-            background: "#0f141a",
+            margin: "14px 14px 0",
+            borderRadius: "16px",
             overflow: "hidden",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#0c1015",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <img
@@ -249,9 +253,11 @@ function ContainerGrupoTelegram({
             decoding="async"
             style={{
               width: "100%",
-              height: "100%",
+              height: "auto",
+              maxHeight: "620px",
               display: "block",
-              objectFit: "cover",
+              objectFit: "contain",
+              borderRadius: "16px",
             }}
           />
         </div>

@@ -1,0 +1,94 @@
+[
+  {
+    "id": "pub_tecnologia_devs",
+    "usuarioId": "usr_mvkhvyyr_szj9k0",
+    "nome": "Comunidade Dev & Inteligência Artificial",
+    "categoria": "Tecnologia",
+    "descricao": "O maior ponto de encontro para desenvolvedores, engenheiros de IA e entusiastas de tech no Brasil. Debates diários, repositórios de código aberto e vagas remotas.",
+    "link": "https://t.me/telegroup_devs",
+    "imagens": [
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80"
+    ],
+    "tipo": "foto",
+    "destaque": true,
+    "visualizacoes": 1420,
+    "likes": 184,
+    "cliques": 96,
+    "status": "Publicado",
+    "dataCriacao": "2026-10-20T10:00:00.000Z",
+    "membros": "12.4K",
+    "tags": ["tecnologia", "programacao", "ia", "python", "javascript"],
+    "nicho": "tecnologia e dev",
+    "nomeNicho": "Tecnologia & Dev",
+    "iconeNicho": "Code"
+  },
+  {
+    "id": "pub_cripto_mercado",
+    "usuarioId": "usr_teste",
+    "nome": "Radar Cripto & DeFi Brasil",
+    "categoria": "Investimentos",
+    "descricao": "Análises técnicas, sinais de mercado em tempo real, novidades do ecossistema DeFi e discussões sobre Bitcoin e altcoins sem ruído.",
+    "link": "https://t.me/radar_cripto_br",
+    "imagens": [
+      "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=800&auto=format&fit=crop&q=80"
+    ],
+    "tipo": "foto",
+    "destaque": false,
+    "visualizacoes": 980,
+    "likes": 112,
+    "cliques": 58,
+    "status": "Publicado",
+    "dataCriacao": "2026-10-21T14:30:00.000Z",
+    "membros": "8.9K",
+    "tags": ["investimentos", "cripto", "bitcoin", "financas", "mercado"],
+    "nicho": "financas e negocios",
+    "nomeNicho": "Finanças & Negócios",
+    "iconeNicho": "TrendingUp"
+  },
+  {
+    "id": "pub_marketing_growth",
+    "usuarioId": "usr_mvkhvyyr_szj9k0",
+    "nome": "Growth & Marketing Digital",
+    "categoria": "Marketing",
+    "descricao": "Estratégias validadas de tráfego pago, automação de funis, copywriting persuasivo e táticas de aquisição acelerada para criadores e e-commerces.",
+    "link": "https://t.me/growth_marketing_br",
+    "imagens": [
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80"
+    ],
+    "tipo": "foto",
+    "destaque": true,
+    "visualizacoes": 760,
+    "likes": 95,
+    "cliques": 42,
+    "status": "Publicado",
+    "dataCriacao": "2026-10-22T08:15:00.000Z",
+    "membros": "5.3K",
+    "tags": ["marketing", "trafego", "vendas", "afiliados", "estrategia"],
+    "nicho": "marketing e vendas",
+    "nomeNicho": "Marketing & Vendas",
+    "iconeNicho": "Target"
+  },
+  {
+    "id": "pub_design_uiux",
+    "usuarioId": "usr_teste",
+    "nome": "Design UI/UX & Criatividade",
+    "categoria": "Design",
+    "descricao": "Inspirações diárias de interfaces, design systems no Figma, tendências de microinterações e feedbacks de portfólio da comunidade.",
+    "link": "https://t.me/design_uiux_br",
+    "imagens": [
+      "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&auto=format&fit=crop&q=80"
+    ],
+    "tipo": "foto",
+    "destaque": false,
+    "visualizacoes": 620,
+    "likes": 78,
+    "cliques": 31,
+    "status": "Publicado",
+    "dataCriacao": "2026-10-22T16:00:00.000Z",
+    "membros": "4.1K",
+    "tags": ["design", "uiux", "figma", "criatividade", "prototipagem"],
+    "nicho": "design e arte",
+    "nomeNicho": "Design & Arte",
+    "iconeNicho": "Palette"
+  }
+]

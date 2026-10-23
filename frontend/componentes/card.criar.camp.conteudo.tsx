@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Link as LinkIcon,
   SlidersHorizontal,
+  Sparkles,
 } from "lucide-react";
 
 import { ComponenteAjusteImagem } from "./componente.ajuste.imagem";
@@ -251,7 +252,7 @@ export function CardCriarCampConteudo({
                     color: "#808ea3",
                   }}
                 >
-                  Será exibida na prévia e no Feed
+                  No feed aparece inteira • Ajuste define a pesquisa (16:9)
                 </div>
               </div>
             </div>
@@ -267,30 +268,31 @@ export function CardCriarCampConteudo({
               <button
                 type="button"
                 onClick={() => setModalAjusteAberto(true)}
-                title="Ajustar foto"
+                title="Ajustar enquadramento da foto para a tela de pesquisa (16:9)"
                 style={{
-                  padding: "7px 12px",
+                  padding: "8px 14px",
                   borderRadius: "8px",
-                  border: "1px solid rgba(56,189,248,0.4)",
-                  background: "rgba(56,189,248,0.14)",
+                  border: "1px solid rgba(56,189,248,0.45)",
+                  background: "rgba(56,189,248,0.15)",
                   color: "#38bdf8",
-                  fontSize: "12px",
-                  fontWeight: 700,
+                  fontSize: "12.5px",
+                  fontWeight: 750,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "5px",
+                  gap: "6px",
+                  transition: "all 0.15s ease",
                 }}
               >
-                <SlidersHorizontal size={13} />
-                Ajustar foto
+                <SlidersHorizontal size={14} />
+                Ajustar para Pesquisa (16:9)
               </button>
 
               <button
                 type="button"
                 onClick={() => inputArquivoRef.current?.click()}
                 style={{
-                  padding: "7px 11px",
+                  padding: "8px 12px",
                   borderRadius: "8px",
                   border: "1px solid rgba(255,255,255,0.12)",
                   background: "rgba(255,255,255,0.05)",
@@ -300,7 +302,7 @@ export function CardCriarCampConteudo({
                   cursor: "pointer",
                 }}
               >
-                Trocar foto
+                Trocar
               </button>
 
               <button
@@ -308,8 +310,8 @@ export function CardCriarCampConteudo({
                 onClick={handleRemoverFoto}
                 title="Remover foto"
                 style={{
-                  width: "32px",
-                  height: "32px",
+                  width: "34px",
+                  height: "34px",
                   borderRadius: "8px",
                   border: "1px solid rgba(239,68,68,0.25)",
                   background: "rgba(239,68,68,0.08)",
@@ -323,6 +325,27 @@ export function CardCriarCampConteudo({
                 <X size={15} />
               </button>
             </div>
+          </div>
+        )}
+
+        {foto && (
+          <div
+            style={{
+              marginTop: "10px",
+              padding: "9px 12px",
+              borderRadius: "8px",
+              background: "rgba(56, 189, 248, 0.06)",
+              border: "1px solid rgba(56, 189, 248, 0.18)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "8px",
+              fontSize: "11.5px",
+              color: "#94a3b8",
+              lineHeight: 1.45,
+            }}
+          >
+            <Sparkles size={14} color="#38bdf8" style={{ flexShrink: 0, marginTop: "2px" }} />
+            <span>No feed principal a foto aparecerá <strong>inteira</strong> com bordas arredondadas estilo Twitter. O botão <strong>Ajustar para Pesquisa</strong> serve especificamente para calibrar o corte (16:9) na tela de pesquisa.</span>
           </div>
         )}
 
