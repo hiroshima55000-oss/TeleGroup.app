@@ -22,6 +22,8 @@ import {
   buscarMetricasCampanhas,
   alterarStatusCampanha,
   deletarCampanha,
+  obterCampanhasCacheLocal,
+  obterMetricasCampanhasCacheLocal,
 } from "../servicos/api.campanhas";
 import { estaLogadoGoogle, checarStatusBanimento } from "../servicos/usuario";
 
@@ -31,9 +33,11 @@ function TelaCampanhas() {
   const navigate = useNavigate();
 
   const [busca, setBusca] = useState("");
-  const [campanhas, setCampanhas] = useState<CampanhaItem[]>([]);
-  const [metricas, setMetricas] = useState<MetricasCampanhasGerais | null>(null);
-  const [carregando, setCarregando] = useState(true);
+  const [campanhas, setCampanhas] = useState<CampanhaItem[]>(() => obterCampanhasCacheLocal());
+  const [metricas, setMetricas] = useState<MetricasCampanhasGerais | null>(() => obterMetricasCampanhasCacheLocal());
+  const [carregando, setCarregando] = useState(() => {
+    return obterCampanhasCacheLocal().length === 0 && !obterMetricasCampanhasCacheLocal();
+  });
   const [atualizandoId, setAtualizandoId] = useState<string | null>(null);
   const [campanhaRecarga, setCampanhaRecarga] = useState<CampanhaItem | null>(null);
   const [campanhaExclusao, setCampanhaExclusao] = useState<CampanhaItem | null>(null);
@@ -43,7 +47,9 @@ function TelaCampanhas() {
 
   async function carregarDados() {
     try {
-      setCarregando(true);
+      setCarregando((prev) => {
+        return obterCampanhasCacheLocal().length === 0 && !obterMetricasCampanhasCacheLocal();
+      });
       const [lista, stats] = await Promise.all([
         buscarCampanhas(),
         buscarMetricasCampanhas(),

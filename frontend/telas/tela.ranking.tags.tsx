@@ -18,6 +18,8 @@ import CabecalhoDivulgacaoTelegram from "../componentes/cabecalho.ranktags";
 import CardTotalTags from "../componentes/card.total.tags";
 import {
   obterTags,
+  obterTagsCacheLocal,
+  salvarTagsCacheLocal,
   type TagItem,
 } from "../servicos/api.publicacoes";
 
@@ -34,12 +36,12 @@ function formatarTextoUsos(tag: TagItem): string {
 export function TelaRankingTags() {
   const navigate = useNavigate();
 
-  const [tags, setTags] = useState<TagItem[]>([]);
-  const [totalFiltradas, setTotalFiltradas] = useState(0);
+  const [tags, setTags] = useState<TagItem[]>(() => obterTagsCacheLocal());
+  const [totalFiltradas, setTotalFiltradas] = useState(() => obterTagsCacheLocal().length);
   const [busca, setBusca] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [temMais, setTemMais] = useState(false);
-  const [carregando, setCarregando] = useState(true);
+  const [carregando, setCarregando] = useState(() => obterTagsCacheLocal().length === 0);
   const [carregandoMais, setCarregandoMais] = useState(false);
   const [recarregando, setRecarregando] = useState(false);
   const [erro, setErro] = useState(false);
@@ -48,7 +50,7 @@ export function TelaRankingTags() {
 
   // Carregar as hashtags do ranking a partir do banco de dados
   const carregarTags = useCallback(async (termoBusca?: string) => {
-    setCarregando(true);
+    setCarregando((prev) => (obterTagsCacheLocal().length === 0 ? true : prev));
     setErro(false);
 
     try {

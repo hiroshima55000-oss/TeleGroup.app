@@ -50,6 +50,60 @@ export interface MetricasCampanhasGerais {
   cpmMedio: number;
 }
 
+const CHAVE_CAMPANHAS_CACHE = "telegroup_campanhas_cache_v1";
+const CHAVE_METRICAS_CAMP_CACHE = "telegroup_metricas_camp_cache_v1";
+let cacheCampanhasMemoria: CampanhaItem[] | null = null;
+let cacheMetricasMemoria: MetricasCampanhasGerais | null = null;
+
+export function obterCampanhasCacheLocal(): CampanhaItem[] {
+  if (cacheCampanhasMemoria) return cacheCampanhasMemoria;
+  if (typeof window === "undefined") return [];
+  try {
+    const s = sessionStorage.getItem(CHAVE_CAMPANHAS_CACHE) || localStorage.getItem(CHAVE_CAMPANHAS_CACHE);
+    if (s) {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) {
+        cacheCampanhasMemoria = parsed;
+        return parsed;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function salvarCampanhasCacheLocal(dados: CampanhaItem[]): void {
+  cacheCampanhasMemoria = dados;
+  if (typeof window === "undefined") return;
+  try {
+    const j = JSON.stringify(dados);
+    sessionStorage.setItem(CHAVE_CAMPANHAS_CACHE, j);
+    localStorage.setItem(CHAVE_CAMPANHAS_CACHE, j);
+  } catch {}
+}
+
+export function obterMetricasCampanhasCacheLocal(): MetricasCampanhasGerais | null {
+  if (cacheMetricasMemoria) return cacheMetricasMemoria;
+  if (typeof window === "undefined") return null;
+  try {
+    const s = sessionStorage.getItem(CHAVE_METRICAS_CAMP_CACHE) || localStorage.getItem(CHAVE_METRICAS_CAMP_CACHE);
+    if (s) {
+      cacheMetricasMemoria = JSON.parse(s);
+      return cacheMetricasMemoria;
+    }
+  } catch {}
+  return null;
+}
+
+export function salvarMetricasCampanhasCacheLocal(dados: MetricasCampanhasGerais): void {
+  cacheMetricasMemoria = dados;
+  if (typeof window === "undefined") return;
+  try {
+    const j = JSON.stringify(dados);
+    sessionStorage.setItem(CHAVE_METRICAS_CAMP_CACHE, j);
+    localStorage.setItem(CHAVE_METRICAS_CAMP_CACHE, j);
+  } catch {}
+}
+
 export async function buscarCampanhas(busca?: string): Promise<CampanhaItem[]> {
   try {
     const usuarioId = obterUsuarioId();
@@ -68,7 +122,11 @@ export async function buscarCampanhas(busca?: string): Promise<CampanhaItem[]> {
       throw new Error("Erro ao buscar campanhas");
     }
     const dados = await resposta.json();
-    return dados.dados || [];
+    const lista = dados.dados || [];
+    if (!busca) {
+      salvarCampanhasCacheLocal(lista);
+    }
+    return lista;
   } catch (err) {
     console.error("Falha ao carregar campanhas:", err);
     throw err;
@@ -88,6 +146,9 @@ export async function buscarMetricasCampanhas(): Promise<MetricasCampanhasGerais
       throw new Error("Erro ao buscar métricas");
     }
     const dados = await resposta.json();
+    if (dados.dados) {
+      salvarMetricasCampanhasCacheLocal(dados.dados);
+    }
     return dados.dados;
   } catch (err) {
     console.error("Falha ao carregar métricas de campanhas:", err);

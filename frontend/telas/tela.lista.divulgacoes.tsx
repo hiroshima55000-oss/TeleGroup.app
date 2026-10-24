@@ -17,6 +17,7 @@ import {
   buscarPublicacoes,
   deletarPublicacao,
   registrarCliqueLink,
+  obterMinhasPubsCacheLocal,
 } from "../servicos/api.publicacoes";
 import { estaLogadoGoogle, checarStatusBanimento } from "../servicos/usuario";
 
@@ -24,15 +25,15 @@ function TelaPublicarGrupo() {
   const navigate = useNavigate();
 
   const [busca, setBusca] = useState("");
-  const [grupos, setGrupos] = useState<PublicacaoItem[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [grupos, setGrupos] = useState<PublicacaoItem[]>(() => obterMinhasPubsCacheLocal());
+  const [carregando, setCarregando] = useState(() => obterMinhasPubsCacheLocal().length === 0);
   const [deletandoId, setDeletandoId] = useState<string | null>(null);
   const [publicacaoExclusao, setPublicacaoExclusao] = useState<PublicacaoItem | null>(null);
   const [excluindoPublicacao, setExcluindoPublicacao] = useState(false);
 
   async function carregar() {
     try {
-      setCarregando(true);
+      setCarregando((prev) => (obterMinhasPubsCacheLocal().length === 0 ? true : prev));
       const lista = await buscarPublicacoes(true);
       setGrupos(lista);
     } catch (err) {

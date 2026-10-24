@@ -77,6 +77,14 @@ app.get("/", (req, res, next) => {
   next();
 });
 
+// Otimização de Desempenho: Carregamento instantâneo com tempo de resposta de 0 ms (stale-while-revalidate)
+app.use("/api", (req, res, next) => {
+  if (req.method === "GET") {
+    res.setHeader("Cache-Control", "public, max-age=0, stale-while-revalidate=120");
+  }
+  next();
+});
+
 // Todas as rotas de API do backend (campanhas, publicações, usuário, banco, webhook, dados, etc.)
 app.use("/api", rotasBackend);
 

@@ -5,6 +5,7 @@ import {
   CalculoInteressePeriodoItem,
   TagRankeadaInteresse,
   obterHistoricoUsuarioApi,
+  obterHistoricoCacheLocal,
 } from "../servicos/api.publicacoes";
 import { obterOuCriarUsuario, InfoUsuario } from "../servicos/usuario";
 import CabecalhoInteresses from "../componentes/cabecalho.interesses";
@@ -17,13 +18,13 @@ type PeriodoCalculador = "ontem" | "10d" | "30d";
 export function TelaHistoricoInteresses() {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState<InfoUsuario | null>(null);
-  const [carregando, setCarregando] = useState(true);
-  const [historico, setHistorico] = useState<RespostaHistoricoUsuario | null>(null);
+  const [carregando, setCarregando] = useState(() => !obterHistoricoCacheLocal());
+  const [historico, setHistorico] = useState<RespostaHistoricoUsuario | null>(() => obterHistoricoCacheLocal());
   const [periodoCalculo, setPeriodoCalculo] = useState<PeriodoCalculador>("10d");
 
   const carregarDados = useCallback(async () => {
     try {
-      setCarregando(true);
+      setCarregando((prev) => (!obterHistoricoCacheLocal() ? true : prev));
       const user = obterOuCriarUsuario();
       setUsuario(user);
 

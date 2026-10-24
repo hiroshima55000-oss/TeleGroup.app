@@ -17,6 +17,7 @@ import {
   obterHistoricoUsuarioApi,
   curtirPublicacao,
   registrarCliqueLink,
+  obterHistoricoCacheLocal,
 } from "../servicos/api.publicacoes";
 import { obterOuCriarUsuario, InfoUsuario } from "../servicos/usuario";
 import CardDenunciar from "../componentes/card.denunciar";
@@ -31,8 +32,8 @@ export function TelaHistoricoConteudos() {
   const abaParam = searchParams.get("aba") as AbaAtiva | null;
 
   const [usuario, setUsuario] = useState<InfoUsuario | null>(null);
-  const [carregando, setCarregando] = useState(true);
-  const [historico, setHistorico] = useState<RespostaHistoricoUsuario | null>(null);
+  const [carregando, setCarregando] = useState(() => !obterHistoricoCacheLocal());
+  const [historico, setHistorico] = useState<RespostaHistoricoUsuario | null>(() => obterHistoricoCacheLocal());
 
   // Exclusivamente as 3 abas solicitadas: vistos - likes - cliques
   const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>(
@@ -49,7 +50,7 @@ export function TelaHistoricoConteudos() {
 
   const carregarDados = useCallback(async () => {
     try {
-      setCarregando(true);
+      setCarregando((prev) => (!obterHistoricoCacheLocal() ? true : prev));
       const user = obterOuCriarUsuario();
       setUsuario(user);
 

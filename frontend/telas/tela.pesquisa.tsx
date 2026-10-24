@@ -11,6 +11,8 @@ import {
   jaCurtiuLocal,
   registrarCliqueLink,
   registrarVisualizacoesEmLote,
+  obterPesquisaCacheLocal,
+  salvarPesquisaCacheLocal,
 } from "../servicos/api.publicacoes";
 
 const LIMITE_POR_PAGINA = 4;
@@ -23,9 +25,15 @@ function TelaPesquisaGrupo() {
 
   const [pesquisa, setPesquisa] = useState(termoInicial);
   const [categoriaAtiva, setCategoriaAtiva] = useState("");
-  const [grupos, setGrupos] = useState<PublicacaoItem[]>([]);
-  const [categoriasDisponiveis, setCategoriasDisponiveis] = useState<string[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [grupos, setGrupos] = useState<PublicacaoItem[]>(() => {
+    const c = obterPesquisaCacheLocal();
+    return c?.dados || [];
+  });
+  const [categoriasDisponiveis, setCategoriasDisponiveis] = useState<string[]>(() => {
+    const c = obterPesquisaCacheLocal();
+    return c?.categorias || [];
+  });
+  const [carregando, setCarregando] = useState(() => !obterPesquisaCacheLocal());
   const [carregandoMais, setCarregandoMais] = useState(false);
   const [pagina, setPagina] = useState(1);
   const [temMais, setTemMais] = useState(true);
@@ -44,7 +52,7 @@ function TelaPesquisaGrupo() {
   const carregarPaginaInicial = useCallback(
     async (termoBusca: string, cat: string) => {
       try {
-        setCarregando(true);
+        setCarregando((prev) => (obterPesquisaCacheLocal() ? prev : true));
         setPagina(1);
 
         const res = await buscarPublicacoesPaginadas(false, {
@@ -59,6 +67,10 @@ function TelaPesquisaGrupo() {
         setTemMais(res.temMais);
         if (res.categoriasDisponiveis && res.categoriasDisponiveis.length > 0) {
           setCategoriasDisponiveis(res.categoriasDisponiveis);
+        }
+
+        if (!termoBusca.trim() && (!cat || cat === "Todos")) {
+          salvarPesquisaCacheLocal(res.dados, res.categoriasDisponiveis || []);
         }
 
         if (res.dados && res.dados.length > 0) {

@@ -44,64 +44,64 @@ export interface RespostaRankingTags {
   timestamp: string;
 }
 
-// Catálogo base de hashtags populares do ecossistema Telegram
+// Catálogo base de hashtags do ecossistema Telegram (contagens 100% reais)
 const CATALOGO_BASE_TAGS: Array<{ slug: string; nicho: string; contagemBase: number }> = [
   // Tecnologia & IA
-  { slug: "tecnologia", nicho: "Tecnologia", contagemBase: 1420 },
-  { slug: "programacao", nicho: "Tecnologia", contagemBase: 980 },
-  { slug: "ia", nicho: "Tecnologia", contagemBase: 890 },
-  { slug: "inteligenciaartificial", nicho: "Tecnologia", contagemBase: 760 },
-  { slug: "python", nicho: "Tecnologia", contagemBase: 650 },
-  { slug: "javascript", nicho: "Tecnologia", contagemBase: 580 },
-  { slug: "cybersecurity", nicho: "Tecnologia", contagemBase: 410 },
-  { slug: "chatgpt", nicho: "Tecnologia", contagemBase: 520 },
+  { slug: "tecnologia", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "programacao", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "ia", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "inteligenciaartificial", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "python", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "javascript", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "cybersecurity", nicho: "Tecnologia", contagemBase: 0 },
+  { slug: "chatgpt", nicho: "Tecnologia", contagemBase: 0 },
 
   // Marketing & Negócios
-  { slug: "marketing", nicho: "Marketing", contagemBase: 1250 },
-  { slug: "marketingdigital", nicho: "Marketing", contagemBase: 1100 },
-  { slug: "empreendedorismo", nicho: "Marketing", contagemBase: 940 },
-  { slug: "vendas", nicho: "Marketing", contagemBase: 820 },
-  { slug: "trafego", nicho: "Marketing", contagemBase: 710 },
-  { slug: "dropshipping", nicho: "Marketing", contagemBase: 630 },
-  { slug: "afiliados", nicho: "Marketing", contagemBase: 590 },
-  { slug: "negocios", nicho: "Marketing", contagemBase: 780 },
+  { slug: "marketing", nicho: "Marketing", contagemBase: 0 },
+  { slug: "marketingdigital", nicho: "Marketing", contagemBase: 0 },
+  { slug: "empreendedorismo", nicho: "Marketing", contagemBase: 0 },
+  { slug: "vendas", nicho: "Marketing", contagemBase: 0 },
+  { slug: "trafego", nicho: "Marketing", contagemBase: 0 },
+  { slug: "dropshipping", nicho: "Marketing", contagemBase: 0 },
+  { slug: "afiliados", nicho: "Marketing", contagemBase: 0 },
+  { slug: "negocios", nicho: "Marketing", contagemBase: 0 },
 
   // Finanças & Cripto
-  { slug: "cripto", nicho: "Finanças", contagemBase: 1380 },
-  { slug: "bitcoin", nicho: "Finanças", contagemBase: 1190 },
-  { slug: "investimentos", nicho: "Finanças", contagemBase: 1040 },
-  { slug: "financas", nicho: "Finanças", contagemBase: 870 },
-  { slug: "rendaextra", nicho: "Finanças", contagemBase: 920 },
-  { slug: "daytrade", nicho: "Finanças", contagemBase: 680 },
-  { slug: "bolsadevalores", nicho: "Finanças", contagemBase: 540 },
+  { slug: "cripto", nicho: "Finanças", contagemBase: 0 },
+  { slug: "bitcoin", nicho: "Finanças", contagemBase: 0 },
+  { slug: "investimentos", nicho: "Finanças", contagemBase: 0 },
+  { slug: "financas", nicho: "Finanças", contagemBase: 0 },
+  { slug: "rendaextra", nicho: "Finanças", contagemBase: 0 },
+  { slug: "daytrade", nicho: "Finanças", contagemBase: 0 },
+  { slug: "bolsadevalores", nicho: "Finanças", contagemBase: 0 },
 
   // Educação & Concursos
-  { slug: "cursos", nicho: "Educação", contagemBase: 960 },
-  { slug: "livros", nicho: "Educação", contagemBase: 810 },
-  { slug: "concursos", nicho: "Educação", contagemBase: 740 },
-  { slug: "estudos", nicho: "Educação", contagemBase: 620 },
-  { slug: "idiomas", nicho: "Educação", contagemBase: 490 },
-  { slug: "ingles", nicho: "Educação", contagemBase: 530 },
+  { slug: "cursos", nicho: "Educação", contagemBase: 0 },
+  { slug: "livros", nicho: "Educação", contagemBase: 0 },
+  { slug: "concursos", nicho: "Educação", contagemBase: 0 },
+  { slug: "estudos", nicho: "Educação", contagemBase: 0 },
+  { slug: "idiomas", nicho: "Educação", contagemBase: 0 },
+  { slug: "ingles", nicho: "Educação", contagemBase: 0 },
 
   // Entretenimento & Mídia
-  { slug: "humor", nicho: "Entretenimento", contagemBase: 1050 },
-  { slug: "memes", nicho: "Entretenimento", contagemBase: 920 },
-  { slug: "filmes", nicho: "Entretenimento", contagemBase: 880 },
-  { slug: "series", nicho: "Entretenimento", contagemBase: 790 },
-  { slug: "animes", nicho: "Entretenimento", contagemBase: 840 },
-  { slug: "games", nicho: "Entretenimento", contagemBase: 760 },
-  { slug: "musica", nicho: "Entretenimento", contagemBase: 690 },
-  { slug: "futebol", nicho: "Entretenimento", contagemBase: 830 },
+  { slug: "humor", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "memes", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "filmes", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "series", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "animes", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "games", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "musica", nicho: "Entretenimento", contagemBase: 0 },
+  { slug: "futebol", nicho: "Entretenimento", contagemBase: 0 },
 
   // Utilidades, Ofertas e Notícias
-  { slug: "promocoes", nicho: "Ofertas", contagemBase: 1120 },
-  { slug: "cupons", nicho: "Ofertas", contagemBase: 870 },
-  { slug: "descontos", nicho: "Ofertas", contagemBase: 740 },
-  { slug: "vagas", nicho: "Utilidades", contagemBase: 680 },
-  { slug: "noticias", nicho: "Notícias", contagemBase: 820 },
-  { slug: "telegram", nicho: "Geral", contagemBase: 1560 },
-  { slug: "canais", nicho: "Geral", contagemBase: 910 },
-  { slug: "grupos", nicho: "Geral", contagemBase: 970 },
+  { slug: "promocoes", nicho: "Ofertas", contagemBase: 0 },
+  { slug: "cupons", nicho: "Ofertas", contagemBase: 0 },
+  { slug: "descontos", nicho: "Ofertas", contagemBase: 0 },
+  { slug: "vagas", nicho: "Utilidades", contagemBase: 0 },
+  { slug: "noticias", nicho: "Notícias", contagemBase: 0 },
+  { slug: "telegram", nicho: "Geral", contagemBase: 0 },
+  { slug: "canais", nicho: "Geral", contagemBase: 0 },
+  { slug: "grupos", nicho: "Geral", contagemBase: 0 },
 ];
 
 const NICHOS_ESTRUTURADOS: NichoItem[] = [
@@ -298,7 +298,7 @@ export const RankHashtagsServico = {
         mapaGeral.set(slug, {
           slug,
           nicho: info.nichoDetectado || adivinharNicho(slug),
-          contagemBase: 10, // Base mínima para novas tags descobertas
+          contagemBase: 0,
           contagemReal: info.contagem,
         });
       }
@@ -307,13 +307,13 @@ export const RankHashtagsServico = {
     // Transforma em array e ordena por contagem total decrescente
     const listaOrdenada = Array.from(mapaGeral.values())
       .map((item) => {
-        const contagemTotal = item.contagemBase + item.contagemReal * 5; // Multiplicador de peso de postagem ativa
+        const contagemTotal = item.contagemReal;
         return {
           rank: 0,
           nome: item.slug,
           slug: item.slug,
           nicho: item.nicho,
-          contagemBase: item.contagemBase,
+          contagemBase: 0,
           contagemReal: item.contagemReal,
           contagemTotal,
           contagemFormatada: contagemTotal === 1 ? "1 uso" : `${contagemTotal.toLocaleString("pt-BR")} usos`,
@@ -324,7 +324,7 @@ export const RankHashtagsServico = {
       .map((item, idx) => ({
         ...item,
         rank: idx + 1,
-        popular: idx < 15,
+        popular: idx < 15 && item.contagemTotal > 0,
       }));
 
     // Atualiza contadores dos nichos
@@ -333,11 +333,10 @@ export const RankHashtagsServico = {
         (t) => t.nicho.toLowerCase() === nicho.nome.toLowerCase() || nicho.tagsPrincipais.includes(t.slug)
       );
       const somaPublicacoes = tagsDoNicho.reduce((acc, cur) => acc + cur.contagemReal, 0);
-      const totalEstimado = Math.max(somaPublicacoes, tagsDoNicho.length * 12);
       return {
         ...nicho,
-        totalPublicacoes: totalEstimado,
-        totalPublicacoesFormatado: `${totalEstimado.toLocaleString("pt-BR")} comunidades`,
+        totalPublicacoes: somaPublicacoes,
+        totalPublicacoesFormatado: somaPublicacoes === 1 ? "1 comunidade" : `${somaPublicacoes.toLocaleString("pt-BR")} comunidades`,
       };
     });
 

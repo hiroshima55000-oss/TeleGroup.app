@@ -105,7 +105,16 @@ export function definirCurtidaLocal(id: string, curtido: boolean): void {
 }
 
 const CHAVE_FEED_CACHE_LOCAL = "telegroup_feed_cache_v1";
+const CHAVE_MINHAS_PUBS_CACHE = "telegroup_minhas_pubs_v1";
+const CHAVE_TAGS_CACHE_LOCAL = "telegroup_tags_cache_v1";
+const CHAVE_HISTORICO_CACHE_LOCAL = "telegroup_historico_cache_v1";
+const CHAVE_PESQUISA_CACHE_LOCAL = "telegroup_pesquisa_cache_v1";
+
 let feedCacheEmMemoria: PublicacaoItem[] | null = null;
+let minhasPubsCacheEmMemoria: PublicacaoItem[] | null = null;
+let tagsCacheEmMemoria: TagItem[] | null = null;
+let historicoCacheEmMemoria: RespostaHistoricoUsuario | null = null;
+let pesquisaCacheEmMemoria: { dados: PublicacaoItem[]; categorias: string[] } | null = null;
 
 export function obterFeedCacheLocal(): PublicacaoItem[] {
   if (feedCacheEmMemoria && feedCacheEmMemoria.length > 0) {
@@ -130,9 +139,114 @@ export function salvarFeedCacheLocal(dados: PublicacaoItem[]): void {
   feedCacheEmMemoria = dados;
   if (typeof window === "undefined") return;
   try {
-    const json = JSON.stringify(dados.slice(0, 40));
+    const json = JSON.stringify(dados.slice(0, 50));
     sessionStorage.setItem(CHAVE_FEED_CACHE_LOCAL, json);
     localStorage.setItem(CHAVE_FEED_CACHE_LOCAL, json);
+  } catch {}
+}
+
+export function obterMinhasPubsCacheLocal(): PublicacaoItem[] {
+  if (minhasPubsCacheEmMemoria) {
+    return minhasPubsCacheEmMemoria;
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const salvo = sessionStorage.getItem(CHAVE_MINHAS_PUBS_CACHE) || localStorage.getItem(CHAVE_MINHAS_PUBS_CACHE);
+    if (salvo) {
+      const lista: PublicacaoItem[] = JSON.parse(salvo);
+      if (Array.isArray(lista)) {
+        minhasPubsCacheEmMemoria = lista;
+        return lista;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function salvarMinhasPubsCacheLocal(dados: PublicacaoItem[]): void {
+  minhasPubsCacheEmMemoria = dados;
+  if (typeof window === "undefined") return;
+  try {
+    const json = JSON.stringify(dados);
+    sessionStorage.setItem(CHAVE_MINHAS_PUBS_CACHE, json);
+    localStorage.setItem(CHAVE_MINHAS_PUBS_CACHE, json);
+  } catch {}
+}
+
+export function obterTagsCacheLocal(): TagItem[] {
+  if (tagsCacheEmMemoria && tagsCacheEmMemoria.length > 0) {
+    return tagsCacheEmMemoria;
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const salvo = sessionStorage.getItem(CHAVE_TAGS_CACHE_LOCAL) || localStorage.getItem(CHAVE_TAGS_CACHE_LOCAL);
+    if (salvo) {
+      const lista: TagItem[] = JSON.parse(salvo);
+      if (Array.isArray(lista) && lista.length > 0) {
+        tagsCacheEmMemoria = lista;
+        return lista;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function salvarTagsCacheLocal(tags: TagItem[]): void {
+  if (!Array.isArray(tags)) return;
+  tagsCacheEmMemoria = tags;
+  if (typeof window === "undefined") return;
+  try {
+    const json = JSON.stringify(tags.slice(0, 100));
+    sessionStorage.setItem(CHAVE_TAGS_CACHE_LOCAL, json);
+    localStorage.setItem(CHAVE_TAGS_CACHE_LOCAL, json);
+  } catch {}
+}
+
+export function obterHistoricoCacheLocal(): RespostaHistoricoUsuario | null {
+  if (historicoCacheEmMemoria) return historicoCacheEmMemoria;
+  if (typeof window === "undefined") return null;
+  try {
+    const salvo = sessionStorage.getItem(CHAVE_HISTORICO_CACHE_LOCAL) || localStorage.getItem(CHAVE_HISTORICO_CACHE_LOCAL);
+    if (salvo) {
+      const parsed: RespostaHistoricoUsuario = JSON.parse(salvo);
+      if (parsed && parsed.sucesso) {
+        historicoCacheEmMemoria = parsed;
+        return parsed;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+export function salvarHistoricoCacheLocal(dados: RespostaHistoricoUsuario): void {
+  if (!dados) return;
+  historicoCacheEmMemoria = dados;
+  if (typeof window === "undefined") return;
+  try {
+    const json = JSON.stringify(dados);
+    sessionStorage.setItem(CHAVE_HISTORICO_CACHE_LOCAL, json);
+    localStorage.setItem(CHAVE_HISTORICO_CACHE_LOCAL, json);
+  } catch {}
+}
+
+export function obterPesquisaCacheLocal(): { dados: PublicacaoItem[]; categorias: string[] } | null {
+  if (pesquisaCacheEmMemoria) return pesquisaCacheEmMemoria;
+  if (typeof window === "undefined") return null;
+  try {
+    const salvo = sessionStorage.getItem(CHAVE_PESQUISA_CACHE_LOCAL);
+    if (salvo) {
+      pesquisaCacheEmMemoria = JSON.parse(salvo);
+      return pesquisaCacheEmMemoria;
+    }
+  } catch {}
+  return null;
+}
+
+export function salvarPesquisaCacheLocal(dados: PublicacaoItem[], categorias: string[]): void {
+  pesquisaCacheEmMemoria = { dados, categorias };
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(CHAVE_PESQUISA_CACHE_LOCAL, JSON.stringify({ dados: dados.slice(0, 20), categorias }));
   } catch {}
 }
 
@@ -256,6 +370,9 @@ export async function buscarPublicacoes(
     }
 
     const resultado = await buscarPublicacoesPaginadas(apenasMinhas, filtros);
+    if (apenasMinhas && (!buscaOuFiltros || typeof buscaOuFiltros !== "string")) {
+      salvarMinhasPubsCacheLocal(resultado.dados);
+    }
     return resultado.dados;
   } catch (err) {
     console.error("Falha ao buscar publicações da API:", err);
@@ -344,6 +461,10 @@ export async function obterTags(
 
     const res = await fetch(`/api/tags?${params.toString()}`);
     const json = await res.json();
+    const tagsRetornadas = json.dados || [];
+    if (!nicho && !busca && pagina === 1 && tagsRetornadas.length > 0) {
+      salvarTagsCacheLocal(tagsRetornadas);
+    }
     return {
       totalTagsExistentes: json.totalTagsExistentes || 0,
       totalFiltradas: json.totalFiltradas || json.totalTagsExistentes || 0,
@@ -351,7 +472,7 @@ export async function obterTags(
       limite: json.limite || limite,
       totalPaginas: json.totalPaginas || 1,
       temMais: Boolean(json.temMais),
-      tags: json.dados || [],
+      tags: tagsRetornadas,
       nichos: json.nichos || [],
     };
   } catch {
@@ -765,7 +886,11 @@ export async function obterHistoricoUsuarioApi(
       }
     );
     if (!res.ok) return null;
-    return await res.json();
+    const json = await res.json();
+    if (json && json.sucesso) {
+      salvarHistoricoCacheLocal(json);
+    }
+    return json;
   } catch (err) {
     console.error("Erro ao obter histórico do usuário:", err);
     return null;

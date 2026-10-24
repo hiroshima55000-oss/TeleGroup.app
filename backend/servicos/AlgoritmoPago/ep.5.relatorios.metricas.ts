@@ -62,7 +62,7 @@ export const RelatoriosMetricasServico = {
     }
 
     const ecpmMedioPlataforma = totalViews > 0 ? (totalInvestido / totalViews) * 1000 : 12.5;
-    const cpcMedioEfetivo = totalCliques > 0 ? totalInvestido / totalCliques : 0.35;
+    const cpcMedioEfetivo = totalCliques > 0 ? totalInvestido / totalCliques : 0;
     const cpmMedioEfetivo = ecpmMedioPlataforma;
 
     // Margem da plataforma: 20% retida sobre o volume financeiro transacionado
@@ -72,11 +72,11 @@ export const RelatoriosMetricasServico = {
     const margemLucroPercentual = CONFIG_VANTAGEM_PAGA.MARGEM_PLATAFORMA_PERCENTUAL * 100;
 
     return {
-      totalLeiloesRealizados: Math.max(120, totalViews * 2),
+      totalLeiloesRealizados: totalViews * 2,
       impressoesEntreguesHoje: totalViews,
       cliquesAtribuidosHoje: totalCliques,
       ecpmMedioPlataforma: Number(ecpmMedioPlataforma.toFixed(2)),
-      taxaPreenchimento: ativas.length > 0 ? 98.4 : 0,
+      taxaPreenchimento: ativas.length > 0 ? 100 : 0,
       campanhasAtivasNoPool: ativas.length,
       distribuicaoPorCategoria,
       totalCreditosConvertidos: Number(totalInvestido.toFixed(2)),
