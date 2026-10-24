@@ -23,6 +23,8 @@ import {
   registrarVisualizacoesEmLote,
   obterFeedCacheLocal,
   salvarFeedCacheLocal,
+  limparFeedCacheLocal,
+  LIMITE_CACHE_PUBLICACOES,
 } from "../servicos/api.publicacoes";
 import {
   InfoUsuario,
@@ -81,6 +83,9 @@ function TelaDivulgacaoTelegram() {
 
   const carregarFeedInicial = useCallback(async (tag?: string) => {
     try {
+      // Limpa cache anterior a cada carregamento de lote inicial para manter o navegador leve
+      limparFeedCacheLocal();
+
       // Se já temos itens em cache, não bloqueia a tela com spinner de página inteira
       setCarregando((prev) => {
         const cacheExistente = !tag ? obterFeedCacheLocal() : [];
@@ -93,13 +98,16 @@ function TelaDivulgacaoTelegram() {
         limite: LIMITE_POR_PAGINA,
       });
 
+      // A cada 6 publicações carregadas, o cache é limpo para evitar sobrecarga no navegador
+      limparFeedCacheLocal();
+
       setGrupos(res.dados);
       setTemMais(res.temMais);
       setTotalPublicacoes(res.total);
 
-      // Salva no cache local para que qualquer retorno ou abertura futura seja 0ms
+      // Salva no cache local estritamente o lote de 6 publicações recém-carregadas
       if (!tag && res.dados && res.dados.length > 0) {
-        salvarFeedCacheLocal(res.dados);
+        salvarFeedCacheLocal(res.dados.slice(0, LIMITE_POR_PAGINA));
       }
 
       // Registra visualização de cada publicação na tela de forma assíncrona
@@ -131,14 +139,18 @@ function TelaDivulgacaoTelegram() {
         limite: LIMITE_POR_PAGINA,
       });
 
+      // REGRA: O cache deve ser limpo a cada 6 publicações carregadas para não sobrecarregar o navegador
+      limparFeedCacheLocal();
+
+      if (!tagFiltroAtiva && res.dados && res.dados.length > 0) {
+        // Salva apenas as 6 novas publicações do lote carregado, sem sobrecarregar a memória
+        salvarFeedCacheLocal(res.dados.slice(0, LIMITE_POR_PAGINA));
+      }
+
       setGrupos((prev) => {
         const idsExistentes = new Set(prev.map((g) => g.id));
         const novos = res.dados.filter((g) => !idsExistentes.has(g.id));
-        const atualizados = [...prev, ...novos];
-        if (!tagFiltroAtiva) {
-          salvarFeedCacheLocal(atualizados);
-        }
-        return atualizados;
+        return [...prev, ...novos];
       });
 
       setPagina(proximaPagina);

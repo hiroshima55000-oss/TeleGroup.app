@@ -116,9 +116,57 @@ let tagsCacheEmMemoria: TagItem[] | null = null;
 let historicoCacheEmMemoria: RespostaHistoricoUsuario | null = null;
 let pesquisaCacheEmMemoria: { dados: PublicacaoItem[]; categorias: string[] } | null = null;
 
+export const LIMITE_CACHE_PUBLICACOES = 6;
+
+/**
+ * Limpa completamente o cache de publicações da memória RAM, sessionStorage e localStorage.
+ * Chamado a cada 6 publicações carregadas para garantir que o navegador não fique sobrecarregado.
+ */
+export function limparFeedCacheLocal(): void {
+  feedCacheEmMemoria = null;
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(CHAVE_FEED_CACHE_LOCAL);
+    localStorage.removeItem(CHAVE_FEED_CACHE_LOCAL);
+  } catch (err) {
+    console.warn("[Cache] Falha ao limpar cache local de publicações:", err);
+  }
+}
+
+/**
+ * Limpa o cache temporário de pesquisa
+ */
+export function limparPesquisaCacheLocal(): void {
+  pesquisaCacheEmMemoria = null;
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(CHAVE_PESQUISA_CACHE_LOCAL);
+  } catch {}
+}
+
+/**
+ * Limpa todos os caches de dados voláteis do navegador para liberação imediata de memória
+ */
+export function limparTodoCacheNavegador(): void {
+  limparFeedCacheLocal();
+  limparPesquisaCacheLocal();
+  minhasPubsCacheEmMemoria = null;
+  tagsCacheEmMemoria = null;
+  historicoCacheEmMemoria = null;
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(CHAVE_MINHAS_PUBS_CACHE);
+    sessionStorage.removeItem(CHAVE_TAGS_CACHE_LOCAL);
+    sessionStorage.removeItem(CHAVE_HISTORICO_CACHE_LOCAL);
+    localStorage.removeItem(CHAVE_MINHAS_PUBS_CACHE);
+    localStorage.removeItem(CHAVE_TAGS_CACHE_LOCAL);
+    localStorage.removeItem(CHAVE_HISTORICO_CACHE_LOCAL);
+  } catch {}
+}
+
 export function obterFeedCacheLocal(): PublicacaoItem[] {
   if (feedCacheEmMemoria && feedCacheEmMemoria.length > 0) {
-    return feedCacheEmMemoria;
+    return feedCacheEmMemoria.slice(0, LIMITE_CACHE_PUBLICACOES);
   }
   if (typeof window === "undefined") return [];
   try {
@@ -126,8 +174,9 @@ export function obterFeedCacheLocal(): PublicacaoItem[] {
     if (salvo) {
       const lista: PublicacaoItem[] = JSON.parse(salvo);
       if (Array.isArray(lista) && lista.length > 0) {
-        feedCacheEmMemoria = lista;
-        return lista;
+        const lote = lista.slice(0, LIMITE_CACHE_PUBLICACOES);
+        feedCacheEmMemoria = lote;
+        return lote;
       }
     }
   } catch {}
@@ -135,14 +184,36 @@ export function obterFeedCacheLocal(): PublicacaoItem[] {
 }
 
 export function salvarFeedCacheLocal(dados: PublicacaoItem[]): void {
+  // Limpa rigorosamente o cache anterior a cada lote para impedir sobrecarga de memória e cota
+  limparFeedCacheLocal();
+
   if (!Array.isArray(dados) || dados.length === 0) return;
-  feedCacheEmMemoria = dados;
+
+  // Retém no máximo 6 publicações (o lote mais recente carregado)
+  const lote6 = dados.slice(-LIMITE_CACHE_PUBLICACOES);
+  feedCacheEmMemoria = lote6;
+
   if (typeof window === "undefined") return;
   try {
-    const json = JSON.stringify(dados.slice(0, 50));
+    // Sanitiza base64 excessivamente pesado para proteger o navegador contra travamento
+    const loteOtimizado = lote6.map((item) => {
+      const imagensLeves = (item.imagens || []).map((img) =>
+        img && img.length > 350_000 ? "" : img
+      ).filter(Boolean);
+
+      return {
+        ...item,
+        imagens: imagensLeves.length > 0 ? imagensLeves : item.imagens,
+      };
+    });
+
+    const json = JSON.stringify(loteOtimizado);
     sessionStorage.setItem(CHAVE_FEED_CACHE_LOCAL, json);
     localStorage.setItem(CHAVE_FEED_CACHE_LOCAL, json);
-  } catch {}
+  } catch (err) {
+    console.warn("[Cache] Armazenamento do navegador cheio. Limpando cache do feed:", err);
+    limparFeedCacheLocal();
+  }
 }
 
 export function obterMinhasPubsCacheLocal(): PublicacaoItem[] {
@@ -243,10 +314,11 @@ export function obterPesquisaCacheLocal(): { dados: PublicacaoItem[]; categorias
 }
 
 export function salvarPesquisaCacheLocal(dados: PublicacaoItem[], categorias: string[]): void {
-  pesquisaCacheEmMemoria = { dados, categorias };
+  const lote6 = (dados || []).slice(0, LIMITE_CACHE_PUBLICACOES);
+  pesquisaCacheEmMemoria = { dados: lote6, categorias };
   if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(CHAVE_PESQUISA_CACHE_LOCAL, JSON.stringify({ dados: dados.slice(0, 20), categorias }));
+    sessionStorage.setItem(CHAVE_PESQUISA_CACHE_LOCAL, JSON.stringify({ dados: lote6, categorias }));
   } catch {}
 }
 

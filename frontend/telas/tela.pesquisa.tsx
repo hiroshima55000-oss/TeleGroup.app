@@ -13,9 +13,10 @@ import {
   registrarVisualizacoesEmLote,
   obterPesquisaCacheLocal,
   salvarPesquisaCacheLocal,
+  limparPesquisaCacheLocal,
 } from "../servicos/api.publicacoes";
 
-const LIMITE_POR_PAGINA = 4;
+const LIMITE_POR_PAGINA = 6;
 
 function TelaPesquisaGrupo() {
   const [searchParams] = useSearchParams();
@@ -52,6 +53,7 @@ function TelaPesquisaGrupo() {
   const carregarPaginaInicial = useCallback(
     async (termoBusca: string, cat: string) => {
       try {
+        limparPesquisaCacheLocal();
         setCarregando((prev) => (obterPesquisaCacheLocal() ? prev : true));
         setPagina(1);
 
@@ -62,6 +64,9 @@ function TelaPesquisaGrupo() {
           pagina: 1,
           limite: LIMITE_POR_PAGINA,
         });
+
+        // Limpa cache anterior a cada lote carregado
+        limparPesquisaCacheLocal();
 
         setGrupos(res.dados);
         setTemMais(res.temMais);
@@ -109,6 +114,9 @@ function TelaPesquisaGrupo() {
         pagina: proximaPagina,
         limite: LIMITE_POR_PAGINA,
       });
+
+      // Limpa cache a cada 6 publicações carregadas para não sobrecarregar
+      limparPesquisaCacheLocal();
 
       setGrupos((prev) => {
         const idsExistentes = new Set(prev.map((g) => g.id));
