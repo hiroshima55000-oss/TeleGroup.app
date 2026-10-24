@@ -259,7 +259,7 @@ function TelaEscolherAnuncio() {
                   fontWeight: 800,
                 }}
               >
-                PUBLICAÇÃO PAGA
+                ANÚNCIO PAGO
               </div>
 
               <div
