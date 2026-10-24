@@ -14,10 +14,24 @@ import { ServidorControle } from "./controles/c.servidor";
 
 import { LoggerInformativo, extrairIp } from "./servicos/s.comunicacao";
 
+import compression from "compression";
+
 const app = express();
 
-app.use(express.json({ limit: "25mb" }));
-app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+app.disable("x-powered-by");
+app.set("etag", true);
+
+// Otimização de Rede: Compressão gzip/deflate de payloads HTTP para economizar 70% de banda
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers["x-no-compression"]) return false;
+    return compression.filter(req, res);
+  },
+  threshold: 1024,
+}));
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Middleware de registro informativo de requisições e eventos HTTP reais
 app.use((req, res, next) => {

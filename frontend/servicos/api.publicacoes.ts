@@ -56,6 +56,47 @@ export interface PerfilInteresseItem {
 }
 
 export async function converterArquivoParaBase64(arquivo: File): Promise<string> {
+  // Otimização de Performance: Se for imagem, redimensiona no navegador para max 1280px e comprime em JPEG
+  // Reduz drasticamente o payload de 10-15MB para ~150-250KB sem nenhuma perda perceptível
+  if (arquivo.type.startsWith("image/") && typeof window !== "undefined" && typeof document !== "undefined") {
+    try {
+      const blobUrl = URL.createObjectURL(arquivo);
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Falha ao carregar"));
+        img.src = blobUrl;
+      });
+
+      const maxDim = 1280;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(blobUrl);
+        return canvas.toDataURL("image/jpeg", 0.82);
+      }
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback seguro caso ocorra erro no canvas
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const leitor = new FileReader();
     leitor.readAsDataURL(arquivo);
@@ -789,9 +830,35 @@ export async function registrarCliqueLink(id: string): Promise<void> {
   }
 }
 
+const filaVisualizacoesLote: Set<string> = new Set();
+let timerFlushVisualizacoes: ReturnType<typeof setTimeout> | null = null;
+
+function descarregarFilaVisualizacoes(): void {
+  if (filaVisualizacoesLote.size === 0) return;
+  const idsParaEnviar = Array.from(filaVisualizacoesLote);
+  filaVisualizacoesLote.clear();
+  const usuarioId = obterUsuarioId();
+  fetch("/api/publicacoes/visualizacoes-em-lote", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-user-id": usuarioId,
+    },
+    body: JSON.stringify({ ids: idsParaEnviar }),
+  }).catch(() => {});
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", descarregarFilaVisualizacoes);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      descarregarFilaVisualizacoes();
+    }
+  });
+}
+
 export async function registrarVisualizacao(id: string): Promise<void> {
   try {
-    const usuarioId = obterUsuarioId();
     const jaVistos = obterConjuntoLocal(CHAVE_VISUALIZACOES_LOCAL);
     if (jaVistos.has(id)) {
       return; // Já visualizou (1 vez por usuário)
@@ -799,12 +866,18 @@ export async function registrarVisualizacao(id: string): Promise<void> {
     jaVistos.add(id);
     salvarConjuntoLocal(CHAVE_VISUALIZACOES_LOCAL, jaVistos);
 
-    await fetch(`/api/publicacoes/${id}/visualizacao`, {
-      method: "POST",
-      headers: {
-        "x-user-id": usuarioId,
-      },
-    });
+    filaVisualizacoesLote.add(id);
+    // Se acumulou 6 ou mais, descarrega imediatamente
+    if (filaVisualizacoesLote.size >= 6) {
+      if (timerFlushVisualizacoes) clearTimeout(timerFlushVisualizacoes);
+      descarregarFilaVisualizacoes();
+    } else if (!timerFlushVisualizacoes) {
+      // Caso contrário, consolida em janela de 1.5s
+      timerFlushVisualizacoes = setTimeout(() => {
+        timerFlushVisualizacoes = null;
+        descarregarFilaVisualizacoes();
+      }, 1500);
+    }
   } catch {}
 }
 

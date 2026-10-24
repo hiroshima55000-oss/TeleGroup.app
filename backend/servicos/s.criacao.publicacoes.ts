@@ -53,11 +53,12 @@ export const PublicacoesServico = {
       };
     }
 
-    // 1. Busca todos os candidatos compatíveis com os filtros básicos de texto/categoria
+    // 1. Busca pool inteligente de candidatos compatíveis para ranqueamento eficiente
+    const limitePool = Math.min(200, Math.max(60, (pagina * limite) + 40));
     const { itens: todosCandidatos, categorias } = await RepositorioPublicacoes.buscarComFiltros({
       ...filtros,
       pagina: 1,
-      limite: 1000, // Recupera pool para ranqueamento
+      limite: limitePool,
     });
 
     // 2. NOVA REGRA DO FEED: O conteúdo orgânico só some quando a pessoa clica para entrar no grupo (gera clique). Visualizar mantém a publicação no feed para estimular cliques. Anúncios pagos continuam elegíveis.

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { ComponenteAjusteImagem } from "./componente.ajuste.imagem";
+import { converterArquivoParaBase64 } from "../servicos/api.publicacoes";
 
 export interface CardCriarCampConteudoProps {
   texto: string;
@@ -109,15 +110,17 @@ export function CardCriarCampConteudo({
       return;
     }
 
-    const leitor = new FileReader();
-
-    leitor.onload = () => {
-      if (typeof leitor.result === "string") {
-        setFoto(leitor.result);
-      }
-    };
-
-    leitor.readAsDataURL(arquivo);
+    converterArquivoParaBase64(arquivo)
+      .then((base64) => setFoto(base64))
+      .catch(() => {
+        const leitor = new FileReader();
+        leitor.onload = () => {
+          if (typeof leitor.result === "string") {
+            setFoto(leitor.result);
+          }
+        };
+        leitor.readAsDataURL(arquivo);
+      });
   }
 
   function handleRemoverFoto() {

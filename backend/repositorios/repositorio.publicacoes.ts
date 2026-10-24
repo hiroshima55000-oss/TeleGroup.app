@@ -10,7 +10,18 @@ import {
 const ARQUIVO_PUBLICACOES = path.resolve(process.cwd(), "publicacoes.dados.json");
 
 let cachePublicacoes: Publicacao[] | null = null;
+const cachePublicacoesMap = new Map<string, Publicacao>();
 let timerSalvarPublicacoes: NodeJS.Timeout | null = null;
+
+function atualizarMapa(lista: Publicacao[]): void {
+  cachePublicacoesMap.clear();
+  for (let i = 0; i < lista.length; i++) {
+    const item = lista[i];
+    if (item?.id) {
+      cachePublicacoesMap.set(item.id, item);
+    }
+  }
+}
 
 function lerPublicacoes(): Publicacao[] {
   if (cachePublicacoes) {
@@ -20,27 +31,31 @@ function lerPublicacoes(): Publicacao[] {
     if (fs.existsSync(ARQUIVO_PUBLICACOES)) {
       const conteudo = fs.readFileSync(ARQUIVO_PUBLICACOES, "utf-8");
       cachePublicacoes = JSON.parse(conteudo || "[]");
+      atualizarMapa(cachePublicacoes || []);
       return cachePublicacoes || [];
     }
   } catch (err) {
     console.warn("[RepositorioPublicacoes] Falha ao ler publicacoes.dados.json:", err);
   }
   cachePublicacoes = [];
+  atualizarMapa([]);
   return cachePublicacoes;
 }
 
 function salvarPublicacoes(lista: Publicacao[]): void {
   cachePublicacoes = lista;
+  atualizarMapa(lista);
   if (timerSalvarPublicacoes) {
     clearTimeout(timerSalvarPublicacoes);
   }
+  // Coalesce I/O em disco para 350ms, evitando travamento do event loop com múltiplas escritas
   timerSalvarPublicacoes = setTimeout(() => {
     try {
       fs.writeFileSync(ARQUIVO_PUBLICACOES, JSON.stringify(lista, null, 2), "utf-8");
     } catch (err) {
       console.error("[RepositorioPublicacoes] Falha ao salvar publicacoes.dados.json:", err);
     }
-  }, 100);
+  }, 350);
 }
 
 export const RepositorioPublicacoes = {
@@ -200,8 +215,8 @@ export const RepositorioPublicacoes = {
       }
     } catch {}
 
-    const lista = lerPublicacoes();
-    return lista.find((p) => p.id === id) || null;
+    lerPublicacoes();
+    return cachePublicacoesMap.get(id) || null;
   },
 
   /**
@@ -270,7 +285,7 @@ export const RepositorioPublicacoes = {
     } catch {}
 
     const lista = lerPublicacoes();
-    const item = lista.find((p) => p.id === id);
+    const item = cachePublicacoesMap.get(id);
     if (!item) return 0;
 
     item.likes = descurtir ? Math.max(0, (item.likes || 1) - 1) : (item.likes || 0) + 1;
@@ -294,7 +309,7 @@ export const RepositorioPublicacoes = {
     } catch {}
 
     const lista = lerPublicacoes();
-    const item = lista.find((p) => p.id === id);
+    const item = cachePublicacoesMap.get(id);
     if (!item) return 0;
 
     item.visualizacoes = (item.visualizacoes || 0) + 1;
@@ -318,7 +333,7 @@ export const RepositorioPublicacoes = {
     } catch {}
 
     const lista = lerPublicacoes();
-    const item = lista.find((p) => p.id === id);
+    const item = cachePublicacoesMap.get(id);
     if (!item) return 0;
 
     item.cliques = (item.cliques || 0) + 1;

@@ -10,7 +10,18 @@ import {
 const ARQUIVO_CAMPANHAS = path.resolve(process.cwd(), "campanhas.dados.json");
 
 let cacheCampanhas: Campanha[] | null = null;
+const cacheCampanhasMap = new Map<string, Campanha>();
 let timerSalvarCampanhas: NodeJS.Timeout | null = null;
+
+function atualizarMapaCampanhas(lista: Campanha[]): void {
+  cacheCampanhasMap.clear();
+  for (let i = 0; i < lista.length; i++) {
+    const c = lista[i];
+    if (c?.id) {
+      cacheCampanhasMap.set(c.id, c);
+    }
+  }
+}
 
 function lerCampanhas(): Campanha[] {
   if (cacheCampanhas) {
@@ -20,27 +31,31 @@ function lerCampanhas(): Campanha[] {
     if (fs.existsSync(ARQUIVO_CAMPANHAS)) {
       const conteudo = fs.readFileSync(ARQUIVO_CAMPANHAS, "utf-8");
       cacheCampanhas = JSON.parse(conteudo || "[]");
+      atualizarMapaCampanhas(cacheCampanhas || []);
       return cacheCampanhas || [];
     }
   } catch (err) {
     console.warn("[RepositorioCampanhas] Falha ao ler campanhas.dados.json:", err);
   }
   cacheCampanhas = [];
+  atualizarMapaCampanhas([]);
   return cacheCampanhas;
 }
 
 function salvarCampanhas(lista: Campanha[]): void {
   cacheCampanhas = lista;
+  atualizarMapaCampanhas(lista);
   if (timerSalvarCampanhas) {
     clearTimeout(timerSalvarCampanhas);
   }
+  // Coalesce gravação em disco para 350ms, desafogando o I/O
   timerSalvarCampanhas = setTimeout(() => {
     try {
       fs.writeFileSync(ARQUIVO_CAMPANHAS, JSON.stringify(lista, null, 2), "utf-8");
     } catch (err) {
       console.error("[RepositorioCampanhas] Falha ao salvar campanhas.dados.json:", err);
     }
-  }, 100);
+  }, 350);
 }
 
 export const RepositorioCampanhas = {
@@ -167,8 +182,8 @@ export const RepositorioCampanhas = {
       }
     } catch {}
 
-    const lista = lerCampanhas();
-    return lista.find((c) => c.id === id) || null;
+    lerCampanhas();
+    return cacheCampanhasMap.get(id) || null;
   },
 
   /**
