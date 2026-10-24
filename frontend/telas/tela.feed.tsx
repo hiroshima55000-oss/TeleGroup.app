@@ -21,6 +21,8 @@ import {
   jaCurtiuLocal,
   registrarCliqueLink,
   registrarVisualizacoesEmLote,
+  obterFeedCacheLocal,
+  salvarFeedCacheLocal,
 } from "../servicos/api.publicacoes";
 import {
   InfoUsuario,
@@ -29,15 +31,26 @@ import {
   ouvirMudancaUsuario,
 } from "../servicos/usuario";
 
-const LIMITE_POR_PAGINA = 4;
+const LIMITE_POR_PAGINA = 15;
 
 function TelaDivulgacaoTelegram() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryTag = new URLSearchParams(location.search).get("tag");
 
-  const [grupos, setGrupos] = useState<PublicacaoItem[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  // Carrega instantaneamente em 0ms do cache local se disponível (SWR)
+  const [grupos, setGrupos] = useState<PublicacaoItem[]>(() => {
+    if (!queryTag) {
+      return obterFeedCacheLocal();
+    }
+    return [];
+  });
+  const [carregando, setCarregando] = useState(() => {
+    if (!queryTag) {
+      return obterFeedCacheLocal().length === 0;
+    }
+    return true;
+  });
   const [carregandoMais, setCarregandoMais] = useState(false);
   const [pagina, setPagina] = useState(1);
   const [temMais, setTemMais] = useState(true);
@@ -68,7 +81,11 @@ function TelaDivulgacaoTelegram() {
 
   const carregarFeedInicial = useCallback(async (tag?: string) => {
     try {
-      setCarregando(true);
+      // Se já temos itens em cache, não bloqueia a tela com spinner de página inteira
+      setCarregando((prev) => {
+        const cacheExistente = !tag ? obterFeedCacheLocal() : [];
+        return cacheExistente.length === 0;
+      });
       setPagina(1);
       const res = await buscarPublicacoesPaginadas(false, {
         tag: tag || undefined,
@@ -80,9 +97,16 @@ function TelaDivulgacaoTelegram() {
       setTemMais(res.temMais);
       setTotalPublicacoes(res.total);
 
-      // Registra visualização de cada publicação na tela (1 vez por usuário)
+      // Salva no cache local para que qualquer retorno ou abertura futura seja 0ms
+      if (!tag && res.dados && res.dados.length > 0) {
+        salvarFeedCacheLocal(res.dados);
+      }
+
+      // Registra visualização de cada publicação na tela de forma assíncrona
       if (res.dados && res.dados.length > 0) {
-        registrarVisualizacoesEmLote(res.dados.map((g) => g.id));
+        setTimeout(() => {
+          registrarVisualizacoesEmLote(res.dados.map((g) => g.id));
+        }, 100);
       }
     } catch (err) {
       console.error("Erro ao carregar feed inicial de publicações:", err);
@@ -110,7 +134,11 @@ function TelaDivulgacaoTelegram() {
       setGrupos((prev) => {
         const idsExistentes = new Set(prev.map((g) => g.id));
         const novos = res.dados.filter((g) => !idsExistentes.has(g.id));
-        return [...prev, ...novos];
+        const atualizados = [...prev, ...novos];
+        if (!tagFiltroAtiva) {
+          salvarFeedCacheLocal(atualizados);
+        }
+        return atualizados;
       });
 
       setPagina(proximaPagina);
@@ -118,7 +146,9 @@ function TelaDivulgacaoTelegram() {
       setTotalPublicacoes(res.total);
 
       if (res.dados && res.dados.length > 0) {
-        registrarVisualizacoesEmLote(res.dados.map((g) => g.id));
+        setTimeout(() => {
+          registrarVisualizacoesEmLote(res.dados.map((g) => g.id));
+        }, 100);
       }
     } catch (err) {
       console.error("Erro ao carregar mais publicações:", err);

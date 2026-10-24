@@ -104,6 +104,38 @@ export function definirCurtidaLocal(id: string, curtido: boolean): void {
   salvarConjuntoLocal(CHAVE_CURTIDAS_LOCAL, conj);
 }
 
+const CHAVE_FEED_CACHE_LOCAL = "telegroup_feed_cache_v1";
+let feedCacheEmMemoria: PublicacaoItem[] | null = null;
+
+export function obterFeedCacheLocal(): PublicacaoItem[] {
+  if (feedCacheEmMemoria && feedCacheEmMemoria.length > 0) {
+    return feedCacheEmMemoria;
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const salvo = sessionStorage.getItem(CHAVE_FEED_CACHE_LOCAL) || localStorage.getItem(CHAVE_FEED_CACHE_LOCAL);
+    if (salvo) {
+      const lista: PublicacaoItem[] = JSON.parse(salvo);
+      if (Array.isArray(lista) && lista.length > 0) {
+        feedCacheEmMemoria = lista;
+        return lista;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function salvarFeedCacheLocal(dados: PublicacaoItem[]): void {
+  if (!Array.isArray(dados) || dados.length === 0) return;
+  feedCacheEmMemoria = dados;
+  if (typeof window === "undefined") return;
+  try {
+    const json = JSON.stringify(dados.slice(0, 40));
+    sessionStorage.setItem(CHAVE_FEED_CACHE_LOCAL, json);
+    localStorage.setItem(CHAVE_FEED_CACHE_LOCAL, json);
+  } catch {}
+}
+
 export interface RespostaPublicacoesPaginadas {
   dados: PublicacaoItem[];
   total: number;
@@ -217,6 +249,10 @@ export async function buscarPublicacoes(
       if (buscaOuFiltros.tag) filtros.tag = buscaOuFiltros.tag;
       if (buscaOuFiltros.nicho && buscaOuFiltros.nicho !== "todos") filtros.nicho = buscaOuFiltros.nicho;
       if (buscaOuFiltros.modo) filtros.modo = buscaOuFiltros.modo;
+    }
+
+    if (apenasMinhas && !filtros.limite) {
+      filtros.limite = 1000;
     }
 
     const resultado = await buscarPublicacoesPaginadas(apenasMinhas, filtros);

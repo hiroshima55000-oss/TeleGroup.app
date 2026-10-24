@@ -35,14 +35,18 @@ export const PublicacoesServico = {
 
     // Se for listagem privada do criador ("apenasMinhas"), mantém a busca direta sem ranqueamento de afinidade
     if (filtros.apenasMinhas) {
-      const { itens, total, categorias } = await RepositorioPublicacoes.buscarComFiltros(filtros);
-      const totalPaginas = Math.ceil(total / limite) || 1;
+      const limiteMinhas = Math.max(1, filtros.limite || 1000);
+      const { itens, total, categorias } = await RepositorioPublicacoes.buscarComFiltros({
+        ...filtros,
+        limite: limiteMinhas,
+      });
+      const totalPaginas = Math.ceil(total / limiteMinhas) || 1;
       return {
         sucesso: true,
         dados: itens,
         total,
         pagina,
-        limite,
+        limite: limiteMinhas,
         totalPaginas,
         temMais: pagina < totalPaginas,
         categoriasDisponiveis: categorias,
