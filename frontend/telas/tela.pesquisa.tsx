@@ -41,6 +41,7 @@ function TelaPesquisaGrupo() {
   const [processandoLikes, setProcessandoLikes] = useState<Record<string, boolean>>({});
 
   const sentinelaRef = useRef<HTMLDivElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const q = searchParams.get("q") || searchParams.get("busca");
@@ -49,11 +50,16 @@ function TelaPesquisaGrupo() {
     }
   }, [searchParams]);
 
-  // Carrega a primeira página com debounce para digitação
+  // Carrega a primeira página com cancelamento de buscas anteriores em trânsito
   const carregarPaginaInicial = useCallback(
     async (termoBusca: string, cat: string) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
-        limparPesquisaCacheLocal();
         setCarregando((prev) => (obterPesquisaCacheLocal() ? prev : true));
         setPagina(1);
 
@@ -63,10 +69,10 @@ function TelaPesquisaGrupo() {
           apenasComImagem: true,
           pagina: 1,
           limite: LIMITE_POR_PAGINA,
+          signal: controller.signal,
         });
 
-        // Limpa cache anterior a cada lote carregado
-        limparPesquisaCacheLocal();
+        if (controller.signal.aborted) return;
 
         setGrupos(res.dados);
         setTemMais(res.temMais);
@@ -81,10 +87,14 @@ function TelaPesquisaGrupo() {
         if (res.dados && res.dados.length > 0) {
           registrarVisualizacoesEmLote(res.dados.map((g) => g.id));
         }
-      } catch (err) {
-        console.error("Erro ao carregar resultados da pesquisa:", err);
+      } catch (err: any) {
+        if (err?.name !== "AbortError") {
+          console.error("Erro ao carregar resultados da pesquisa:", err);
+        }
       } finally {
-        setCarregando(false);
+        if (!controller.signal.aborted) {
+          setCarregando(false);
+        }
       }
     },
     []

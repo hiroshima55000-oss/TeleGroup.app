@@ -382,6 +382,7 @@ export interface FiltrosPublicacoes {
   apenasComImagem?: boolean;
   pagina?: number;
   limite?: number;
+  signal?: AbortSignal;
 }
 
 export async function buscarPublicacoesPaginadas(
@@ -423,6 +424,7 @@ export async function buscarPublicacoesPaginadas(
 
     const url = `/api/publicacoes?${params.toString()}`;
     const resposta = await fetch(url, {
+      signal: filtros.signal,
       headers: {
         "x-user-id": usuarioId,
       },
@@ -456,7 +458,10 @@ export async function buscarPublicacoesPaginadas(
       temMais: Boolean(json.temMais),
       categoriasDisponiveis: Array.isArray(json.categoriasDisponiveis) ? json.categoriasDisponiveis : [],
     };
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.name === "AbortError") {
+      return { dados: [], total: 0, pagina: 1, limite: filtros.limite || 6, totalPaginas: 1, temMais: false };
+    }
     console.error("Falha ao buscar publicações paginadas:", err);
     throw err;
   }
@@ -479,7 +484,7 @@ export async function buscarPublicacoes(
     }
 
     if (apenasMinhas && !filtros.limite) {
-      filtros.limite = 1000;
+      filtros.limite = 50;
     }
 
     const resultado = await buscarPublicacoesPaginadas(apenasMinhas, filtros);

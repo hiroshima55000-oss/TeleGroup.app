@@ -117,7 +117,7 @@ function salvarDadosInteracoes(dados: DadosPersistidosInteracoes): void {
     } catch (err) {
       console.error("[RepositorioInteracoes] Erro ao salvar interações:", err);
     }
-  }, 100);
+  }, 350);
 }
 
 export const RepositorioInteracoesUsuario = {

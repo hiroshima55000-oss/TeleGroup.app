@@ -286,11 +286,12 @@ export const PublicacoesControle = {
         "../repositorios/repositorio.interacoes.usuario"
       );
 
-      const conteudos = await RepositorioInteracoesUsuario.obterConteudosDoUsuario(usuarioId);
-
-      const calcOntem = await RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "ontem");
-      const calc10d = await RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "10d");
-      const calc30d = await RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "30d");
+      const [conteudos, calcOntem, calc10d, calc30d] = await Promise.all([
+        RepositorioInteracoesUsuario.obterConteudosDoUsuario(usuarioId),
+        RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "ontem"),
+        RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "10d"),
+        RepositorioInteracoesUsuario.calcularInteresses(usuarioId, "30d"),
+      ]);
 
       res.status(200).json({
         sucesso: true,

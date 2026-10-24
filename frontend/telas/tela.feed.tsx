@@ -83,14 +83,15 @@ function TelaDivulgacaoTelegram() {
 
   const carregarFeedInicial = useCallback(async (tag?: string) => {
     try {
-      // Limpa cache anterior a cada carregamento de lote inicial para manter o navegador leve
-      limparFeedCacheLocal();
+      // Se já temos itens em cache, exibe instantaneamente sem bloquear a tela (SWR)
+      const cacheExistente = !tag ? obterFeedCacheLocal() : [];
+      if (cacheExistente.length > 0) {
+        setGrupos(cacheExistente);
+        setCarregando(false);
+      } else {
+        setCarregando(true);
+      }
 
-      // Se já temos itens em cache, não bloqueia a tela com spinner de página inteira
-      setCarregando((prev) => {
-        const cacheExistente = !tag ? obterFeedCacheLocal() : [];
-        return cacheExistente.length === 0;
-      });
       setPagina(1);
       const res = await buscarPublicacoesPaginadas(false, {
         tag: tag || undefined,
@@ -98,14 +99,11 @@ function TelaDivulgacaoTelegram() {
         limite: LIMITE_POR_PAGINA,
       });
 
-      // A cada 6 publicações carregadas, o cache é limpo para evitar sobrecarga no navegador
-      limparFeedCacheLocal();
-
       setGrupos(res.dados);
       setTemMais(res.temMais);
       setTotalPublicacoes(res.total);
 
-      // Salva no cache local estritamente o lote de 6 publicações recém-carregadas
+      // Atualiza o cache local com os dados frescos
       if (!tag && res.dados && res.dados.length > 0) {
         salvarFeedCacheLocal(res.dados.slice(0, LIMITE_POR_PAGINA));
       }

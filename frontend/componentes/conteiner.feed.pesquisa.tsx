@@ -261,6 +261,7 @@ export function ConteinerFeedPesquisa({
               alt="Imagem da publicação"
 
               loading="lazy"
+              decoding="async"
 
               style={{
                 width: "100%",
