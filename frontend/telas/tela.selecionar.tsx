@@ -128,7 +128,7 @@ function TelaEscolherAnuncio() {
               color: "#e9eef5",
             }}
           >
-            Escolha como anunciar
+            Escolha como publicar
           </h1>
 
           <p
@@ -139,8 +139,7 @@ function TelaEscolherAnuncio() {
               lineHeight: 1.6,
             }}
           >
-            Escolha uma opção para continuar
-            com a criação do seu anúncio.
+            Escolha uma opção para publicar seu conteúdo.
           </p>
 
           {googleUser ? (
@@ -219,7 +218,7 @@ function TelaEscolherAnuncio() {
                   fontWeight: 800,
                 }}
               >
-                Anunciar gratuito
+                PUBLICAÇÃO GRATUITA
               </div>
 
               <div
@@ -229,7 +228,7 @@ function TelaEscolherAnuncio() {
                   color: "#7f8c9d",
                 }}
               >
-                Crie seu anúncio gratuitamente.
+                Publique seu conteúdo gratuitamente.
               </div>
             </div>
           </button>
@@ -260,7 +259,7 @@ function TelaEscolherAnuncio() {
                   fontWeight: 800,
                 }}
               >
-                Anunciar pago
+                PUBLICAÇÃO PAGA
               </div>
 
               <div
@@ -270,7 +269,7 @@ function TelaEscolherAnuncio() {
                   color: "#7f8c9d",
                 }}
               >
-                Amplie o alcance do seu anúncio.
+                Publique seu conteúdo mediante pagamento.
               </div>
             </div>
           </button>

@@ -95,7 +95,7 @@ function BotaoAnunciar() {
 
 
             <span>
-                Anunciar
+                Publicar
             </span>
 
 
