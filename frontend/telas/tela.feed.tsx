@@ -31,7 +31,7 @@ import {
   ouvirMudancaUsuario,
 } from "../servicos/usuario";
 
-const LIMITE_POR_PAGINA = 15;
+const LIMITE_POR_PAGINA = 6;
 
 function TelaDivulgacaoTelegram() {
   const navigate = useNavigate();

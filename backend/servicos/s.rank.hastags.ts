@@ -44,73 +44,13 @@ export interface RespostaRankingTags {
   timestamp: string;
 }
 
-// Catálogo base de hashtags do ecossistema Telegram (contagens 100% reais)
-const CATALOGO_BASE_TAGS: Array<{ slug: string; nicho: string; contagemBase: number }> = [
-  // Tecnologia & IA
-  { slug: "tecnologia", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "programacao", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "ia", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "inteligenciaartificial", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "python", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "javascript", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "cybersecurity", nicho: "Tecnologia", contagemBase: 0 },
-  { slug: "chatgpt", nicho: "Tecnologia", contagemBase: 0 },
-
-  // Marketing & Negócios
-  { slug: "marketing", nicho: "Marketing", contagemBase: 0 },
-  { slug: "marketingdigital", nicho: "Marketing", contagemBase: 0 },
-  { slug: "empreendedorismo", nicho: "Marketing", contagemBase: 0 },
-  { slug: "vendas", nicho: "Marketing", contagemBase: 0 },
-  { slug: "trafego", nicho: "Marketing", contagemBase: 0 },
-  { slug: "dropshipping", nicho: "Marketing", contagemBase: 0 },
-  { slug: "afiliados", nicho: "Marketing", contagemBase: 0 },
-  { slug: "negocios", nicho: "Marketing", contagemBase: 0 },
-
-  // Finanças & Cripto
-  { slug: "cripto", nicho: "Finanças", contagemBase: 0 },
-  { slug: "bitcoin", nicho: "Finanças", contagemBase: 0 },
-  { slug: "investimentos", nicho: "Finanças", contagemBase: 0 },
-  { slug: "financas", nicho: "Finanças", contagemBase: 0 },
-  { slug: "rendaextra", nicho: "Finanças", contagemBase: 0 },
-  { slug: "daytrade", nicho: "Finanças", contagemBase: 0 },
-  { slug: "bolsadevalores", nicho: "Finanças", contagemBase: 0 },
-
-  // Educação & Concursos
-  { slug: "cursos", nicho: "Educação", contagemBase: 0 },
-  { slug: "livros", nicho: "Educação", contagemBase: 0 },
-  { slug: "concursos", nicho: "Educação", contagemBase: 0 },
-  { slug: "estudos", nicho: "Educação", contagemBase: 0 },
-  { slug: "idiomas", nicho: "Educação", contagemBase: 0 },
-  { slug: "ingles", nicho: "Educação", contagemBase: 0 },
-
-  // Entretenimento & Mídia
-  { slug: "humor", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "memes", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "filmes", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "series", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "animes", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "games", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "musica", nicho: "Entretenimento", contagemBase: 0 },
-  { slug: "futebol", nicho: "Entretenimento", contagemBase: 0 },
-
-  // Utilidades, Ofertas e Notícias
-  { slug: "promocoes", nicho: "Ofertas", contagemBase: 0 },
-  { slug: "cupons", nicho: "Ofertas", contagemBase: 0 },
-  { slug: "descontos", nicho: "Ofertas", contagemBase: 0 },
-  { slug: "vagas", nicho: "Utilidades", contagemBase: 0 },
-  { slug: "noticias", nicho: "Notícias", contagemBase: 0 },
-  { slug: "telegram", nicho: "Geral", contagemBase: 0 },
-  { slug: "canais", nicho: "Geral", contagemBase: 0 },
-  { slug: "grupos", nicho: "Geral", contagemBase: 0 },
-];
-
 const NICHOS_ESTRUTURADOS: NichoItem[] = [
   {
     id: "tecnologia",
     nome: "Tecnologia",
     icone: "💻",
     descricao: "Programação, Inteligência Artificial, TI e Inovação",
-    tagsPrincipais: ["tecnologia", "programacao", "ia", "python", "javascript"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -119,7 +59,7 @@ const NICHOS_ESTRUTURADOS: NichoItem[] = [
     nome: "Marketing",
     icone: "📈",
     descricao: "Marketing Digital, Tráfego Pago, Vendas e Empreendedorismo",
-    tagsPrincipais: ["marketing", "marketingdigital", "vendas", "empreendedorismo", "trafego"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -128,7 +68,7 @@ const NICHOS_ESTRUTURADOS: NichoItem[] = [
     nome: "Finanças",
     icone: "💰",
     descricao: "Investimentos, Criptomoedas, Bitcoin, Renda Extra e Ações",
-    tagsPrincipais: ["cripto", "bitcoin", "investimentos", "financas", "rendaextra"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -137,7 +77,7 @@ const NICHOS_ESTRUTURADOS: NichoItem[] = [
     nome: "Educação",
     icone: "📚",
     descricao: "Cursos gratuitos, Livros, Concursos Públicos e Estudos",
-    tagsPrincipais: ["cursos", "livros", "concursos", "estudos", "idiomas"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -146,7 +86,7 @@ const NICHOS_ESTRUTURADOS: NichoItem[] = [
     nome: "Entretenimento",
     icone: "🎬",
     descricao: "Filmes, Séries, Memes, Humor, Animes, Games e Futebol",
-    tagsPrincipais: ["humor", "memes", "filmes", "series", "games", "animes"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -155,7 +95,7 @@ const NICHOS_ESTRUTURADOS: NichoItem[] = [
     nome: "Ofertas",
     icone: "🏷️",
     descricao: "Promoções diárias, Cupons de desconto e Achadinhos",
-    tagsPrincipais: ["promocoes", "cupons", "descontos"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -164,7 +104,7 @@ const NICHOS_ESTRUTURADOS: NichoItem[] = [
     nome: "Geral",
     icone: "📢",
     descricao: "Comunidades abertas e canais diversos do Telegram",
-    tagsPrincipais: ["telegram", "canais", "grupos"],
+    tagsPrincipais: [],
     totalPublicacoes: 0,
     totalPublicacoesFormatado: "0 comunidades",
   },
@@ -278,43 +218,18 @@ export const RankHashtagsServico = {
       }
     } catch {}
 
-    // Monta mapa geral unindo catálogo base e ocorrências reais
-    const mapaGeral = new Map<string, { slug: string; nicho: string; contagemBase: number; contagemReal: number }>();
-
-    for (const item of CATALOGO_BASE_TAGS) {
-      mapaGeral.set(item.slug, {
-        slug: item.slug,
-        nicho: item.nicho,
-        contagemBase: item.contagemBase,
-        contagemReal: 0,
-      });
-    }
-
-    for (const [slug, info] of contagensReais.entries()) {
-      const existente = mapaGeral.get(slug);
-      if (existente) {
-        existente.contagemReal += info.contagem;
-      } else {
-        mapaGeral.set(slug, {
+    // O ranking contém única e exclusivamente as tags reais criadas no banco de dados
+    const listaOrdenada: TagItem[] = Array.from(contagensReais.entries())
+      .filter(([slug, info]) => info.contagem > 0)
+      .map(([slug, info]) => {
+        const contagemTotal = info.contagem;
+        return {
+          rank: 0,
+          nome: slug,
           slug,
           nicho: info.nichoDetectado || adivinharNicho(slug),
           contagemBase: 0,
           contagemReal: info.contagem,
-        });
-      }
-    }
-
-    // Transforma em array e ordena por contagem total decrescente
-    const listaOrdenada = Array.from(mapaGeral.values())
-      .map((item) => {
-        const contagemTotal = item.contagemReal;
-        return {
-          rank: 0,
-          nome: item.slug,
-          slug: item.slug,
-          nicho: item.nicho,
-          contagemBase: 0,
-          contagemReal: item.contagemReal,
           contagemTotal,
           contagemFormatada: contagemTotal === 1 ? "1 uso" : `${contagemTotal.toLocaleString("pt-BR")} usos`,
           popular: false,
@@ -324,17 +239,18 @@ export const RankHashtagsServico = {
       .map((item, idx) => ({
         ...item,
         rank: idx + 1,
-        popular: idx < 15 && item.contagemTotal > 0,
+        popular: idx < 15,
       }));
 
-    // Atualiza contadores dos nichos
+    // Atualiza contadores e tags principais dos nichos baseando-se estritamente nas tags existentes no banco
     const nichosAtualizados = NICHOS_ESTRUTURADOS.map((nicho) => {
       const tagsDoNicho = listaOrdenada.filter(
-        (t) => t.nicho.toLowerCase() === nicho.nome.toLowerCase() || nicho.tagsPrincipais.includes(t.slug)
+        (t) => t.nicho.toLowerCase() === nicho.nome.toLowerCase()
       );
       const somaPublicacoes = tagsDoNicho.reduce((acc, cur) => acc + cur.contagemReal, 0);
       return {
         ...nicho,
+        tagsPrincipais: tagsDoNicho.map((t) => t.slug).slice(0, 5),
         totalPublicacoes: somaPublicacoes,
         totalPublicacoesFormatado: somaPublicacoes === 1 ? "1 comunidade" : `${somaPublicacoes.toLocaleString("pt-BR")} comunidades`,
       };

@@ -67,7 +67,7 @@ export const RepositorioPublicacoes = {
     categorias: string[];
   }> {
     const pagina = Math.max(1, filtros.pagina || 1);
-    const limite = Math.max(1, filtros.limite || 15);
+    const limite = Math.max(1, filtros.limite || 6);
     const offset = (pagina - 1) * limite;
 
     // 1. Tenta consulta no PostgreSQL

@@ -30,7 +30,7 @@ export const PublicacoesServico = {
     };
   }> {
     const pagina = Math.max(1, filtros.pagina || 1);
-    const limite = Math.max(1, filtros.limite || 15);
+    const limite = Math.max(1, filtros.limite || 6);
     const offset = (pagina - 1) * limite;
 
     // Se for listagem privada do criador ("apenasMinhas"), mantém a busca direta sem ranqueamento de afinidade
