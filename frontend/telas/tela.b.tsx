@@ -7,14 +7,9 @@ import {
   ArrowRight,
   AlertTriangle,
   RefreshCw,
-  ExternalLink,
 } from "lucide-react";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import { useState, useEffect } from "react";
 
 import {
   useNavigate,
@@ -29,21 +24,17 @@ import {
   InfoUsuarioGoogle,
   obterOuCriarUsuario,
 } from "../servicos/usuario";
+
 import CabecalhoLoginGoogle from "../componentes/cabecalho.login.google";
 
-function GoogleIconSvg({
-  size = 20,
-}: {
-  size?: number;
-}) {
+function GoogleIconSvg({ size = 20 }: { size?: number }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      style={{
-        flexShrink: 0,
-      }}
+      style={{ flexShrink: 0 }}
+      aria-hidden="true"
     >
       <path
         fill="#4285F4"
@@ -81,21 +72,18 @@ export default function TelaBloqueioLoginGoogle() {
   const [carregando, setCarregando] = useState(false);
   const [erroLogin, setErroLogin] = useState<string | null>(null);
   const [popupBloqueado, setPopupBloqueado] = useState(false);
-  const [googleClientId, setGoogleClientId] = useState<string>("");
-  const [gisPronto, setGisPronto] = useState(false);
-
-  const googleBtnContainerRef = useRef<HTMLDivElement>(null);
+  const [googleClientId, setGoogleClientId] = useState("");
 
   useEffect(() => {
     const atual = obterGoogleUsuario();
     setUsuarioGoogle(atual);
   }, []);
 
+  // Carrega o Client ID do Google sem renderizar um segundo botão.
   useEffect(() => {
     let montado = true;
-    let tentativas = 0;
 
-    async function carregarConfigEInicializar() {
+    async function carregarConfigGoogle() {
       try {
         let clientId =
           (
@@ -109,117 +97,41 @@ export default function TelaBloqueioLoginGoogle() {
         if (!clientId) {
           try {
             const resp = await fetch("/api/auth/google-config");
+
             if (resp.ok) {
               const dados = await resp.json();
+
               if (dados?.clientId) {
                 clientId = dados.clientId;
               }
             }
           } catch {
-            // Continua
+            // A configuração também pode vir da variável de ambiente.
           }
         }
 
-        if (!montado) return;
-
-        setGoogleClientId(clientId);
-
-        if (!clientId) {
-          return;
+        if (montado) {
+          setGoogleClientId(clientId);
         }
-
-        const aguardarGis = () => {
-          if (!montado) return;
-          const win = window as any;
-
-          if (win.google?.accounts?.id) {
-            try {
-              win.google.accounts.id.initialize({
-                client_id: clientId,
-                callback: handleCredentialResponse,
-                auto_select: false,
-              });
-
-              if (googleBtnContainerRef.current) {
-                googleBtnContainerRef.current.innerHTML = "";
-                win.google.accounts.id.renderButton(
-                  googleBtnContainerRef.current,
-                  {
-                    theme: "filled_blue",
-                    size: "large",
-                    text: "continue_with",
-                    shape: "rectangular",
-                    width: 320,
-                    logo_alignment: "left",
-                  }
-                );
-              }
-              setGisPronto(true);
-            } catch (err) {
-              console.warn("[Google GIS] Inicialização silenciosa:", err);
-            }
-          } else if (tentativas < 25) {
-            tentativas++;
-            setTimeout(aguardarGis, 250);
-          }
-        };
-
-        aguardarGis();
       } catch (err) {
-        console.warn("[Google Auth] Verificação de configuração concluída");
+        console.warn(
+          "[Google Auth] Não foi possível carregar a configuração.",
+          err
+        );
       }
     }
 
-    carregarConfigEInicializar();
+    carregarConfigGoogle();
 
     return () => {
       montado = false;
     };
   }, []);
 
-  async function handleCredentialResponse(response: any) {
-    if (!response?.credential) {
-      setErroLogin("Não foi possível receber a credencial do Google. Tente novamente.");
-      return;
-    }
-
-    try {
-      setCarregando(true);
-      setErroLogin(null);
-      setPopupBloqueado(false);
-
-      const base64Url = response.credential.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-
-      const payload = JSON.parse(jsonPayload);
-
-      if (!payload.email) {
-        throw new Error("O Google não forneceu um endereço de email válido.");
-      }
-
-      await finalizarAutenticacaoNoServidor({
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-        googleId: payload.sub,
-      });
-    } catch (err: any) {
-      console.error("[Google Auth] Erro ao decodificar token:", err);
-      setErroLogin(err?.message || "Falha ao processar login com Google.");
-      setCarregando(false);
-    }
-  }
-
   function abrirJanelaGoogleOficial() {
     setErroLogin(null);
     setPopupBloqueado(false);
+
     const win = window as any;
 
     if (!googleClientId) {
@@ -230,84 +142,112 @@ export default function TelaBloqueioLoginGoogle() {
     }
 
     if (!win.google?.accounts?.oauth2) {
-      setErroLogin("A biblioteca do Google ainda está carregando. Aguarde 2 segundos e clique novamente.");
+      setErroLogin(
+        "A biblioteca do Google ainda está carregando. Aguarde 2 segundos e clique novamente."
+      );
       return;
     }
 
     try {
       setCarregando(true);
 
-      const tokenClient = win.google.accounts.oauth2.initTokenClient({
-        client_id: googleClientId,
-        scope: "email profile openid",
-        callback: async (tokenResponse: any) => {
-          if (tokenResponse?.error) {
-            setCarregando(false);
+      const tokenClient =
+        win.google.accounts.oauth2.initTokenClient({
+          client_id: googleClientId,
+          scope: "email profile openid",
 
-            if (
-              tokenResponse.error === "popup_blocked_by_browser" ||
-              tokenResponse.error === "popup_failed_to_open"
-            ) {
-              setPopupBloqueado(true);
-              setErroLogin(
-                "O pop-up do Google foi bloqueado pelo seu navegador. Por favor, permita pop-ups para este site e tente novamente."
-              );
-            } else if (tokenResponse.error === "popup_closed_by_user") {
-              setErroLogin("A janela do Google foi fechada antes de concluir o login.");
-            } else {
-              setErroLogin(`Erro de autenticação Google: ${tokenResponse.error}`);
-            }
-            return;
-          }
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse?.error) {
+              setCarregando(false);
 
-          if (!tokenResponse?.access_token) {
-            setCarregando(false);
-            setErroLogin("Nenhum token de acesso retornado pelo Google. Tente novamente.");
-            return;
-          }
-
-          try {
-            const userinfoRes = await fetch(
-              "https://www.googleapis.com/oauth2/v3/userinfo",
-              {
-                headers: {
-                  Authorization: `Bearer ${tokenResponse.access_token}`,
-                },
+              if (
+                tokenResponse.error === "popup_blocked_by_browser" ||
+                tokenResponse.error === "popup_failed_to_open"
+              ) {
+                setPopupBloqueado(true);
+                setErroLogin(
+                  "O pop-up do Google foi bloqueado pelo navegador. Permita pop-ups para este site e tente novamente."
+                );
+              } else if (
+                tokenResponse.error === "popup_closed_by_user"
+              ) {
+                setErroLogin(
+                  "A janela do Google foi fechada antes de concluir o login."
+                );
+              } else {
+                setErroLogin(
+                  `Erro de autenticação Google: ${tokenResponse.error}`
+                );
               }
-            );
 
-            if (!userinfoRes.ok) {
-              throw new Error("Não foi possível obter dados cadastrais da sua conta Google.");
+              return;
             }
 
-            const perfilGoogle = await userinfoRes.json();
-
-            if (!perfilGoogle?.email) {
-              throw new Error("Sua conta Google não forneceu um endereço de email.");
+            if (!tokenResponse?.access_token) {
+              setCarregando(false);
+              setErroLogin(
+                "Nenhum token de acesso foi retornado pelo Google. Tente novamente."
+              );
+              return;
             }
 
-            await finalizarAutenticacaoNoServidor({
-              email: perfilGoogle.email,
-              name: perfilGoogle.name,
-              picture: perfilGoogle.picture,
-              googleId: perfilGoogle.sub,
-              accessToken: tokenResponse.access_token,
-            });
-          } catch (err: any) {
-            console.error("[Google Auth] Erro ao obter perfil:", err);
-            setErroLogin(err?.message || "Erro ao obter informações do perfil Google.");
+            try {
+              const userinfoRes = await fetch(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                {
+                  headers: {
+                    Authorization: `Bearer ${tokenResponse.access_token}`,
+                  },
+                }
+              );
+
+              if (!userinfoRes.ok) {
+                throw new Error(
+                  "Não foi possível obter os dados da sua conta Google."
+                );
+              }
+
+              const perfilGoogle = await userinfoRes.json();
+
+              if (!perfilGoogle?.email) {
+                throw new Error(
+                  "Sua conta Google não forneceu um endereço de email."
+                );
+              }
+
+              await finalizarAutenticacaoNoServidor({
+                email: perfilGoogle.email,
+                name: perfilGoogle.name,
+                picture: perfilGoogle.picture,
+                googleId: perfilGoogle.sub,
+                accessToken: tokenResponse.access_token,
+              });
+            } catch (err: any) {
+              console.error(
+                "[Google Auth] Erro ao obter perfil:",
+                err
+              );
+
+              setErroLogin(
+                err?.message ||
+                  "Erro ao obter informações do perfil Google."
+              );
+
+              setCarregando(false);
+            }
+          },
+
+          error_callback: (err: any) => {
             setCarregando(false);
-          }
-        },
-        error_callback: (err: any) => {
-          setCarregando(false);
-          setPopupBloqueado(true);
-          const msg =
-            err?.message ||
-            "O pop-up de login do Google foi bloqueado pelo seu navegador. Por favor, habilite pop-ups para este site nas configurações da barra de endereço.";
-          setErroLogin(msg);
-        },
-      });
+            setPopupBloqueado(true);
+
+            const msg =
+              err?.message ||
+              "O pop-up de login do Google foi bloqueado. Habilite pop-ups nas configurações do navegador.";
+
+            setErroLogin(msg);
+          },
+        });
 
       tokenClient.requestAccessToken({
         prompt: "select_account",
@@ -315,17 +255,22 @@ export default function TelaBloqueioLoginGoogle() {
     } catch (err: any) {
       setCarregando(false);
       setPopupBloqueado(true);
-      setErroLogin("Não foi possível abrir o pop-up do Google. Verifique se pop-ups estão habilitados.");
+
+      setErroLogin(
+        "Não foi possível abrir o pop-up do Google. Verifique se os pop-ups estão habilitados."
+      );
     }
   }
 
-  async function finalizarAutenticacaoNoServidor(dadosGoogle: {
-    email: string;
-    name?: string;
-    picture?: string;
-    googleId?: string;
-    accessToken?: string;
-  }) {
+  async function finalizarAutenticacaoNoServidor(
+    dadosGoogle: {
+      email: string;
+      name?: string;
+      picture?: string;
+      googleId?: string;
+      accessToken?: string;
+    }
+  ) {
     try {
       const idAnonimoAtual = obterOuCriarUsuario().id;
 
@@ -343,8 +288,15 @@ export default function TelaBloqueioLoginGoogle() {
 
       const resultado = await resp.json();
 
-      if (!resp.ok || !resultado.sucesso || !resultado.usuario) {
-        throw new Error(resultado.erro || "Falha ao registrar conta Google no servidor.");
+      if (
+        !resp.ok ||
+        !resultado.sucesso ||
+        !resultado.usuario
+      ) {
+        throw new Error(
+          resultado.erro ||
+            "Falha ao registrar conta Google no servidor."
+        );
       }
 
       const usuarioSalvo = resultado.usuario;
@@ -363,20 +315,32 @@ export default function TelaBloqueioLoginGoogle() {
 
       navigate(destino, { replace: true });
     } catch (err: any) {
-      console.error("[Servidor] Erro ao salvar login Google:", err);
-      // Salva localmente com a conta Google verificada em caso de instabilidade pontual de rede
+      console.error(
+        "[Servidor] Erro ao salvar login Google:",
+        err
+      );
+
+      // Mantém o fallback local existente.
       try {
         const usuarioFinal = salvarLoginGoogle({
           email: dadosGoogle.email,
-          nome: dadosGoogle.name || dadosGoogle.email.split("@")[0],
+          nome:
+            dadosGoogle.name ||
+            dadosGoogle.email.split("@")[0],
           foto: dadosGoogle.picture,
-          googleId: dadosGoogle.googleId || `gid_${Date.now()}`,
+          googleId:
+            dadosGoogle.googleId || `gid_${Date.now()}`,
         });
+
         setUsuarioGoogle(usuarioFinal.google || null);
         setCarregando(false);
+
         navigate(destino, { replace: true });
       } catch (localErr: any) {
-        setErroLogin(err?.message || "Erro ao conectar conta Google.");
+        setErroLogin(
+          err?.message || "Erro ao conectar conta Google."
+        );
+
         setCarregando(false);
       }
     }
@@ -449,15 +413,21 @@ export default function TelaBloqueioLoginGoogle() {
                   width: "60px",
                   height: "60px",
                   borderRadius: "18px",
-                  background: "linear-gradient(145deg, #3b82f6, #2563eb)",
+                  background:
+                    "linear-gradient(145deg, #3b82f6, #2563eb)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: "14px",
-                  boxShadow: "0 8px 28px rgba(37, 99, 235, 0.3)",
+                  boxShadow:
+                    "0 8px 28px rgba(37, 99, 235, 0.3)",
                 }}
               >
-                <Users size={30} color="#ffffff" strokeWidth={2.2} />
+                <Users
+                  size={30}
+                  color="#ffffff"
+                  strokeWidth={2.2}
+                />
               </div>
 
               <h1
@@ -469,7 +439,10 @@ export default function TelaBloqueioLoginGoogle() {
                   letterSpacing: "-1px",
                 }}
               >
-                Tele<span style={{ color: "#60a5fa" }}>Group</span>
+                Tele
+                <span style={{ color: "#60a5fa" }}>
+                  Group
+                </span>
               </h1>
 
               <p
@@ -492,16 +465,22 @@ export default function TelaBloqueioLoginGoogle() {
               }}
             />
 
-            {/* Caso 1: Usuário já conectado com conta Google */}
+            {/* Usuário já conectado com o Google */}
             {usuarioGoogle ? (
-              <div style={{ textAlign: "center", marginBottom: "20px" }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  marginBottom: "20px",
+                }}
+              >
                 <div
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "8px",
                     background: "rgba(34, 197, 94, 0.12)",
-                    border: "1px solid rgba(34, 197, 94, 0.3)",
+                    border:
+                      "1px solid rgba(34, 197, 94, 0.3)",
                     padding: "8px 16px",
                     borderRadius: "30px",
                     color: "#4ade80",
@@ -511,23 +490,37 @@ export default function TelaBloqueioLoginGoogle() {
                   }}
                 >
                   <CheckCircle2 size={16} />
-                  <span>Conta Google Conectada</span>
+                  <span>Conta Google conectada</span>
                 </div>
 
                 <div
                   style={{
                     background: "rgba(15, 23, 42, 0.6)",
-                    border: "1px solid rgba(148, 163, 184, 0.12)",
+                    border:
+                      "1px solid rgba(148, 163, 184, 0.12)",
                     borderRadius: "14px",
                     padding: "16px",
                     marginBottom: "20px",
                     textAlign: "left",
                   }}
                 >
-                  <div style={{ color: "#f8fafc", fontWeight: 700, fontSize: "15px" }}>
+                  <div
+                    style={{
+                      color: "#f8fafc",
+                      fontWeight: 700,
+                      fontSize: "15px",
+                    }}
+                  >
                     {usuarioGoogle.nome}
                   </div>
-                  <div style={{ color: "#94a3b8", fontSize: "13px", marginTop: "2px" }}>
+
+                  <div
+                    style={{
+                      color: "#94a3b8",
+                      fontSize: "13px",
+                      marginTop: "2px",
+                    }}
+                  >
                     {usuarioGoogle.email}
                   </div>
                 </div>
@@ -543,14 +536,16 @@ export default function TelaBloqueioLoginGoogle() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "10px",
-                    background: "linear-gradient(145deg, #2563eb, #1d4ed8)",
+                    background:
+                      "linear-gradient(145deg, #2563eb, #1d4ed8)",
                     border: "none",
                     borderRadius: "11px",
                     color: "#ffffff",
                     fontSize: "14px",
                     fontWeight: 600,
                     cursor: "pointer",
-                    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
+                    boxShadow:
+                      "0 4px 14px rgba(37, 99, 235, 0.3)",
                   }}
                 >
                   <span>Continuar</span>
@@ -577,7 +572,7 @@ export default function TelaBloqueioLoginGoogle() {
                 </button>
               </div>
             ) : (
-              /* Caso 2: Login com Conta Google */
+              /* Usuário ainda não conectado */
               <div>
                 <div
                   style={{
@@ -604,12 +599,13 @@ export default function TelaBloqueioLoginGoogle() {
                       margin: 0,
                     }}
                   >
-                    Para garantir a segurança da comunidade, o cadastro e a publicação
-                    exigem autenticação oficial com conta Google.
+                    Para garantir a segurança da comunidade, o
+                    cadastro e a publicação exigem autenticação
+                    com conta Google.
                   </p>
                 </div>
 
-                {/* Banner de erro ou pop-up bloqueado */}
+                {/* Mensagem de erro */}
                 {erroLogin && (
                   <div
                     role="alert"
@@ -623,7 +619,9 @@ export default function TelaBloqueioLoginGoogle() {
                         ? "1px solid rgba(245, 158, 11, 0.35)"
                         : "1px solid rgba(239, 68, 68, 0.28)",
                       borderRadius: "12px",
-                      color: popupBloqueado ? "#fcd34d" : "#fca5a5",
+                      color: popupBloqueado
+                        ? "#fcd34d"
+                        : "#fca5a5",
                       fontSize: "13px",
                       lineHeight: 1.5,
                       textAlign: "left",
@@ -642,13 +640,21 @@ export default function TelaBloqueioLoginGoogle() {
                         style={{
                           flexShrink: 0,
                           marginTop: "2px",
-                          color: popupBloqueado ? "#fbbf24" : "#f87171",
+                          color: popupBloqueado
+                            ? "#fbbf24"
+                            : "#f87171",
                         }}
                       />
+
                       <div>
                         {popupBloqueado ? (
                           <>
-                            <strong style={{ display: "block", marginBottom: "4px" }}>
+                            <strong
+                              style={{
+                                display: "block",
+                                marginBottom: "4px",
+                              }}
+                            >
                               Pop-up bloqueado pelo navegador
                             </strong>
                             <span>{erroLogin}</span>
@@ -664,31 +670,23 @@ export default function TelaBloqueioLoginGoogle() {
                         style={{
                           marginTop: "10px",
                           paddingTop: "8px",
-                          borderTop: "1px solid rgba(245, 158, 11, 0.2)",
+                          borderTop:
+                            "1px solid rgba(245, 158, 11, 0.2)",
                           fontSize: "12px",
                           color: "#fde68a",
                         }}
                       >
-                        💡 <strong>Como desbloquear:</strong> Clique no ícone de pop-up bloqueado na barra de endereços (ao lado da URL) e escolha <em>"Sempre permitir pop-ups"</em>. Em seguida, clique no botão abaixo.
+                        💡 <strong>Como desbloquear:</strong>{" "}
+                        clique no ícone de pop-up bloqueado na
+                        barra de endereços e escolha{" "}
+                        <em>"Sempre permitir pop-ups"</em>. Em
+                        seguida, tente novamente.
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Container do Botão Oficial do Google Identity Services (GIS) */}
-                <div
-                  ref={googleBtnContainerRef}
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    minHeight: "44px",
-                    width: "100%",
-                    marginBottom: "14px",
-                  }}
-                />
-
-                {/* Botão de backup/tentativa caso o GIS nativo precise de acionamento direto */}
+                {/* Único botão de login com Google */}
                 <button
                   type="button"
                   onClick={abrirJanelaGoogleOficial}
@@ -709,19 +707,28 @@ export default function TelaBloqueioLoginGoogle() {
                     fontWeight: 600,
                     cursor: carregando ? "wait" : "pointer",
                     opacity: carregando ? 0.7 : 1,
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                    boxShadow:
+                      "0 2px 8px rgba(0, 0, 0, 0.15)",
                     transition: "all 0.2s ease",
                   }}
                 >
                   {carregando ? (
                     <>
-                      <Loader2 size={19} className="animate-spin" />
+                      <Loader2
+                        size={19}
+                        className="animate-spin"
+                      />
                       <span>Conectando com o Google...</span>
                     </>
                   ) : popupBloqueado ? (
                     <>
-                      <RefreshCw size={18} color="#2563eb" />
-                      <span>Tentar Novamente com o Google</span>
+                      <RefreshCw
+                        size={18}
+                        color="#2563eb"
+                      />
+                      <span>
+                        Tentar novamente com o Google
+                      </span>
                     </>
                   ) : (
                     <>
@@ -733,7 +740,7 @@ export default function TelaBloqueioLoginGoogle() {
               </div>
             )}
 
-            {/* Selo de Segurança */}
+            {/* Selo de segurança */}
             <div
               style={{
                 display: "flex",
@@ -746,8 +753,13 @@ export default function TelaBloqueioLoginGoogle() {
                 textAlign: "center",
               }}
             >
-              <ShieldCheck size={15} color="#60a5fa" />
-              <span>Autenticação protegida exclusivamente pelo Google</span>
+              <ShieldCheck
+                size={15}
+                color="#60a5fa"
+              />
+              <span>
+                Autenticação protegida exclusivamente pelo Google
+              </span>
             </div>
           </div>
 
